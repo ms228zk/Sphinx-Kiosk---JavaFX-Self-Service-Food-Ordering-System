@@ -1,67 +1,73 @@
 package se.lnu.database;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
 public class DatabaseInitializer {
 
   public static void initialize() {
-    String createCategoryTable = """
-            CREATE TABLE IF NOT EXISTS Category (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL
-            );
-            """;
+    String url = "jdbc:sqlite:kiosk.db";
 
-    String createMenuItemTable = """
-            CREATE TABLE IF NOT EXISTS MenuItem (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                category_id INTEGER NOT NULL,
-                name TEXT NOT NULL,
-                description TEXT,
-                price REAL NOT NULL,
-                image_path TEXT,
-                is_available INTEGER NOT NULL DEFAULT 1,
-                FOREIGN KEY (category_id) REFERENCES Category(id)
-            );
-            """;
-
-    String insertCategory = """
-            INSERT OR IGNORE INTO Category (id, name)
-            VALUES (1, 'Burgers');
-            """;
-
-    String insertMenuItem = """
-            INSERT OR IGNORE INTO MenuItem (id, category_id, name, description, price, image_path, is_available)
-            VALUES (1, 1, 'Cheeseburger', 'Tasty burger with cheese', 5.99, NULL, 1);
-            """;
-
-    try (Connection conn = DatabaseConnection.getConnection();
+    try (Connection conn = DriverManager.getConnection(url);
          Statement stmt = conn.createStatement()) {
 
-      stmt.execute(createCategoryTable);
-      stmt.execute(createMenuItemTable);
+      String createCategory = """
+                CREATE TABLE IF NOT EXISTS Category (
+                    category_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name TEXT NOT NULL,
+                    description TEXT
+                );
+            """;
 
-      stmt.execute(insertCategory);
-      stmt.execute(insertMenuItem);
+      String createMenuItem = """
+                CREATE TABLE IF NOT EXISTS MenuItem (
+                    menu_item_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    category_id INTEGER NOT NULL,
+                    name TEXT NOT NULL,
+                    description TEXT,
+                    price REAL NOT NULL,
+                    image_path TEXT,
+                    is_available INTEGER NOT NULL DEFAULT 1,
+                    FOREIGN KEY (category_id) REFERENCES Category(category_id)
+                );
+            """;
 
-      ResultSet rs = stmt.executeQuery("SELECT * FROM MenuItem");
+      // Create tables
+      stmt.execute(createCategory);
+      stmt.execute(createMenuItem);
 
-      System.out.println("Menu items in database:");
-      while (rs.next()) {
-        System.out.println(
-                rs.getInt("id") + " | " +
-                        rs.getString("name") + " | " +
-                        rs.getDouble("price")
-        );
-      }
+      // Insert test categories
+      stmt.execute("""
+                INSERT OR IGNORE INTO Category (category_id, name, description)
+                VALUES (1, 'Burgers', 'Burger meals and sandwiches');
+            """);
 
-      System.out.println("SQLite database initialized successfully.");
+      stmt.execute("""
+                INSERT OR IGNORE INTO Category (category_id, name, description)
+                VALUES (2, 'Drinks', 'Cold beverages');
+            """);
+
+      // Insert test menu items
+      stmt.execute("""
+                INSERT OR IGNORE INTO MenuItem
+                (menu_item_id, category_id, name, description, price, image_path, is_available)
+                VALUES
+                (1, 1, 'Cheeseburger', 'Beef burger with cheese', 5.99, 'images/cheeseburger.png', 1);
+            """);
+
+      stmt.execute("""
+                INSERT OR IGNORE INTO MenuItem
+                (menu_item_id, category_id, name, description, price, image_path, is_available)
+                VALUES
+                (2, 2, 'Coca-Cola', 'Cold soft drink', 2.50, 'images/coke.png', 1);
+            """);
+
+      System.out.println("Category and MenuItem tables created with test data!");
 
     } catch (SQLException e) {
-      e.printStackTrace();
+      System.out.println("Database error: " + e.getMessage());
     }
   }
 }
