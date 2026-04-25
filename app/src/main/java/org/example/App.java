@@ -32,7 +32,18 @@ public class App extends Application {
 
         // Button action (simple for now)
         startButton.setOnAction(e -> {
-            System.out.println("Start clicked");
+
+            VBox nextLayout = new VBox(20);
+            nextLayout.setStyle("-fx-alignment: center;");
+
+            Label nextLabel = new Label("Next Screen");
+            nextLabel.setStyle("-fx-font-size: 24px;");
+
+            nextLayout.getChildren().add(nextLabel);
+
+            Scene nextScene = new Scene(nextLayout, 600, 400);
+
+            primaryStage.setScene(nextScene);
         });
 
         // Layout
