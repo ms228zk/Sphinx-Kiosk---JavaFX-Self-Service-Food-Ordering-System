@@ -4,7 +4,7 @@ plugins {
 }
 
 javafx {
-    version = "17"
+    version = "21.0.5"
     modules = [ 'javafx.controls' ]
 }
 
@@ -13,11 +13,11 @@ repositories {
 }
 
 dependencies {
-    testImplementation "org.junit.jupiter:junit-jupiter:5.10.0"
+    testImplementation libs.junit.jupiter
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-    implementation "com.google.guava:guava:33.2.1-jre"
-    implementation 'org.xerial:sqlite-jdbc:3.45.1.0'
+    implementation libs.guava
+    implementation 'org.xerial:sqlite-jdbc:3.46.0.0'
 }
 
 java {
