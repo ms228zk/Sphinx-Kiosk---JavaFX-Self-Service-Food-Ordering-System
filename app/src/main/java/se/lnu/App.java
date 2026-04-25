@@ -1,36 +1,27 @@
 package se.lnu;
 
 import javafx.application.Application;
-import javafx.geometry.Insets;
-import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import se.lnu.database.DatabaseInitializer;
 
 public class App extends Application {
 
+    // store user choice
+    public static String orderType;
+
     @Override
     public void start(Stage primaryStage) {
-        VBox root = new VBox();
-        root.setPadding(new Insets(10));
-        root.setSpacing(10);
 
-        Label title = new Label("JavaFX Kiosk");
-        Label dbStatus;
-
+        // keep database initialization
         try {
             DatabaseInitializer.initialize();
-            dbStatus = new Label("SQLite database initialized successfully.");
+            System.out.println("Database initialized");
         } catch (Exception e) {
-            dbStatus = new Label("Error: " + e.getMessage());
+            System.out.println("Database error: " + e.getMessage());
         }
 
-        root.getChildren().addAll(title, dbStatus);
-
-        Scene scene = new Scene(root, 400, 200);
-        primaryStage.setScene(scene);
-        primaryStage.setTitle("Sphinx Kiosk");
+        // show your screen (User Story 2)
+        OrderTypeScreen.show(primaryStage);
         primaryStage.show();
     }
 
