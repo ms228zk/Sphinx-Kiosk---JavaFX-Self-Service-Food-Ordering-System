@@ -17,7 +17,7 @@ public class App extends Application {
             System.out.println("Database error: " + e.getMessage());
         }
 
-        OrderTypeScreen.show(primaryStage);
+        WelcomeScreen.show(primaryStage);
         primaryStage.show();
     }
 
