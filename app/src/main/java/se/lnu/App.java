@@ -8,15 +8,13 @@ public class App extends Application {
 
     public static int selectedCategoryId = -1;
     public static String selectedCategoryName = "";
+    public static String orderType;
 
     public static void setCategory(int id, String name) {
         selectedCategoryId = id;
         selectedCategoryName = name;
         System.out.println("Selected category: " + name + " (ID: " + id + ")");
     }
-
-
-    public static String orderType;
 
     @Override
     public void start(Stage primaryStage) {
