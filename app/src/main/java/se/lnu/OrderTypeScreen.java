@@ -42,13 +42,13 @@ public class OrderTypeScreen {
     // Action for Eat-in
     eatInButton.setOnAction(e -> {
       App.orderType = "Eat-in"; // store selected type
-      CategoryScreenPlaceholder.show(stage); // navigate forward
+      CategoryScreen.show(stage); // navigate forward
     });
 
     // Action for Takeaway
     takeawayButton.setOnAction(e -> {
       App.orderType = "Takeaway"; // store selected type
-      CategoryScreenPlaceholder.show(stage); // navigate forward
+      CategoryScreen.show(stage); // navigate forward
     });
 
     // Center layout for content
