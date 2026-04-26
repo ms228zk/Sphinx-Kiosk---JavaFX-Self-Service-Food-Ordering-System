@@ -7,6 +7,9 @@ import se.lnu.database.DatabaseInitializer;
 public class App extends Application {
 
     public static String orderType;
+    public static String selectedCategory;
+    public static MenuItem selectedMenuItem;
+    public static int selectedQuantity = 1;
 
     @Override
     public void start(Stage primaryStage) {
