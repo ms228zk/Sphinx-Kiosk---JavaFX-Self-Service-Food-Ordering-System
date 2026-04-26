@@ -27,7 +27,7 @@ public class CategoryScreen {
               "-fx-background-radius: 15;"
       );
 
-      // ⭐ USER STORY 3 ONLY — print category
+      // print category
       btn.setOnAction(e -> {
         System.out.println("Category clicked: " + c.getName() + " (ID: " + c.getId() + ")");
       });
