@@ -2,12 +2,14 @@ package se.lnu.database;
 
 import se.lnu.Category;
 import se.lnu.MenuItem;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class DatabaseHelper {
 
+    // Get all categories
     public static List<Category> getCategories() {
         List<Category> categories = new ArrayList<>();
 
@@ -25,35 +27,40 @@ public class DatabaseHelper {
             }
 
         } catch (SQLException e) {
-            System.out.println("DB error: " + e.getMessage());
+            System.out.println("DB error (getCategories): " + e.getMessage());
         }
 
         return categories;
     }
 
-
+    // Get items by category
     public static List<MenuItem> getItemsByCategory(int categoryId) {
         List<MenuItem> items = new ArrayList<>();
 
-        String sql = "SELECT menu_item_id, name, description, price FROM MenuItem WHERE category_id = ?";
+        String sql = """
+            SELECT menu_item_id, name, description, price
+            FROM MenuItem
+            WHERE category_id = ?
+        """;
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setInt(1, categoryId);
-            ResultSet rs = pstmt.executeQuery();
 
-            while (rs.next()) {
-                items.add(new MenuItem(
-                        rs.getInt("menu_item_id"),
-                        rs.getString("name"),
-                        rs.getString("description"),
-                        rs.getDouble("price")
-                ));
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    items.add(new MenuItem(
+                            rs.getInt("menu_item_id"),
+                            rs.getString("name"),
+                            rs.getString("description"),
+                            rs.getDouble("price")
+                    ));
+                }
             }
 
         } catch (SQLException e) {
-            System.out.println("DB error: " + e.getMessage());
+            System.out.println("DB error (getItemsByCategory): " + e.getMessage());
         }
 
         return items;
