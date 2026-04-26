@@ -27,9 +27,10 @@ public class CategoryScreen {
               "-fx-background-radius: 15;"
       );
 
-      // print category
+
       btn.setOnAction(e -> {
-        System.out.println("Category clicked: " + c.getName() + " (ID: " + c.getId() + ")");
+        App.setCategory(c.getId(), c.getName());
+        ItemListScreen.show(stage);
       });
 
       layout.getChildren().add(btn);

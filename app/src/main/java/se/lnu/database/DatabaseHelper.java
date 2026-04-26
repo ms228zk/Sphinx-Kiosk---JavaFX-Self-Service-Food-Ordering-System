@@ -1,6 +1,7 @@
 package se.lnu.database;
 
 import se.lnu.Category;
+import se.lnu.MenuItem;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,5 +29,33 @@ public class DatabaseHelper {
         }
 
         return categories;
+    }
+
+
+    public static List<MenuItem> getItemsByCategory(int categoryId) {
+        List<MenuItem> items = new ArrayList<>();
+
+        String sql = "SELECT menu_item_id, name, description, price FROM MenuItem WHERE category_id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, categoryId);
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                items.add(new MenuItem(
+                        rs.getInt("menu_item_id"),
+                        rs.getString("name"),
+                        rs.getString("description"),
+                        rs.getDouble("price")
+                ));
+            }
+
+        } catch (SQLException e) {
+            System.out.println("DB error: " + e.getMessage());
+        }
+
+        return items;
     }
 }
