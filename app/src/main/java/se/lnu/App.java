@@ -9,6 +9,9 @@ public class App extends Application {
     public static int selectedCategoryId = -1;
     public static String selectedCategoryName = "";
     public static String orderType;
+    public static String selectedCategory;
+    public static MenuItem selectedMenuItem;
+    public static int selectedQuantity = 1;
 
     public static void setCategory(int id, String name) {
         selectedCategoryId = id;

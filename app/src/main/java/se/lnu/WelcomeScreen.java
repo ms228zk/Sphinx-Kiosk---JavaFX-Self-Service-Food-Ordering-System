@@ -33,7 +33,7 @@ public class WelcomeScreen {
 
     VBox layout = new VBox(20);
     layout.setAlignment(Pos.CENTER);
-    layout.setStyle("-fx-background-color: #f5f5f5;");
+    layout.setBackground(ScreenStyle.createBackground());
     layout.getChildren().addAll(title, subtitle, startButton);
 
     Scene scene = new Scene(layout, 600, 400);
