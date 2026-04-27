@@ -1,11 +1,12 @@
 package se.lnu;
 
-import javafx.geometry.Pos;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.HBox;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import se.lnu.database.DatabaseHelper;
@@ -14,58 +15,62 @@ import java.util.List;
 
 public class ItemListScreen {
 
-    public static void show(Stage stage) {
+  public static void show(Stage stage) {
+    Label title = new Label(App.selectedCategoryName);
+    title.setStyle("-fx-font-size: 32px; -fx-font-weight: bold;");
 
-        Label title = new Label(App.selectedCategoryName);
-        title.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
+    Label subtitle = new Label("Select an item to continue");
+    subtitle.setStyle("-fx-font-size: 16px; -fx-text-fill: gray;");
 
-        // Back button
-        Button backButton = new Button("Back");
-        backButton.setStyle(
-                "-fx-font-size: 14px;" +
-                        "-fx-background-color: #eeeeee;" +
-                        "-fx-text-fill: #333333;" +
-                        "-fx-padding: 8 18;" +
+    Button backButton = new Button("Back");
+    backButton.setStyle(
+            "-fx-font-size: 16px;" +
+                    "-fx-background-color: #eeeeee;" +
+                    "-fx-text-fill: #333333;" +
+                    "-fx-padding: 10 20;" +
+                    "-fx-background-radius: 10;"
+    );
+    backButton.setOnAction(e -> CategoryScreen.show(stage));
+
+    VBox itemsBox = new VBox(15);
+    itemsBox.setAlignment(Pos.CENTER);
+
+    List<MenuItem> items = DatabaseHelper.getItemsByCategory(App.selectedCategoryId);
+    if (items.isEmpty()) {
+      itemsBox.getChildren().add(new Label("No items available"));
+    } else {
+      for (MenuItem item : items) {
+        Button itemButton = new Button(item.getName() + " - " + String.format("%.2f", item.getPrice()) + " kr");
+        itemButton.setPrefWidth(280);
+        itemButton.setStyle(
+                "-fx-font-size: 18px;" +
+                        "-fx-background-color: #FF9800;" +
+                        "-fx-text-fill: white;" +
+                        "-fx-padding: 12 25;" +
                         "-fx-background-radius: 10;"
         );
-        backButton.setOnAction(e -> CategoryScreen.show(stage));
-
-        // ⭐ Put ONLY the back button in a left-aligned HBox
-        HBox backContainer = new HBox(backButton);
-        backContainer.setAlignment(Pos.TOP_LEFT);
-        backContainer.setPadding(new Insets(10, 0, 0, 10));
-
-        VBox itemsBox = new VBox(10);
-        itemsBox.setAlignment(Pos.CENTER);
-
-        List<MenuItem> items = DatabaseHelper.getItemsByCategory(App.selectedCategoryId);
-
-        for (MenuItem item : items) {
-            Button itemBtn = new Button(item.getName() + " - " + item.getPrice() + " kr");
-            itemBtn.setPrefWidth(260);
-            itemBtn.setStyle(
-                    "-fx-font-size: 16px;" +
-                            "-fx-background-color: #FF9800;" +
-                            "-fx-text-fill: white;" +
-                            "-fx-background-radius: 15;"
-            );
-
-            itemBtn.setOnAction(e -> {
-                System.out.println("Selected item: " + item.getName());
-            });
-
-            itemsBox.getChildren().add(itemBtn);
-        }
-
-        VBox layout = new VBox(20);
-        layout.setAlignment(Pos.TOP_CENTER);
-
-        // ⭐ Add backContainer instead of backButton
-        layout.getChildren().addAll(backContainer, title, itemsBox);
-
-        Scene scene = new Scene(layout, 600, 400);
-        stage.setScene(scene);
-        stage.setTitle("Items");
-        stage.show();
+        itemButton.setOnAction(e -> MealSelectionScreen.show(stage, item));
+        itemsBox.getChildren().add(itemButton);
+      }
     }
+
+    VBox centerContent = new VBox(20, title, subtitle, itemsBox);
+    centerContent.setAlignment(Pos.CENTER);
+
+    ScrollPane scrollPane = new ScrollPane(centerContent);
+    scrollPane.setFitToWidth(true);
+    scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+    scrollPane.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
+
+    BorderPane root = new BorderPane();
+    root.setPadding(new Insets(20));
+    root.setBackground(ScreenStyle.createBackground());
+    root.setTop(backButton);
+    root.setCenter(scrollPane);
+
+    Scene scene = new Scene(root, 600, 450);
+    stage.setScene(scene);
+    stage.setTitle("Items");
+    stage.show();
+  }
 }

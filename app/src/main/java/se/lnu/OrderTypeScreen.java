@@ -59,7 +59,7 @@ public class OrderTypeScreen {
     // Root layout
     BorderPane root = new BorderPane();
     root.setPadding(new Insets(25));
-    root.setStyle("-fx-background-color: linear-gradient(to bottom, #fff7e6, #ffffff);");
+    root.setBackground(ScreenStyle.createBackground());
 
     // Position elements
     root.setTop(backButton);

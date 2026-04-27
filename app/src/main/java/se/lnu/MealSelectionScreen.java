@@ -1,0 +1,99 @@
+package se.lnu;
+
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+
+public class MealSelectionScreen {
+
+  public static void show(Stage stage, MenuItem item) {
+    App.selectedMenuItem = item;
+    App.selectedQuantity = 1;
+
+    Button backButton = new Button("Back");
+    backButton.setStyle(
+            "-fx-font-size: 16px;" +
+                    "-fx-background-color: #eeeeee;" +
+                    "-fx-text-fill: #333333;" +
+                    "-fx-padding: 10 20;" +
+                    "-fx-background-radius: 10;"
+    );
+    backButton.setOnAction(e -> ItemListScreen.show(stage));
+
+    Label title = new Label(item.getName());
+    title.setStyle("-fx-font-size: 32px; -fx-font-weight: bold;");
+
+    Label description = new Label(item.getDescription());
+    description.setStyle("-fx-font-size: 16px; -fx-text-fill: gray;");
+    Label priceLabel = new Label("Price: $" + String.format("%.2f", item.getPrice()));
+    priceLabel.setStyle("-fx-font-size: 18px;");
+
+    Button minusButton = new Button("-");
+    Button plusButton = new Button("+");
+    minusButton.setStyle(
+            "-fx-font-size: 18px;" +
+                    "-fx-background-color: #FF9800;" +
+                    "-fx-text-fill: white;" +
+                    "-fx-padding: 10 18;" +
+                    "-fx-background-radius: 10;"
+    );
+    plusButton.setStyle(
+            "-fx-font-size: 18px;" +
+                    "-fx-background-color: #FF9800;" +
+                    "-fx-text-fill: white;" +
+                    "-fx-padding: 10 18;" +
+                    "-fx-background-radius: 10;"
+    );
+    Label quantityLabel = new Label(String.valueOf(App.selectedQuantity));
+    quantityLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
+    Label statusLabel = new Label("Meal selected and ready to add");
+    statusLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: gray;");
+
+    minusButton.setOnAction(e -> {
+      if (App.selectedQuantity > 1) {
+        App.selectedQuantity--;
+        quantityLabel.setText(String.valueOf(App.selectedQuantity));
+      }
+    });
+
+    plusButton.setOnAction(e -> {
+      App.selectedQuantity++;
+      quantityLabel.setText(String.valueOf(App.selectedQuantity));
+    });
+
+    Button confirmButton = new Button("Confirm Selection");
+    confirmButton.setStyle(
+            "-fx-font-size: 18px;" +
+                    "-fx-background-color: #FF9800;" +
+                    "-fx-text-fill: white;" +
+                    "-fx-padding: 12 25;" +
+                    "-fx-background-radius: 10;"
+    );
+    confirmButton.setOnAction(e -> statusLabel.setText(
+            "Selected " + App.selectedQuantity + " x " + item.getName()
+    ));
+
+    HBox quantityBox = new HBox(15, minusButton, quantityLabel, plusButton);
+    quantityBox.setAlignment(Pos.CENTER);
+
+    VBox centerContent = new VBox(18, title, description, priceLabel, quantityBox, confirmButton, statusLabel);
+    centerContent.setAlignment(Pos.CENTER);
+
+    BorderPane root = new BorderPane();
+    root.setPadding(new Insets(20));
+    root.setBackground(ScreenStyle.createBackground());
+    root.setTop(backButton);
+    root.setCenter(centerContent);
+
+    Scene scene = new Scene(root, 600, 400);
+    stage.setScene(scene);
+    stage.setTitle("Select Meal");
+    stage.show();
+  }
+}
