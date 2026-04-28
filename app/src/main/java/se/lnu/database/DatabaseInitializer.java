@@ -10,6 +10,7 @@ public class DatabaseInitializer {
     try (Connection conn = DatabaseConnection.getConnection();
          Statement stmt = conn.createStatement()) {
 
+      // Create Category table
       stmt.execute("""
                 CREATE TABLE IF NOT EXISTS Category (
                     category_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -17,6 +18,7 @@ public class DatabaseInitializer {
                 )
             """);
 
+      // Create MenuItem table
       stmt.execute("""
                 CREATE TABLE IF NOT EXISTS MenuItem (
                     menu_item_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -28,9 +30,11 @@ public class DatabaseInitializer {
                 )
             """);
 
+      // Reset data
       stmt.execute("DELETE FROM MenuItem");
       stmt.execute("DELETE FROM Category");
 
+      // Insert Categories (same as before)
       stmt.execute("""
                 INSERT INTO Category (category_id, name) VALUES
                 (1, 'Burgers'),
@@ -39,21 +43,24 @@ public class DatabaseInitializer {
                 (4, 'Desserts')
             """);
 
+      // Insert Better Menu Items
       stmt.execute("""
                 INSERT INTO MenuItem (category_id, name, description, price) VALUES
-                (1, 'Cheeseburger', 'Beef burger with cheese', 39.00),
-                (1, 'Chicken Burger', 'Chicken burger with salad', 45.00),
-                (1, 'Veg Burger', 'Vegetarian burger', 35.00),
+                (1, 'BBQ Smash Burger', 'Double beef patty with BBQ sauce', 49.00),
+                (1, 'Crispy Chicken Burger', 'Crispy chicken with garlic mayo', 45.00),
+                (1, 'Halloumi Burger', 'Grilled halloumi with salad', 42.00),
 
-                (2, 'Cola', 'Cold soft drink', 25.00),
-                (2, 'Water', 'Still water', 20.00),
-                (2, 'Juice', 'Fresh fruit juice', 30.00),
+                (2, 'Iced Coffee', 'Cold coffee with milk', 35.00),
+                (2, 'Mango Smoothie', 'Fresh mango smoothie', 38.00),
+                (2, 'Lemon Mint Cooler', 'Lemon drink with fresh mint', 30.00),
 
-                (3, 'Fries', 'Crispy fries', 29.00),
-                (3, 'Onion Rings', 'Fried onion rings', 32.00),
+                (3, 'Loaded Fries', 'Fries with cheese and sauce', 39.00),
+                (3, 'Mozzarella Sticks', 'Crispy cheese sticks with dip', 36.00),
+                (3, 'Spicy Chicken Bites', 'Small crispy spicy chicken pieces', 42.00),
 
-                (4, 'Ice Cream', 'Vanilla ice cream', 28.00),
-                (4, 'Chocolate Cake', 'Chocolate dessert', 40.00)
+                (4, 'Chocolate Brownie', 'Warm brownie with chocolate sauce', 32.00),
+                (4, 'Mini Donuts', 'Three glazed mini donuts', 29.00),
+                (4, 'Ice Cream Sundae', 'Ice cream with toppings and syrup', 35.00)
             """);
 
       System.out.println("Database initialized successfully.");
