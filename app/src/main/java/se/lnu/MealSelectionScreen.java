@@ -83,8 +83,27 @@ public class MealSelectionScreen {
     HBox quantityBox = new HBox(15, minusButton, quantityLabel, plusButton);
     quantityBox.setAlignment(Pos.CENTER);
 
-    VBox centerContent = new VBox(18, title, description, priceLabel, quantityBox, confirmButton, statusLabel);
+
+/**
+ * You can delete from this...
+*/
+    Button viewCartButton = new Button("View Cart");
+    viewCartButton.setStyle(
+            "-fx-font-size: 18px;" +
+            "-fx-background-color: #4CAF50;" +
+            "-fx-text-fill: white;" +
+            "-fx-padding: 12 25;" +
+            "-fx-background-radius: 10;"
+    );
+    viewCartButton.setOnAction(e -> CartScreen.show(stage));
+
+    VBox centerContent = new VBox(18, title, description, priceLabel, quantityBox, confirmButton, statusLabel, viewCartButton);
     centerContent.setAlignment(Pos.CENTER);
+/**
+ * to this as it is the view cart button which was a demo I(Battur) created to check whether the Cart class worked or not.
+ */
+
+
 
     BorderPane root = new BorderPane();
     root.setPadding(new Insets(20));
