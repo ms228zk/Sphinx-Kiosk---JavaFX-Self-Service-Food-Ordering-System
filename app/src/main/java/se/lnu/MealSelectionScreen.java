@@ -52,7 +52,7 @@ public class MealSelectionScreen {
     );
     Label quantityLabel = new Label(String.valueOf(App.selectedQuantity));
     quantityLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
-    Label statusLabel = new Label("Meal selected and ready to add");
+    Label statusLabel = new Label("");
     statusLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: gray;");
 
     minusButton.setOnAction(e -> {
@@ -67,7 +67,7 @@ public class MealSelectionScreen {
       quantityLabel.setText(String.valueOf(App.selectedQuantity));
     });
 
-    Button confirmButton = new Button("Confirm Selection");
+    Button confirmButton = new Button("Add to Order");
     confirmButton.setStyle(
             "-fx-font-size: 18px;" +
                     "-fx-background-color: #FF9800;" +
@@ -75,9 +75,10 @@ public class MealSelectionScreen {
                     "-fx-padding: 12 25;" +
                     "-fx-background-radius: 10;"
     );
-    confirmButton.setOnAction(e -> statusLabel.setText(
-            "Selected " + App.selectedQuantity + " x " + item.getName()
-    ));
+    confirmButton.setOnAction(e -> {
+        Cart.getInstance().addItem(item, App.selectedQuantity);
+        statusLabel.setText(App.selectedQuantity + " x " + item.getName() + " added to order!");
+    });
 
     HBox quantityBox = new HBox(15, minusButton, quantityLabel, plusButton);
     quantityBox.setAlignment(Pos.CENTER);
