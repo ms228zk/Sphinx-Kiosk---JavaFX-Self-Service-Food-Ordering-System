@@ -9,7 +9,6 @@ import java.util.List;
 
 public class DatabaseHelper {
 
-    // Get all categories
     public static List<Category> getCategories() {
         List<Category> categories = new ArrayList<>();
 
@@ -33,7 +32,6 @@ public class DatabaseHelper {
         return categories;
     }
 
-    // Get items by category
     public static List<MenuItem> getItemsByCategory(int categoryId) {
         List<MenuItem> items = new ArrayList<>();
 
@@ -41,6 +39,7 @@ public class DatabaseHelper {
             SELECT menu_item_id, name, description, price
             FROM MenuItem
             WHERE category_id = ?
+            ORDER BY name
         """;
 
         try (Connection conn = DatabaseConnection.getConnection();
