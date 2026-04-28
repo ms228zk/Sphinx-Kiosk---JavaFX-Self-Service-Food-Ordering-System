@@ -52,7 +52,7 @@ public class MealSelectionScreen {
     );
     Label quantityLabel = new Label(String.valueOf(App.selectedQuantity));
     quantityLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
-    Label statusLabel = new Label("Meal selected and ready to add");
+    Label statusLabel = new Label("");
     statusLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: gray;");
 
     minusButton.setOnAction(e -> {
@@ -67,7 +67,7 @@ public class MealSelectionScreen {
       quantityLabel.setText(String.valueOf(App.selectedQuantity));
     });
 
-    Button confirmButton = new Button("Confirm Selection");
+    Button confirmButton = new Button("Add to Order");
     confirmButton.setStyle(
             "-fx-font-size: 18px;" +
                     "-fx-background-color: #FF9800;" +
@@ -75,15 +75,35 @@ public class MealSelectionScreen {
                     "-fx-padding: 12 25;" +
                     "-fx-background-radius: 10;"
     );
-    confirmButton.setOnAction(e -> statusLabel.setText(
-            "Selected " + App.selectedQuantity + " x " + item.getName()
-    ));
+    confirmButton.setOnAction(e -> {
+        Cart.getInstance().addItem(item, App.selectedQuantity);
+        statusLabel.setText(App.selectedQuantity + " x " + item.getName() + " added to order!");
+    });
 
     HBox quantityBox = new HBox(15, minusButton, quantityLabel, plusButton);
     quantityBox.setAlignment(Pos.CENTER);
 
-    VBox centerContent = new VBox(18, title, description, priceLabel, quantityBox, confirmButton, statusLabel);
+
+/**
+ * You can delete from this...
+*/
+    Button viewCartButton = new Button("View Cart");
+    viewCartButton.setStyle(
+            "-fx-font-size: 18px;" +
+            "-fx-background-color: #4CAF50;" +
+            "-fx-text-fill: white;" +
+            "-fx-padding: 12 25;" +
+            "-fx-background-radius: 10;"
+    );
+    viewCartButton.setOnAction(e -> CartScreen.show(stage));
+
+    VBox centerContent = new VBox(18, title, description, priceLabel, quantityBox, confirmButton, statusLabel, viewCartButton);
     centerContent.setAlignment(Pos.CENTER);
+/**
+ * to this as it is the view cart button which was a demo I(Battur) created to check whether the Cart class worked or not.
+ */
+
+
 
     BorderPane root = new BorderPane();
     root.setPadding(new Insets(20));
