@@ -45,7 +45,7 @@ public class CartScreen {
             itemsBox.getChildren().add(emptyLabel);
         } else {
             for (Cart.CartItem cartItem : items) {
-                Button minusButton = new Button("−");
+                Button minusButton = new Button("-");
                 Button plusButton = new Button("+");
 
                 String quantityButtonStyle =
@@ -61,6 +61,8 @@ public class CartScreen {
 
                 minusButton.setStyle(quantityButtonStyle);
                 plusButton.setStyle(quantityButtonStyle);
+
+                minusButton.setDisable(cartItem.getQuantity() <= 1);
 
                 minusButton.setOnAction(e -> {
                     Cart.getInstance().decreaseQuantity(cartItem);
@@ -79,27 +81,20 @@ public class CartScreen {
                                 "-fx-text-fill: #1f1f1f;"
                 );
 
-                Label quantityLabel = new Label(String.valueOf(cartItem.getQuantity()));
+                Label quantityLabel = new Label("Qty: " + cartItem.getQuantity());
                 quantityLabel.setStyle(
                         "-fx-font-size: 28px;" +
                                 "-fx-font-weight: bold;" +
                                 "-fx-text-fill: #1f1f1f;" +
-                                "-fx-min-width: 42;" +
+                                "-fx-min-width: 90;" +
                                 "-fx-alignment: center;"
                 );
                 quantityLabel.setAlignment(Pos.CENTER);
 
-                Label priceLabel = new Label(String.format("%.2f kr", cartItem.getSubtotal()));
-                priceLabel.setStyle(
-                        "-fx-font-size: 24px;" +
-                                "-fx-font-weight: bold;" +
-                                "-fx-text-fill: #1f1f1f;"
-                );
-
                 HBox quantityControls = new HBox(16, minusButton, quantityLabel, plusButton);
                 quantityControls.setAlignment(Pos.CENTER);
 
-                HBox row = new HBox(45, itemNameLabel, quantityControls, priceLabel);
+                HBox row = new HBox(45, itemNameLabel, quantityControls);
                 row.setAlignment(Pos.CENTER);
                 row.setPadding(new Insets(18, 30, 18, 30));
                 row.setMinWidth(760);
