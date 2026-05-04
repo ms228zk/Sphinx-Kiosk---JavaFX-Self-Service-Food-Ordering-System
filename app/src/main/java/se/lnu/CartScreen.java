@@ -48,6 +48,30 @@ public class CartScreen {
             Label totalLabel = new Label("Total: " + String.format("%.2f", total) + " kr");
             totalLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-padding: 15 0 0 0;");
             itemsBox.getChildren().add(totalLabel);
+
+            Button confirmButton = new Button("Confirm Order");
+            confirmButton.setStyle(
+                    "-fx-font-size: 18px;" +
+                            "-fx-background-color: #4CAF50;" +
+                            "-fx-text-fill: white;" +
+                            "-fx-padding: 12 25;" +
+                            "-fx-background-radius: 10;"
+            );
+
+            confirmButton.setOnAction(e -> {
+
+                if (items.isEmpty()) {
+                    itemsBox.getChildren().add(new Label("Cart is empty!"));
+                    return;
+                }
+
+                Order order = new Order(Cart.getInstance().getItems());
+
+                OrderConfirmationScreen screen = new OrderConfirmationScreen();
+                screen.start(stage, order);
+            });
+
+            itemsBox.getChildren().add(confirmButton);
         }
 
         VBox centerContent = new VBox(20, title, itemsBox);
