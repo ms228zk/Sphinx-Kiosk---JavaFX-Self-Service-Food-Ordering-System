@@ -22,13 +22,53 @@ public class Cart {
         return items;
     }
 
+    public void increaseQuantity(CartItem item) {
+        item.increaseQuantity();
+    }
+
+    public void decreaseQuantity(CartItem item) {
+        item.decreaseQuantity();
+    }
+
+    public double getTotalPrice() {
+        double total = 0;
+
+        for (CartItem item : items) {
+            total += item.getSubtotal();
+        }
+
+        return total;
+    }
+
     public static class CartItem {
-        public final MenuItem menuItem;
-        public final int quantity;
+        private final MenuItem menuItem;
+        private int quantity;
 
         public CartItem(MenuItem menuItem, int quantity) {
             this.menuItem = menuItem;
             this.quantity = quantity;
+        }
+
+        public MenuItem getMenuItem() {
+            return menuItem;
+        }
+
+        public int getQuantity() {
+            return quantity;
+        }
+
+        public void increaseQuantity() {
+            quantity++;
+        }
+
+        public void decreaseQuantity() {
+            if (quantity > 1) {
+                quantity--;
+            }
+        }
+
+        public double getSubtotal() {
+            return menuItem.getPrice() * quantity;
         }
     }
 }
