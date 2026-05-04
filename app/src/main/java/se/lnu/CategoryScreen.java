@@ -4,8 +4,11 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import se.lnu.database.DatabaseHelper;
@@ -30,7 +33,11 @@ public class CategoryScreen {
       OrderTypeScreen.show(stage);
     });
 
-    HBox topBar = new HBox(backBtn);
+    Button cartButton = createCartButton(stage);
+    Region spacer = new Region();
+    HBox.setHgrow(spacer, Priority.ALWAYS);
+
+    HBox topBar = new HBox(backBtn, spacer, cartButton);
     topBar.setAlignment(Pos.CENTER_LEFT);
 
     // category layout
@@ -56,15 +63,35 @@ public class CategoryScreen {
       layout.getChildren().add(btn);
     }
 
+    ScrollPane scrollPane = new ScrollPane(layout);
+    scrollPane.setFitToWidth(true);
+    scrollPane.setPannable(true);
+    scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+    scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+    scrollPane.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
+
     // Root layout
     BorderPane root = new BorderPane();
     root.setPadding(new Insets(20));
     root.setTop(topBar);
-    root.setCenter(layout);
+    root.setCenter(scrollPane);
 
     Scene scene = new Scene(root, 600, 400);
     stage.setScene(scene);
     stage.setTitle("Select Category");
     stage.show();
+  }
+
+  private static Button createCartButton(Stage stage) {
+    Button cartButton = new Button("Cart (" + Cart.getInstance().getItemCount() + ")");
+    cartButton.setStyle(
+            "-fx-font-size: 16px;" +
+                    "-fx-background-color: #4CAF50;" +
+                    "-fx-text-fill: white;" +
+                    "-fx-padding: 10 20;" +
+                    "-fx-background-radius: 10;"
+    );
+    cartButton.setOnAction(e -> CartScreen.show(stage));
+    return cartButton;
   }
 }

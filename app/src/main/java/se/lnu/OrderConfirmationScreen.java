@@ -60,10 +60,15 @@ public class OrderConfirmationScreen {
             HBox itemRow = new HBox();
             itemRow.setAlignment(Pos.CENTER_LEFT);
 
-            Label name = new Label(item.menuItem.getName());
+            Label name = new Label(item.getMenuItem().getName());
             name.setStyle("-fx-font-size: 16px; -fx-text-fill: #222;");
 
-            Label price = new Label(String.format("%.2f kr", item.menuItem.getPrice()));
+            Label price = new Label(
+                    String.format("%.2f kr x %d = %.2f kr",
+                            item.getMenuItem().getPrice(),
+                            item.getQuantity(),
+                            item.getSubtotal())
+            );
             price.setStyle("-fx-font-size: 16px; -fx-text-fill: #222;");
 
             HBox.setMargin(price, new Insets(0, 0, 0, 250)); //  price
@@ -71,7 +76,7 @@ public class OrderConfirmationScreen {
             itemRow.getChildren().addAll(name, price);
 
             // Qty
-            Label qtyLabel = new Label("Qty: " + item.quantity);
+            Label qtyLabel = new Label("Qty: " + item.getQuantity());
             qtyLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #444;");
 
             itemsBox.getChildren().addAll(itemRow, qtyLabel);
@@ -98,7 +103,9 @@ public class OrderConfirmationScreen {
 
         ScrollPane scrollPane = new ScrollPane(centerContent);
         scrollPane.setFitToWidth(true);
+        scrollPane.setPannable(true);
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         scrollPane.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
 
         BorderPane root = new BorderPane();

@@ -15,6 +15,13 @@ public class Cart {
     }
 
     public void addItem(MenuItem menuItem, int quantity) {
+        for (CartItem item : items) {
+            if (item.getMenuItem().getId() == menuItem.getId()) {
+                item.increaseQuantity(quantity);
+                return;
+            }
+        }
+
         items.add(new CartItem(menuItem, quantity));
     }
 
@@ -40,6 +47,20 @@ public class Cart {
         return total;
     }
 
+    public int getItemCount() {
+        int count = 0;
+
+        for (CartItem item : items) {
+            count += item.getQuantity();
+        }
+
+        return count;
+    }
+
+    public void clear() {
+        items.clear();
+    }
+
     public static class CartItem {
         private final MenuItem menuItem;
         private int quantity;
@@ -59,6 +80,12 @@ public class Cart {
 
         public void increaseQuantity() {
             quantity++;
+        }
+
+        public void increaseQuantity(int amount) {
+            if (amount > 0) {
+                quantity += amount;
+            }
         }
 
         public void decreaseQuantity() {
