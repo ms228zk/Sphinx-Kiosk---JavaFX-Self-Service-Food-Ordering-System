@@ -12,20 +12,24 @@ public class Order {
 
     public String getItemList() {
         StringBuilder sb = new StringBuilder();
+
         for (Cart.CartItem item : items) {
-            sb.append(item.quantity)
+            sb.append(item.getQuantity())
                     .append(" x ")
-                    .append(item.menuItem.getName())
+                    .append(item.getMenuItem().getName())
                     .append("\n");
         }
+
         return sb.toString();
     }
 
     public double getTotalPrice() {
         double total = 0;
+
         for (Cart.CartItem item : items) {
-            total += item.menuItem.getPrice() * item.quantity;
+            total += item.getSubtotal();
         }
+
         return total;
     }
 }
