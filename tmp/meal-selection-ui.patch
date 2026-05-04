@@ -1,0 +1,183 @@
+diff --git a/app/src/main/java/se/lnu/App.java b/app/src/main/java/se/lnu/App.java
+index 31df1aa..dc87b61 100644
+--- a/app/src/main/java/se/lnu/App.java
++++ b/app/src/main/java/se/lnu/App.java
+@@ -6,11 +6,19 @@ import se.lnu.database.DatabaseInitializer;
+ 
+ public class App extends Application {
+ 
++    public static int selectedCategoryId = -1;
++    public static String selectedCategoryName = "";
+     public static String orderType;
+     public static String selectedCategory;
+     public static MenuItem selectedMenuItem;
+     public static int selectedQuantity = 1;
+ 
++    public static void setCategory(int id, String name) {
++        selectedCategoryId = id;
++        selectedCategoryName = name;
++        System.out.println("Selected category: " + name + " (ID: " + id + ")");
++    }
++
+     @Override
+     public void start(Stage primaryStage) {
+         try {
+diff --git a/app/src/main/java/se/lnu/ItemListScreen.java b/app/src/main/java/se/lnu/ItemListScreen.java
+index f91135a..bdc104e 100644
+--- a/app/src/main/java/se/lnu/ItemListScreen.java
++++ b/app/src/main/java/se/lnu/ItemListScreen.java
+@@ -9,14 +9,18 @@ import javafx.scene.control.ScrollPane;
+ import javafx.scene.layout.BorderPane;
+ import javafx.scene.layout.VBox;
+ import javafx.stage.Stage;
+-import se.lnu.database.MenuItemRepository;
++import se.lnu.database.DatabaseHelper;
+ 
+ import java.util.List;
+ 
+ public class ItemListScreen {
+ 
+-  public static void show(Stage stage, String categoryName) {
+-    App.selectedCategory = categoryName;
++  public static void show(Stage stage) {
++    Label title = new Label(App.selectedCategoryName);
++    title.setStyle("-fx-font-size: 32px; -fx-font-weight: bold;");
++
++    Label subtitle = new Label("Select an item to continue");
++    subtitle.setStyle("-fx-font-size: 16px; -fx-text-fill: gray;");
+ 
+     Button backButton = new Button("Back");
+     backButton.setStyle(
+@@ -26,23 +30,17 @@ public class ItemListScreen {
+                     "-fx-padding: 10 20;" +
+                     "-fx-background-radius: 10;"
+     );
+-    backButton.setOnAction(e -> CategoryScreenPlaceholder.show(stage));
+-
+-    Label title = new Label(categoryName);
+-    title.setStyle("-fx-font-size: 32px; -fx-font-weight: bold;");
+-
+-    Label subtitle = new Label("Select an item to continue");
+-    subtitle.setStyle("-fx-font-size: 16px; -fx-text-fill: gray;");
++    backButton.setOnAction(e -> CategoryScreen.show(stage));
+ 
+-    VBox itemBox = new VBox(15);
+-    itemBox.setAlignment(Pos.CENTER);
++    VBox itemsBox = new VBox(15);
++    itemsBox.setAlignment(Pos.CENTER);
+ 
+-    List<MenuItem> items = MenuItemRepository.findByCategoryName(categoryName);
++    List<MenuItem> items = DatabaseHelper.getItemsByCategory(App.selectedCategoryId);
+     if (items.isEmpty()) {
+-      itemBox.getChildren().add(new Label("No items available"));
++      itemsBox.getChildren().add(new Label("No items available"));
+     } else {
+       for (MenuItem item : items) {
+-        Button itemButton = new Button(item.getName() + " - $" + String.format("%.2f", item.getPrice()));
++        Button itemButton = new Button(item.getName() + " - " + String.format("%.2f", item.getPrice()) + " kr");
+         itemButton.setPrefWidth(280);
+         itemButton.setStyle(
+                 "-fx-font-size: 18px;" +
+@@ -52,11 +50,11 @@ public class ItemListScreen {
+                         "-fx-background-radius: 10;"
+         );
+         itemButton.setOnAction(e -> MealSelectionScreen.show(stage, item));
+-        itemBox.getChildren().add(itemButton);
++        itemsBox.getChildren().add(itemButton);
+       }
+     }
+ 
+-    VBox centerContent = new VBox(20, title, subtitle, itemBox);
++    VBox centerContent = new VBox(20, title, subtitle, itemsBox);
+     centerContent.setAlignment(Pos.CENTER);
+ 
+     ScrollPane scrollPane = new ScrollPane(centerContent);
+diff --git a/app/src/main/java/se/lnu/MealSelectionScreen.java b/app/src/main/java/se/lnu/MealSelectionScreen.java
+index e248b91..791a214 100644
+--- a/app/src/main/java/se/lnu/MealSelectionScreen.java
++++ b/app/src/main/java/se/lnu/MealSelectionScreen.java
+@@ -24,7 +24,7 @@ public class MealSelectionScreen {
+                     "-fx-padding: 10 20;" +
+                     "-fx-background-radius: 10;"
+     );
+-    backButton.setOnAction(e -> ItemListScreen.show(stage, App.selectedCategory));
++    backButton.setOnAction(e -> ItemListScreen.show(stage));
+ 
+     Label title = new Label(item.getName());
+     title.setStyle("-fx-font-size: 32px; -fx-font-weight: bold;");
+diff --git a/app/src/main/java/se/lnu/MenuItem.java b/app/src/main/java/se/lnu/MenuItem.java
+index 9de6e58..592c882 100644
+--- a/app/src/main/java/se/lnu/MenuItem.java
++++ b/app/src/main/java/se/lnu/MenuItem.java
+@@ -3,14 +3,12 @@ package se.lnu;
+ public class MenuItem {
+ 
+   private final int id;
+-  private final int categoryId;
+   private final String name;
+   private final String description;
+   private final double price;
+ 
+-  public MenuItem(int id, int categoryId, String name, String description, double price) {
++  public MenuItem(int id, String name, String description, double price) {
+     this.id = id;
+-    this.categoryId = categoryId;
+     this.name = name;
+     this.description = description;
+     this.price = price;
+@@ -20,10 +18,6 @@ public class MenuItem {
+     return id;
+   }
+ 
+-  public int getCategoryId() {
+-    return categoryId;
+-  }
+-
+   public String getName() {
+     return name;
+   }
+diff --git a/app/src/main/java/se/lnu/OrderTypeScreen.java b/app/src/main/java/se/lnu/OrderTypeScreen.java
+index 6658ccc..c81e81e 100644
+--- a/app/src/main/java/se/lnu/OrderTypeScreen.java
++++ b/app/src/main/java/se/lnu/OrderTypeScreen.java
+@@ -42,13 +42,13 @@ public class OrderTypeScreen {
+     // Action for Eat-in
+     eatInButton.setOnAction(e -> {
+       App.orderType = "Eat-in"; // store selected type
+-      CategoryScreenPlaceholder.show(stage); // navigate forward
++      CategoryScreen.show(stage); // navigate forward
+     });
+ 
+     // Action for Takeaway
+     takeawayButton.setOnAction(e -> {
+       App.orderType = "Takeaway"; // store selected type
+-      CategoryScreenPlaceholder.show(stage); // navigate forward
++      CategoryScreen.show(stage); // navigate forward
+     });
+ 
+     // Center layout for content
+diff --git a/app/src/main/java/se/lnu/database/MenuItemRepository.java b/app/src/main/java/se/lnu/database/MenuItemRepository.java
+index ac59765..6b1c6e0 100644
+--- a/app/src/main/java/se/lnu/database/MenuItemRepository.java
++++ b/app/src/main/java/se/lnu/database/MenuItemRepository.java
+@@ -14,10 +14,10 @@ public class MenuItemRepository {
+   public static List<MenuItem> findByCategoryName(String categoryName) {
+     List<MenuItem> items = new ArrayList<>();
+     String sql = """
+-            SELECT m.menu_item_id, m.category_id, m.name, m.description, m.price
++            SELECT m.menu_item_id, m.name, m.description, m.price
+             FROM MenuItem m
+             JOIN Category c ON c.category_id = m.category_id
+-            WHERE c.name = ? AND m.is_available = 1
++            WHERE c.name = ?
+             ORDER BY m.name
+         """;
+ 
+@@ -29,7 +29,6 @@ public class MenuItemRepository {
+         while (resultSet.next()) {
+           items.add(new MenuItem(
+                   resultSet.getInt("menu_item_id"),
+-                  resultSet.getInt("category_id"),
+                   resultSet.getString("name"),
+                   resultSet.getString("description"),
+                   resultSet.getDouble("price")

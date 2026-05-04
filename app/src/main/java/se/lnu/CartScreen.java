@@ -5,6 +5,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -81,6 +82,18 @@ public class CartScreen {
                                 "-fx-text-fill: #1f1f1f;"
                 );
 
+                Label unitPriceLabel = new Label(
+                        "Unit: " + String.format("%.2f kr", cartItem.getMenuItem().getPrice())
+                );
+                unitPriceLabel.setStyle(
+                        "-fx-font-size: 16px;" +
+                                "-fx-text-fill: #555555;"
+                );
+
+                VBox itemDetails = new VBox(6, itemNameLabel, unitPriceLabel);
+                itemDetails.setAlignment(Pos.CENTER_LEFT);
+                itemDetails.setMinWidth(260);
+
                 Label quantityLabel = new Label("Qty: " + cartItem.getQuantity());
                 quantityLabel.setStyle(
                         "-fx-font-size: 28px;" +
@@ -94,7 +107,17 @@ public class CartScreen {
                 HBox quantityControls = new HBox(16, minusButton, quantityLabel, plusButton);
                 quantityControls.setAlignment(Pos.CENTER);
 
-                HBox row = new HBox(45, itemNameLabel, quantityControls);
+                Label subtotalLabel = new Label(
+                        "Line total: " + String.format("%.2f kr", cartItem.getSubtotal())
+                );
+                subtotalLabel.setStyle(
+                        "-fx-font-size: 20px;" +
+                                "-fx-font-weight: bold;" +
+                                "-fx-text-fill: #1f1f1f;"
+                );
+                subtotalLabel.setMinWidth(190);
+
+                HBox row = new HBox(35, itemDetails, quantityControls, subtotalLabel);
                 row.setAlignment(Pos.CENTER);
                 row.setPadding(new Insets(18, 30, 18, 30));
                 row.setMinWidth(760);
@@ -150,11 +173,18 @@ public class CartScreen {
         VBox centerContent = new VBox(32, title, itemsBox);
         centerContent.setAlignment(Pos.CENTER);
 
+        ScrollPane scrollPane = new ScrollPane(centerContent);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setPannable(true);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
+
         BorderPane root = new BorderPane();
         root.setPadding(new Insets(26));
         root.setBackground(ScreenStyle.createBackground());
         root.setTop(backButton);
-        root.setCenter(centerContent);
+        root.setCenter(scrollPane);
 
         Scene scene = new Scene(root, 900, 600);
         stage.setScene(scene);
