@@ -17,7 +17,7 @@ public class ItemListScreen {
 
   public static void show(Stage stage) {
     Label title = new Label(App.selectedCategoryName);
-    title.setStyle("-fx-font-size: 32px; -fx-font-weight: bold;");
+    title.setStyle("-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #333333;");
 
     Label subtitle = new Label("Select an item to continue");
     subtitle.setStyle("-fx-font-size: 16px; -fx-text-fill: gray;");
