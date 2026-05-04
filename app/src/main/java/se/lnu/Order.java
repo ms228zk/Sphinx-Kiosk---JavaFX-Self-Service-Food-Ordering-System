@@ -28,4 +28,8 @@ public class Order {
         }
         return total;
     }
+
+    public List<Cart.CartItem> getItems() {
+        return items;
+    }
 }
