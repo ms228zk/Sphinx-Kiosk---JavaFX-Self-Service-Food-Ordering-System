@@ -25,8 +25,6 @@ public class OrderConfirmationScreen {
         String date = now.format(dateFormatter);
         String time = now.format(timeFormatter);
 
-        // Order number (timestamp)
-        String orderNumber = "ORD-" + (System.currentTimeMillis() % 100000);
 
         // Title
         Label title = new Label("Order Placed Successfully!");
@@ -34,16 +32,14 @@ public class OrderConfirmationScreen {
         VBox titleBox = new VBox(title);
         titleBox.setAlignment(Pos.CENTER);
 
-        // Date , Order Number , Time are in same row
+        // Date ,Time are in same row
         Label dateLabel = new Label("Date : " + date);
-        Label orderNumLabel = new Label("Order Number : " + orderNumber);
         Label timeLabel = new Label("Time : " + time);
 
         dateLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #222;");
-        orderNumLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #222;");
         timeLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #222;");
 
-        HBox infoRow = new HBox(40, dateLabel, orderNumLabel, timeLabel);
+        HBox infoRow = new HBox(40, dateLabel, timeLabel);
         infoRow.setAlignment(Pos.CENTER);
 
         // Items Ordered
@@ -64,10 +60,7 @@ public class OrderConfirmationScreen {
             name.setStyle("-fx-font-size: 16px; -fx-text-fill: #222;");
 
             Label price = new Label(
-                    String.format("%.2f kr x %d = %.2f kr",
-                            item.getMenuItem().getPrice(),
-                            item.getQuantity(),
-                            item.getSubtotal())
+                    String.format("%.2f kr", item.getSubtotal())
             );
             price.setStyle("-fx-font-size: 16px; -fx-text-fill: #222;");
 
