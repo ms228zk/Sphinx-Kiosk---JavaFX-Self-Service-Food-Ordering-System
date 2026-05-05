@@ -11,6 +11,9 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.animation.FadeTransition;
+import javafx.util.Duration;
+
 
 public class MealSelectionScreen {
 
@@ -63,7 +66,16 @@ public class MealSelectionScreen {
     Label quantityLabel = new Label(String.valueOf(App.selectedQuantity));
     quantityLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
     Label statusLabel = new Label("");
-    statusLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: gray;");
+    statusLabel.setOpacity(0);
+
+    statusLabel.setStyle(
+      "-fx-font-size: 16px;" +
+        "-fx-text-fill: white;" +
+        "-fx-background-color: #4CAF50;" +
+        "-fx-padding: 10 20;" +
+        "-fx-background-radius: 15;" +
+        "-fx-font-weight: bold;"
+    );
 
     minusButton.setOnAction(e -> {
       if (App.selectedQuantity > 1) {
@@ -89,7 +101,17 @@ public class MealSelectionScreen {
     );
     confirmButton.setOnAction(e -> {
         Cart.getInstance().addItem(item, App.selectedQuantity);
-        statusLabel.setText(App.selectedQuantity + " x " + item.getName() + " added to order!");
+      statusLabel.setText("✔ Added " + App.selectedQuantity + " x " + item.getName());
+      FadeTransition fadeIn = new FadeTransition(Duration.millis(400), statusLabel);
+      fadeIn.setFromValue(0);
+      fadeIn.setToValue(1);
+
+      FadeTransition fadeOut = new FadeTransition(Duration.seconds(2.5), statusLabel);
+      fadeOut.setFromValue(1);
+      fadeOut.setToValue(0);
+      fadeOut.setDelay(Duration.seconds(2));
+      fadeIn.play();
+      fadeOut.play();
         cartButton.setText("Cart (" + Cart.getInstance().getItemCount() + ")");
     });
 

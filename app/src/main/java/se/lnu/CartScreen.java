@@ -48,7 +48,21 @@ public class CartScreen {
             for (Cart.CartItem cartItem : items) {
                 Button minusButton = new Button("-");
                 Button plusButton = new Button("+");
-
+                Button removeButton = new Button("\uD83D\uDDD1");
+                removeButton.setStyle(
+                  "-fx-background-color: rgba(255, 80, 80, 0.15);" +
+                    "-fx-text-fill: #ff4d4d;" +
+                    "-fx-font-size: 18px;" +
+                    "-fx-font-weight: bold;" +
+                    "-fx-background-radius: 50;" +
+                    "-fx-min-width: 40;" +
+                    "-fx-min-height: 40;" +
+                    "-fx-cursor: hand;"
+                );
+                removeButton.setOnAction(e -> {
+                    Cart.getInstance().removeItem(cartItem);
+                    CartScreen.show(stage);
+                });
                 String quantityButtonStyle =
                         "-fx-background-color: linear-gradient(to bottom, #ffae00, #ff8c00);" +
                                 "-fx-text-fill: white;" +
@@ -117,7 +131,7 @@ public class CartScreen {
                 );
                 subtotalLabel.setMinWidth(190);
 
-                HBox row = new HBox(35, itemDetails, quantityControls, subtotalLabel);
+                HBox row = new HBox(20, itemDetails, quantityControls, subtotalLabel, removeButton);
                 row.setAlignment(Pos.CENTER);
                 row.setPadding(new Insets(18, 30, 18, 30));
                 row.setMinWidth(760);

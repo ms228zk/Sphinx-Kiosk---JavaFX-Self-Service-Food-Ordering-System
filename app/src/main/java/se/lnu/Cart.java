@@ -36,6 +36,9 @@ public class Cart {
     public void decreaseQuantity(CartItem item) {
         item.decreaseQuantity();
     }
+    public void removeItem(CartItem item) {
+        items.remove(item);
+    }
 
     public double getTotalPrice() {
         double total = 0;
