@@ -35,34 +35,63 @@ public class CartScreen {
         VBox itemsBox = new VBox(20);
         itemsBox.setAlignment(Pos.CENTER);
 
+        Label warningLabel = new Label("Add items before confirming your order.");
+        warningLabel.setStyle(
+                "-fx-font-size: 18px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-text-fill: #b00020;" +
+                        "-fx-background-color: rgba(255, 220, 220, 0.90);" +
+                        "-fx-background-radius: 18;" +
+                        "-fx-padding: 14 28 14 28;"
+        );
+
         java.util.List<Cart.CartItem> items = Cart.getInstance().getItems();
 
         if (items.isEmpty()) {
             Label emptyLabel = new Label("Your cart is empty.");
             emptyLabel.setStyle(
-                    "-fx-font-size: 22px;" +
-                            "-fx-text-fill: #777777;"
+                    "-fx-font-size: 24px;" +
+                            "-fx-font-weight: bold;" +
+                            "-fx-text-fill: #777777;" +
+                            "-fx-background-color: rgba(255,255,255,0.90);" +
+                            "-fx-background-radius: 24;" +
+                            "-fx-padding: 24 60 24 60;"
             );
-            itemsBox.getChildren().add(emptyLabel);
+
+            Button confirmButton = new Button("Confirm Order");
+            confirmButton.setDisable(true);
+            confirmButton.setStyle(
+                    "-fx-font-size: 18px;" +
+                            "-fx-background-color: #bdbdbd;" +
+                            "-fx-text-fill: white;" +
+                            "-fx-padding: 12 25;" +
+                            "-fx-background-radius: 10;"
+            );
+
+            itemsBox.getChildren().addAll(emptyLabel, warningLabel, confirmButton);
+
         } else {
             for (Cart.CartItem cartItem : items) {
                 Button minusButton = new Button("-");
                 Button plusButton = new Button("+");
                 Button removeButton = new Button("\uD83D\uDDD1");
+
                 removeButton.setStyle(
-                  "-fx-background-color: rgba(255, 80, 80, 0.15);" +
-                    "-fx-text-fill: #ff4d4d;" +
-                    "-fx-font-size: 18px;" +
-                    "-fx-font-weight: bold;" +
-                    "-fx-background-radius: 50;" +
-                    "-fx-min-width: 40;" +
-                    "-fx-min-height: 40;" +
-                    "-fx-cursor: hand;"
+                        "-fx-background-color: rgba(255, 80, 80, 0.15);" +
+                                "-fx-text-fill: #ff4d4d;" +
+                                "-fx-font-size: 18px;" +
+                                "-fx-font-weight: bold;" +
+                                "-fx-background-radius: 50;" +
+                                "-fx-min-width: 40;" +
+                                "-fx-min-height: 40;" +
+                                "-fx-cursor: hand;"
                 );
+
                 removeButton.setOnAction(e -> {
                     Cart.getInstance().removeItem(cartItem);
                     CartScreen.show(stage);
                 });
+
                 String quantityButtonStyle =
                         "-fx-background-color: linear-gradient(to bottom, #ffae00, #ff8c00);" +
                                 "-fx-text-fill: white;" +
@@ -80,8 +109,10 @@ public class CartScreen {
                 minusButton.setDisable(cartItem.getQuantity() <= 1);
 
                 minusButton.setOnAction(e -> {
-                    Cart.getInstance().decreaseQuantity(cartItem);
-                    CartScreen.show(stage);
+                    if (cartItem.getQuantity() > 1) {
+                        Cart.getInstance().decreaseQuantity(cartItem);
+                        CartScreen.show(stage);
+                    }
                 });
 
                 plusButton.setOnAction(e -> {
@@ -157,21 +188,21 @@ public class CartScreen {
                             "-fx-padding: 18 65 18 65;"
             );
 
-            itemsBox.getChildren().add(totalLabel);
-
             Button confirmButton = new Button("Confirm Order");
             confirmButton.setStyle(
                     "-fx-font-size: 18px;" +
                             "-fx-background-color: #4CAF50;" +
                             "-fx-text-fill: white;" +
                             "-fx-padding: 12 25;" +
-                            "-fx-background-radius: 10;"
+                            "-fx-background-radius: 10;" +
+                            "-fx-cursor: hand;"
             );
 
-            confirmButton.setOnAction(e -> {
+            confirmButton.setDisable(Cart.getInstance().getItems().isEmpty());
 
-                if (items.isEmpty()) {
-                    itemsBox.getChildren().add(new Label("Cart is empty!"));
+            confirmButton.setOnAction(e -> {
+                if (Cart.getInstance().getItems().isEmpty()) {
+                    CartScreen.show(stage);
                     return;
                 }
 
@@ -181,7 +212,7 @@ public class CartScreen {
                 screen.start(stage, order);
             });
 
-            itemsBox.getChildren().add(confirmButton);
+            itemsBox.getChildren().addAll(totalLabel, confirmButton);
         }
 
         VBox centerContent = new VBox(32, title, itemsBox);
