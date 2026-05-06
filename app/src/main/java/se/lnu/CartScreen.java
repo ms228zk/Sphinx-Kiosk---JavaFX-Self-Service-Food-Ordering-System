@@ -35,7 +35,7 @@ public class CartScreen {
         VBox itemsBox = new VBox(20);
         itemsBox.setAlignment(Pos.CENTER);
 
-        Label warningLabel = new Label("Add items before confirming your order.");
+        Label warningLabel = new Label("Add items before confirming.");
         warningLabel.setStyle(
                 "-fx-font-size: 18px;" +
                         "-fx-font-weight: bold;" +
