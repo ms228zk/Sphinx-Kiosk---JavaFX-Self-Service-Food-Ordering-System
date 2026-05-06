@@ -38,10 +38,10 @@ public class MealSelectionScreen {
     topBar.setAlignment(Pos.CENTER_LEFT);
 
     Label title = new Label(item.getName());
-    title.setStyle("-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #1f1f1f;");
+    title.setStyle("-fx-font-size: 38px; -fx-font-weight: bold; -fx-text-fill: #1f1f1f;");
 
     Label description = new Label(item.getDescription());
-    description.setStyle("-fx-font-size: 16px; -fx-text-fill: #555555;");
+    description.setStyle("-fx-font-size: 17px; -fx-text-fill: #555555;");
 
     Label priceLabel = new Label("Unit price: " + String.format("%.2f kr", item.getPrice()));
     priceLabel.setStyle("-fx-font-size: 18px; -fx-text-fill: #1f1f1f;");
@@ -51,27 +51,22 @@ public class MealSelectionScreen {
 
     Button minusButton = new Button("-");
     Button plusButton = new Button("+");
-    minusButton.setStyle(
+
+    String quantityButtonStyle =
             "-fx-font-size: 18px;" +
                     "-fx-background-color: #FF9800;" +
                     "-fx-text-fill: white;" +
                     "-fx-padding: 10 18;" +
-                    "-fx-background-radius: 10;"
-    );
-    plusButton.setStyle(
-            "-fx-font-size: 18px;" +
-                    "-fx-background-color: #FF9800;" +
-                    "-fx-text-fill: white;" +
-                    "-fx-padding: 10 18;" +
-                    "-fx-background-radius: 10;"
-    );
+                    "-fx-background-radius: 10;";
+
+    minusButton.setStyle(quantityButtonStyle);
+    plusButton.setStyle(quantityButtonStyle);
 
     Label quantityLabel = new Label(String.valueOf(App.selectedQuantity));
     quantityLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1f1f1f;");
 
     Label statusLabel = new Label("");
     statusLabel.setOpacity(0);
-
     statusLabel.setStyle(
             "-fx-font-size: 16px;" +
                     "-fx-text-fill: white;" +
@@ -103,9 +98,10 @@ public class MealSelectionScreen {
                     "-fx-padding: 12 25;" +
                     "-fx-background-radius: 10;"
     );
+
     confirmButton.setOnAction(e -> {
       Cart.getInstance().addItem(item, App.selectedQuantity);
-      statusLabel.setText("✔ Added " + App.selectedQuantity + " x " + item.getName());
+      statusLabel.setText("Added " + App.selectedQuantity + " x " + item.getName());
 
       FadeTransition fadeIn = new FadeTransition(Duration.millis(400), statusLabel);
       fadeIn.setFromValue(0);
@@ -135,8 +131,53 @@ public class MealSelectionScreen {
     );
     viewCartButton.setOnAction(e -> CartScreen.show(stage));
 
-    VBox centerContent = new VBox(18, title, description, priceLabel, quantityBox, itemTotalLabel, confirmButton, statusLabel, viewCartButton);
+    VBox centerContent;
+
+    if (App.selectedCategoryName.equalsIgnoreCase("Combos")) {
+      Label chooseLabel = new Label("Customize your combo");
+      chooseLabel.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #1f1f1f;");
+
+      HBox comboOptions = new HBox(
+              15,
+              createOptionCard("Choose Size", "Coming next"),
+              createOptionCard("Choose Drink", "Coming next"),
+              createOptionCard("Choose Side", "Coming next")
+      );
+      comboOptions.setAlignment(Pos.CENTER);
+
+      Label noteLabel = new Label("Combo customization options will be completed in Sprint 3.");
+      noteLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #777777;");
+
+      centerContent = new VBox(
+              18,
+              title,
+              description,
+              priceLabel,
+              chooseLabel,
+              comboOptions,
+              quantityBox,
+              itemTotalLabel,
+              confirmButton,
+              statusLabel,
+              viewCartButton,
+              noteLabel
+      );
+    } else {
+      centerContent = new VBox(
+              18,
+              title,
+              description,
+              priceLabel,
+              quantityBox,
+              itemTotalLabel,
+              confirmButton,
+              statusLabel,
+              viewCartButton
+      );
+    }
+
     centerContent.setAlignment(Pos.CENTER);
+    centerContent.setPadding(new Insets(20));
 
     ScrollPane scrollPane = new ScrollPane(centerContent);
     scrollPane.setFitToWidth(true);
@@ -155,6 +196,26 @@ public class MealSelectionScreen {
     stage.setScene(scene);
     stage.setTitle("Select Meal");
     stage.show();
+  }
+
+  private static VBox createOptionCard(String title, String subtitle) {
+    Label titleLabel = new Label(title);
+    titleLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1f1f1f;");
+
+    Label subtitleLabel = new Label(subtitle);
+    subtitleLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #666666;");
+
+    VBox card = new VBox(6, titleLabel, subtitleLabel);
+    card.setAlignment(Pos.CENTER);
+    card.setPadding(new Insets(14, 18, 14, 18));
+    card.setMinWidth(130);
+    card.setStyle(
+            "-fx-background-color: rgba(255,255,255,0.90);" +
+                    "-fx-background-radius: 18;" +
+                    "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.10), 8, 0, 0, 2);"
+    );
+
+    return card;
   }
 
   private static Button createCartButton(Stage stage) {
