@@ -48,27 +48,63 @@ public class CartScreen {
         java.util.List<Cart.CartItem> items = Cart.getInstance().getItems();
 
         if (items.isEmpty()) {
-            Label emptyLabel = new Label("Your cart is empty.");
-            emptyLabel.setStyle(
-                    "-fx-font-size: 24px;" +
+            Label cartIcon = new Label("🛒");
+            cartIcon.setStyle(
+                    "-fx-font-size: 48px;"
+            );
+
+            Label emptyHeading = new Label("Your cart is empty");
+            emptyHeading.setStyle(
+                    "-fx-font-size: 28px;" +
                             "-fx-font-weight: bold;" +
-                            "-fx-text-fill: #777777;" +
-                            "-fx-background-color: rgba(255,255,255,0.90);" +
-                            "-fx-background-radius: 24;" +
-                            "-fx-padding: 24 60 24 60;"
+                            "-fx-text-fill: #2d2d2d;"
             );
 
-            Button confirmButton = new Button("Confirm Order");
-            confirmButton.setDisable(true);
-            confirmButton.setStyle(
+            Label emptySubtext = new Label("Browse the menu and add something delicious!");
+            emptySubtext.setStyle(
+                    "-fx-font-size: 16px;" +
+                            "-fx-text-fill: #888888;"
+            );
+
+            warningLabel.setStyle(
                     "-fx-font-size: 18px;" +
-                            "-fx-background-color: #bdbdbd;" +
-                            "-fx-text-fill: white;" +
-                            "-fx-padding: 12 25;" +
-                            "-fx-background-radius: 10;"
+                            "-fx-font-weight: bold;" +
+                            "-fx-text-fill: #b00020;" +
+                            "-fx-background-color: rgba(255, 220, 220, 0.90);" +
+                            "-fx-background-radius: 18;" +
+                            "-fx-padding: 14 28 14 28;"
             );
 
-            itemsBox.getChildren().addAll(emptyLabel, warningLabel, confirmButton);
+            VBox textGroup = new VBox(8, emptyHeading, emptySubtext);
+            textGroup.setAlignment(Pos.CENTER);
+
+            VBox emptyCard = new VBox(16, cartIcon, textGroup, warningLabel);
+            emptyCard.setAlignment(Pos.CENTER);
+            emptyCard.setPadding(new Insets(20, 52, 20, 52));
+            emptyCard.setMaxWidth(520);
+            emptyCard.setStyle(
+                    "-fx-background-color: rgba(255,255,255,0.92);" +
+                            "-fx-background-radius: 24;" +
+                            "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.10), 16, 0, 0, 3);"
+            );
+
+            Button browseButton = new Button("← Browse Menu");
+            browseButton.setStyle(
+                    "-fx-font-size: 15px;" +
+                            "-fx-font-weight: bold;" +
+                            "-fx-background-color: linear-gradient(to bottom, #ffae00, #ff8c00);" +
+                            "-fx-text-fill: white;" +
+                            "-fx-padding: 11 32;" +
+                            "-fx-background-radius: 16;" +
+                            "-fx-cursor: hand;" +
+                            "-fx-effect: dropshadow(gaussian, rgba(255,140,0,0.35), 8, 0, 0, 2);"
+            );
+            browseButton.setOnAction(e -> CategoryScreen.show(stage));
+
+            VBox emptyStateGroup = new VBox(16, emptyCard, browseButton);
+            emptyStateGroup.setAlignment(Pos.CENTER);
+
+            itemsBox.getChildren().add(emptyStateGroup);
 
         } else {
             for (Cart.CartItem cartItem : items) {
@@ -215,8 +251,10 @@ public class CartScreen {
             itemsBox.getChildren().addAll(totalLabel, confirmButton);
         }
 
-        VBox centerContent = new VBox(32, title, itemsBox);
+        VBox centerContent = new VBox(24, title, itemsBox);
         centerContent.setAlignment(Pos.CENTER);
+        centerContent.setFillWidth(true);
+        VBox.setVgrow(itemsBox, javafx.scene.layout.Priority.ALWAYS);
 
         ScrollPane scrollPane = new ScrollPane(centerContent);
         scrollPane.setFitToWidth(true);
