@@ -35,7 +35,7 @@ public class CartScreen {
         VBox itemsBox = new VBox(20);
         itemsBox.setAlignment(Pos.CENTER);
 
-        Label warningLabel = new Label("Add items before confirming.");
+        Label warningLabel = new Label("Add items before confirming your order.");
         warningLabel.setStyle(
                 "-fx-font-size: 18px;" +
                         "-fx-font-weight: bold;" +
@@ -48,10 +48,9 @@ public class CartScreen {
         java.util.List<Cart.CartItem> items = Cart.getInstance().getItems();
 
         if (items.isEmpty()) {
-            // Cart icon using Unicode chars stacked in a styled label
             Label cartIcon = new Label("🛒");
             cartIcon.setStyle(
-                    "-fx-font-size: 72px;"
+                    "-fx-font-size: 48px;"
             );
 
             Label emptyHeading = new Label("Your cart is empty");
@@ -64,37 +63,48 @@ public class CartScreen {
             Label emptySubtext = new Label("Browse the menu and add something delicious!");
             emptySubtext.setStyle(
                     "-fx-font-size: 16px;" +
-                            "-fx-text-fill: #888888;" +
-                            "-fx-padding: 0 0 8 0;"
+                            "-fx-text-fill: #888888;"
+            );
+
+            warningLabel.setStyle(
+                    "-fx-font-size: 18px;" +
+                            "-fx-font-weight: bold;" +
+                            "-fx-text-fill: #b00020;" +
+                            "-fx-background-color: rgba(255, 220, 220, 0.90);" +
+                            "-fx-background-radius: 18;" +
+                            "-fx-padding: 14 28 14 28;"
             );
 
             VBox textGroup = new VBox(8, emptyHeading, emptySubtext);
             textGroup.setAlignment(Pos.CENTER);
 
-            VBox emptyCard = new VBox(20, cartIcon, textGroup, warningLabel);
+            VBox emptyCard = new VBox(16, cartIcon, textGroup, warningLabel);
             emptyCard.setAlignment(Pos.CENTER);
-            emptyCard.setPadding(new Insets(48, 80, 48, 80));
+            emptyCard.setPadding(new Insets(20, 52, 20, 52));
             emptyCard.setMaxWidth(520);
             emptyCard.setStyle(
                     "-fx-background-color: rgba(255,255,255,0.92);" +
-                            "-fx-background-radius: 32;" +
-                            "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.10), 20, 0, 0, 4);"
+                            "-fx-background-radius: 24;" +
+                            "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.10), 16, 0, 0, 3);"
             );
 
             Button browseButton = new Button("← Browse Menu");
             browseButton.setStyle(
-                    "-fx-font-size: 17px;" +
+                    "-fx-font-size: 15px;" +
                             "-fx-font-weight: bold;" +
                             "-fx-background-color: linear-gradient(to bottom, #ffae00, #ff8c00);" +
                             "-fx-text-fill: white;" +
-                            "-fx-padding: 14 40;" +
-                            "-fx-background-radius: 20;" +
+                            "-fx-padding: 11 32;" +
+                            "-fx-background-radius: 16;" +
                             "-fx-cursor: hand;" +
-                            "-fx-effect: dropshadow(gaussian, rgba(255,140,0,0.35), 10, 0, 0, 3);"
+                            "-fx-effect: dropshadow(gaussian, rgba(255,140,0,0.35), 8, 0, 0, 2);"
             );
             browseButton.setOnAction(e -> CategoryScreen.show(stage));
 
-            itemsBox.getChildren().addAll(emptyCard, browseButton);
+            VBox emptyStateGroup = new VBox(16, emptyCard, browseButton);
+            emptyStateGroup.setAlignment(Pos.CENTER);
+
+            itemsBox.getChildren().add(emptyStateGroup);
 
         } else {
             for (Cart.CartItem cartItem : items) {
@@ -241,8 +251,10 @@ public class CartScreen {
             itemsBox.getChildren().addAll(totalLabel, confirmButton);
         }
 
-        VBox centerContent = new VBox(32, title, itemsBox);
+        VBox centerContent = new VBox(24, title, itemsBox);
         centerContent.setAlignment(Pos.CENTER);
+        centerContent.setFillWidth(true);
+        VBox.setVgrow(itemsBox, javafx.scene.layout.Priority.ALWAYS);
 
         ScrollPane scrollPane = new ScrollPane(centerContent);
         scrollPane.setFitToWidth(true);
