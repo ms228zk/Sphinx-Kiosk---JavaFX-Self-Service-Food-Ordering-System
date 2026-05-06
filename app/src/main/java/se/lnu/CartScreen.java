@@ -48,27 +48,53 @@ public class CartScreen {
         java.util.List<Cart.CartItem> items = Cart.getInstance().getItems();
 
         if (items.isEmpty()) {
-            Label emptyLabel = new Label("Your cart is empty.");
-            emptyLabel.setStyle(
-                    "-fx-font-size: 24px;" +
+            // Cart icon using Unicode chars stacked in a styled label
+            Label cartIcon = new Label("🛒");
+            cartIcon.setStyle(
+                    "-fx-font-size: 72px;"
+            );
+
+            Label emptyHeading = new Label("Your cart is empty");
+            emptyHeading.setStyle(
+                    "-fx-font-size: 28px;" +
                             "-fx-font-weight: bold;" +
-                            "-fx-text-fill: #777777;" +
-                            "-fx-background-color: rgba(255,255,255,0.90);" +
-                            "-fx-background-radius: 24;" +
-                            "-fx-padding: 24 60 24 60;"
+                            "-fx-text-fill: #2d2d2d;"
             );
 
-            Button confirmButton = new Button("Confirm Order");
-            confirmButton.setDisable(true);
-            confirmButton.setStyle(
-                    "-fx-font-size: 18px;" +
-                            "-fx-background-color: #bdbdbd;" +
+            Label emptySubtext = new Label("Browse the menu and add something delicious!");
+            emptySubtext.setStyle(
+                    "-fx-font-size: 16px;" +
+                            "-fx-text-fill: #888888;" +
+                            "-fx-padding: 0 0 8 0;"
+            );
+
+            VBox textGroup = new VBox(8, emptyHeading, emptySubtext);
+            textGroup.setAlignment(Pos.CENTER);
+
+            VBox emptyCard = new VBox(20, cartIcon, textGroup, warningLabel);
+            emptyCard.setAlignment(Pos.CENTER);
+            emptyCard.setPadding(new Insets(48, 80, 48, 80));
+            emptyCard.setMaxWidth(520);
+            emptyCard.setStyle(
+                    "-fx-background-color: rgba(255,255,255,0.92);" +
+                            "-fx-background-radius: 32;" +
+                            "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.10), 20, 0, 0, 4);"
+            );
+
+            Button browseButton = new Button("← Browse Menu");
+            browseButton.setStyle(
+                    "-fx-font-size: 17px;" +
+                            "-fx-font-weight: bold;" +
+                            "-fx-background-color: linear-gradient(to bottom, #ffae00, #ff8c00);" +
                             "-fx-text-fill: white;" +
-                            "-fx-padding: 12 25;" +
-                            "-fx-background-radius: 10;"
+                            "-fx-padding: 14 40;" +
+                            "-fx-background-radius: 20;" +
+                            "-fx-cursor: hand;" +
+                            "-fx-effect: dropshadow(gaussian, rgba(255,140,0,0.35), 10, 0, 0, 3);"
             );
+            browseButton.setOnAction(e -> CategoryScreen.show(stage));
 
-            itemsBox.getChildren().addAll(emptyLabel, warningLabel, confirmButton);
+            itemsBox.getChildren().addAll(emptyCard, browseButton);
 
         } else {
             for (Cart.CartItem cartItem : items) {
