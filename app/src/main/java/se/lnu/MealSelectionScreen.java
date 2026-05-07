@@ -29,7 +29,9 @@ public class MealSelectionScreen {
                     "-fx-padding: 10 20;" +
                     "-fx-background-radius: 10;"
     );
-    backButton.setOnAction(e -> ItemListScreen.show(stage));
+
+    // Fixed: go back to the new category screen, not old ItemListScreen
+    backButton.setOnAction(e -> CategoryScreen.show(stage));
 
     Button cartButton = createCartButton(stage);
     Region spacer = new Region();
