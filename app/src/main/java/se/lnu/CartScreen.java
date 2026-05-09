@@ -269,15 +269,7 @@ public class CartScreen {
             confirmButton.setDisable(Cart.getInstance().getItems().isEmpty());
 
             confirmButton.setOnAction(e -> {
-                if (Cart.getInstance().getItems().isEmpty()) {
-                    CartScreen.show(stage);
-                    return;
-                }
-
-                Order order = new Order(Cart.getInstance().getItems());
-
-                OrderConfirmationScreen screen = new OrderConfirmationScreen();
-                screen.start(stage, order);
+                PaymentScreen.show(stage);
             });
 
             itemsBox.getChildren().addAll(totalLabel, confirmButton);
