@@ -15,14 +15,25 @@ public class Cart {
     }
 
     public void addItem(MenuItem menuItem, int quantity) {
+        addItem(menuItem, quantity, new ArrayList<>(), 0.0, new ArrayList<>());
+    }
+
+    public void addItem(MenuItem menuItem, int quantity, List<String> extras, double extrasPrice) {
+        addItem(menuItem, quantity, extras, extrasPrice, new ArrayList<>());
+    }
+
+    public void addItem(MenuItem menuItem, int quantity, List<String> extras, double extrasPrice, List<String> comboChoices) {
         for (CartItem item : items) {
-            if (item.getMenuItem().getId() == menuItem.getId()) {
+            if (item.getMenuItem().getId() == menuItem.getId()
+                    && item.getExtras().equals(extras)
+                    && item.getExtrasPrice() == extrasPrice
+                    && item.getComboChoices().equals(comboChoices)) {
                 item.increaseQuantity(quantity);
                 return;
             }
         }
 
-        items.add(new CartItem(menuItem, quantity));
+        items.add(new CartItem(menuItem, quantity, extras, extrasPrice, comboChoices));
     }
 
     public List<CartItem> getItems() {
@@ -36,6 +47,7 @@ public class Cart {
     public void decreaseQuantity(CartItem item) {
         item.decreaseQuantity();
     }
+
     public void removeItem(CartItem item) {
         items.remove(item);
     }
@@ -64,13 +76,23 @@ public class Cart {
         items.clear();
     }
 
+    public void reset() {
+        clear();
+    }
+
     public static class CartItem {
         private final MenuItem menuItem;
         private int quantity;
+        private final List<String> extras;
+        private final double extrasPrice;
+        private final List<String> comboChoices;
 
-        public CartItem(MenuItem menuItem, int quantity) {
+        public CartItem(MenuItem menuItem, int quantity, List<String> extras, double extrasPrice, List<String> comboChoices) {
             this.menuItem = menuItem;
             this.quantity = quantity;
+            this.extras = new ArrayList<>(extras);
+            this.extrasPrice = extrasPrice;
+            this.comboChoices = new ArrayList<>(comboChoices);
         }
 
         public MenuItem getMenuItem() {
@@ -79,6 +101,18 @@ public class Cart {
 
         public int getQuantity() {
             return quantity;
+        }
+
+        public List<String> getExtras() {
+            return extras;
+        }
+
+        public double getExtrasPrice() {
+            return extrasPrice;
+        }
+
+        public List<String> getComboChoices() {
+            return comboChoices;
         }
 
         public void increaseQuantity() {
@@ -97,8 +131,28 @@ public class Cart {
             }
         }
 
+        public double getUnitPriceWithExtras() {
+            return menuItem.getPrice() + extrasPrice;
+        }
+
         public double getSubtotal() {
-            return menuItem.getPrice() * quantity;
+            return getUnitPriceWithExtras() * quantity;
+        }
+
+        public String getExtrasText() {
+            if (extras.isEmpty()) {
+                return "";
+            }
+
+            return String.join(", ", extras);
+        }
+
+        public String getComboChoicesText() {
+            if (comboChoices.isEmpty()) {
+                return "";
+            }
+
+            return String.join("\n", comboChoices);
         }
     }
 }

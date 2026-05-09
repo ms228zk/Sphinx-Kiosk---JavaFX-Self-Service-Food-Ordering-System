@@ -49,9 +49,7 @@ public class CartScreen {
 
         if (items.isEmpty()) {
             Label cartIcon = new Label("🛒");
-            cartIcon.setStyle(
-                    "-fx-font-size: 48px;"
-            );
+            cartIcon.setStyle("-fx-font-size: 48px;");
 
             Label emptyHeading = new Label("Your cart is empty");
             emptyHeading.setStyle(
@@ -64,15 +62,6 @@ public class CartScreen {
             emptySubtext.setStyle(
                     "-fx-font-size: 16px;" +
                             "-fx-text-fill: #888888;"
-            );
-
-            warningLabel.setStyle(
-                    "-fx-font-size: 18px;" +
-                            "-fx-font-weight: bold;" +
-                            "-fx-text-fill: #b00020;" +
-                            "-fx-background-color: rgba(255, 220, 220, 0.90);" +
-                            "-fx-background-radius: 18;" +
-                            "-fx-padding: 14 28 14 28;"
             );
 
             VBox textGroup = new VBox(8, emptyHeading, emptySubtext);
@@ -157,30 +146,73 @@ public class CartScreen {
                 });
 
                 Label itemNameLabel = new Label(cartItem.getMenuItem().getName());
+                itemNameLabel.setWrapText(true);
                 itemNameLabel.setStyle(
                         "-fx-font-size: 24px;" +
                                 "-fx-font-weight: bold;" +
                                 "-fx-text-fill: #1f1f1f;"
                 );
 
+                Label comboChoicesLabel = new Label();
+                if (cartItem.getComboChoices().isEmpty()) {
+                    comboChoicesLabel.setText("");
+                    comboChoicesLabel.setVisible(false);
+                    comboChoicesLabel.setManaged(false);
+                } else {
+                    comboChoicesLabel.setText(cartItem.getComboChoicesText());
+                    comboChoicesLabel.setVisible(true);
+                    comboChoicesLabel.setManaged(true);
+                }
+
+                comboChoicesLabel.setWrapText(true);
+                comboChoicesLabel.setStyle(
+                        "-fx-font-size: 14px;" +
+                                "-fx-font-weight: bold;" +
+                                "-fx-text-fill: #444444;" +
+                                "-fx-background-color: rgba(255,152,0,0.12);" +
+                                "-fx-background-radius: 14;" +
+                                "-fx-padding: 9 13 9 13;"
+                );
+
+                Label extrasLabel = new Label();
+                if (cartItem.getExtras().isEmpty()) {
+                    extrasLabel.setText("Extras: None");
+                } else {
+                    extrasLabel.setText("Extras: " + cartItem.getExtrasText());
+                }
+
+                extrasLabel.setWrapText(true);
+                extrasLabel.setStyle(
+                        "-fx-font-size: 14px;" +
+                                "-fx-text-fill: #666666;"
+                );
+
                 Label unitPriceLabel = new Label(
-                        "Unit: " + String.format("%.2f kr", cartItem.getMenuItem().getPrice())
+                        "Unit: " + String.format("%.2f kr", cartItem.getUnitPriceWithExtras())
                 );
                 unitPriceLabel.setStyle(
                         "-fx-font-size: 16px;" +
+                                "-fx-font-weight: bold;" +
                                 "-fx-text-fill: #555555;"
                 );
 
-                VBox itemDetails = new VBox(6, itemNameLabel, unitPriceLabel);
+                VBox itemDetails = new VBox(
+                        7,
+                        itemNameLabel,
+                        comboChoicesLabel,
+                        extrasLabel,
+                        unitPriceLabel
+                );
                 itemDetails.setAlignment(Pos.CENTER_LEFT);
-                itemDetails.setMinWidth(260);
+                itemDetails.setMinWidth(330);
+                itemDetails.setMaxWidth(390);
 
                 Label quantityLabel = new Label("Qty: " + cartItem.getQuantity());
                 quantityLabel.setStyle(
                         "-fx-font-size: 28px;" +
                                 "-fx-font-weight: bold;" +
                                 "-fx-text-fill: #1f1f1f;" +
-                                "-fx-min-width: 90;" +
+                                "-fx-min-width: 95;" +
                                 "-fx-alignment: center;"
                 );
                 quantityLabel.setAlignment(Pos.CENTER);
@@ -196,17 +228,17 @@ public class CartScreen {
                                 "-fx-font-weight: bold;" +
                                 "-fx-text-fill: #1f1f1f;"
                 );
-                subtotalLabel.setMinWidth(190);
+                subtotalLabel.setMinWidth(200);
 
-                HBox row = new HBox(20, itemDetails, quantityControls, subtotalLabel, removeButton);
+                HBox row = new HBox(22, itemDetails, quantityControls, subtotalLabel, removeButton);
                 row.setAlignment(Pos.CENTER);
-                row.setPadding(new Insets(18, 30, 18, 30));
-                row.setMinWidth(760);
-                row.setMaxWidth(820);
+                row.setPadding(new Insets(20, 30, 20, 30));
+                row.setMinWidth(900);
+                row.setMaxWidth(980);
                 row.setStyle(
-                        "-fx-background-color: rgba(255,255,255,0.94);" +
+                        "-fx-background-color: rgba(255,255,255,0.95);" +
                                 "-fx-background-radius: 28;" +
-                                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 10, 0, 0, 3);"
+                                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 12, 0, 0, 4);"
                 );
 
                 itemsBox.getChildren().add(row);
@@ -269,7 +301,7 @@ public class CartScreen {
         root.setTop(backButton);
         root.setCenter(scrollPane);
 
-        Scene scene = new Scene(root, 900, 600);
+        Scene scene = new Scene(root, 1000, 650);
         stage.setScene(scene);
         stage.setTitle("Cart");
         stage.show();
