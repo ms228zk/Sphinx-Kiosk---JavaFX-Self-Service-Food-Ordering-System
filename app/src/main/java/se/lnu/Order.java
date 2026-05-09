@@ -1,13 +1,27 @@
 package se.lnu;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+
 import java.util.List;
 
 public class Order {
 
     private static int counter = 1;
     private static String lastDate = "";
+
+    // file in project folder
+    private static final Path FILE_PATH = Path.of("order_data.txt");
+
     private final String orderNumber;
     private final List<Cart.CartItem> items;
+
+    // Load saved data when class loads
+    static {
+        loadOrderData();
+    }
 
     public Order(List<Cart.CartItem> items) {
         this.items = items;
@@ -25,6 +39,34 @@ public class Order {
         counter++;
         if (counter > 9999) {
             counter = 1;
+        }
+        // Save updated counter + date
+        saveOrderData();
+    }
+
+    // Save to file
+    private static void saveOrderData() {
+        try {
+            String data = lastDate + "\n" + counter;
+            Files.writeString(FILE_PATH, data);
+        } catch (IOException e) {
+            System.out.println("Failed to save order data: " + e.getMessage());
+        }
+    }
+
+    // Load from file
+    private static void loadOrderData() {
+        try {
+            if (Files.exists(FILE_PATH)) {
+                List<String> lines = Files.readAllLines(FILE_PATH);
+
+                if (lines.size() >= 2) {
+                    lastDate = lines.get(0).trim();
+                    counter = Integer.parseInt(lines.get(1).trim());
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Failed to load order data: " + e.getMessage());
         }
     }
 

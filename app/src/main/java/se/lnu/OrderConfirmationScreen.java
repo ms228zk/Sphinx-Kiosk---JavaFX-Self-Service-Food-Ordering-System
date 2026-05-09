@@ -25,7 +25,6 @@ public class OrderConfirmationScreen {
         String date = now.format(dateFormatter);
         String time = now.format(timeFormatter);
 
-
         // Title
         Label title = new Label("Order Placed Successfully!");
         title.setStyle("-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #222;");
@@ -69,7 +68,6 @@ public class OrderConfirmationScreen {
 
             itemRow.getChildren().addAll(name, price);
 
-
             // Qty
             Label qtyLabel = new Label("Qty: " + item.getQuantity());
             qtyLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: #444;");
@@ -93,7 +91,6 @@ public class OrderConfirmationScreen {
 
         totalRow.getChildren().addAll(totalText, totalAmount);
 
-
         VBox centerContent = new VBox(20, titleBox, infoRow, itemsLabel, itemsBox, totalRow);
         centerContent.setPadding(new Insets(20));
         centerContent.setAlignment(Pos.TOP_LEFT);
@@ -116,7 +113,7 @@ public class OrderConfirmationScreen {
                         "-fx-text-fill: white; " +
                         "-fx-font-size: 16px; " +
                         "-fx-font-weight: bold; " +
-                        "-fx-padding: 10px 20px; " +
+                        "-fx-padding: 15px 40px; " +
                         "-fx-background-radius: 8px;"
         );
 
