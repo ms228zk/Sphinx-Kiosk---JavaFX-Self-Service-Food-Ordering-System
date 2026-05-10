@@ -11,6 +11,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
+import org.jspecify.annotations.NonNull;
 
 public class OrderNumberScreen {
 
@@ -65,6 +66,19 @@ public class OrderNumberScreen {
 
         ticket.getChildren().addAll(topBar, line1, numberLabel, line2, ticketMsg);
 
+        VBox centerContent = getVBox(stage, title, ticket);
+
+        BorderPane root = new BorderPane();
+        root.setBackground(ScreenStyle.createBackground());
+        root.setCenter(centerContent);
+
+        Scene scene = new Scene(root, 600, 450);
+        stage.setScene(scene);
+        stage.setTitle("Order Number");
+        stage.show();
+    }
+
+    private static @NonNull VBox getVBox(Stage stage, Label title, VBox ticket) {
         Button resetButton = new Button("New order");
         resetButton.setStyle(
                 "-fx-background-color: #4CAF50; " +
@@ -82,14 +96,6 @@ public class OrderNumberScreen {
 
         VBox centerContent = new VBox(30, title, ticket, resetButton);
         centerContent.setAlignment(Pos.CENTER);
-
-        BorderPane root = new BorderPane();
-        root.setBackground(ScreenStyle.createBackground());
-        root.setCenter(centerContent);
-
-        Scene scene = new Scene(root, 600, 450);
-        stage.setScene(scene);
-        stage.setTitle("Order Number");
-        stage.show();
+        return centerContent;
     }
 }
