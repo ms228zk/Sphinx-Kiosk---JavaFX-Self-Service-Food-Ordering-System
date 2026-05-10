@@ -86,12 +86,26 @@ public class OrderConfirmationScreen {
         Label totalAmount = new Label(String.format("%.2f kr", order.getTotalPrice()));
         totalAmount.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #222;");
 
+        Label paymentLabel = new Label();
+
+        if (order.getPaymentMethod().equalsIgnoreCase("Cash")) {
+            paymentLabel.setText("Please pay at the counter.");
+        } else {
+            paymentLabel.setText("Please follow the payment terminal instructions.");
+        }
+
+        paymentLabel.setStyle(
+                "-fx-font-size: 18px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-text-fill: #1f1f1f;"
+        );
+
         HBox.setHgrow(totalText, javafx.scene.layout.Priority.ALWAYS);
         totalText.setMaxWidth(Double.MAX_VALUE);
 
         totalRow.getChildren().addAll(totalText, totalAmount);
 
-        VBox centerContent = new VBox(20, titleBox, infoRow, itemsLabel, itemsBox, totalRow);
+        VBox centerContent = new VBox(20, titleBox, infoRow, itemsLabel, itemsBox, paymentLabel, totalRow);
         centerContent.setPadding(new Insets(20));
         centerContent.setAlignment(Pos.TOP_LEFT);
 

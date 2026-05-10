@@ -65,8 +65,14 @@ public class PaymentScreen {
                 return;
             }
 
+            String paymentMethod =
+                    ((RadioButton) paymentGroup.getSelectedToggle()).getText();
+
             // Create order
-            Order order = new Order(Cart.getInstance().getItems());
+            Order order = new Order(
+                    Cart.getInstance().getItems(),
+                    paymentMethod
+            );
 
             // Go to confirmation screen
             new OrderConfirmationScreen().start(stage, order);
