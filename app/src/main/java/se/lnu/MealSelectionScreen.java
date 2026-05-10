@@ -18,6 +18,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -139,6 +140,23 @@ public class MealSelectionScreen {
       checkBox.setOnAction(e -> updateTotal.run());
     }
 
+    List<RemovableIngredient> removableIngredients = item.getRemovableIngredients();
+    List<CheckBox> removablesCheckBoxes = new ArrayList<>();
+
+    for (RemovableIngredient r : removableIngredients) {
+      CheckBox box = new CheckBox(r.name());
+      box.setStyle(
+              "-fx-font-size: 16px;" +
+                      "-fx-font-weight: 600;" +
+                      "-fx-text-fill: #202020;" +
+                      "-fx-padding: 4 0 4 0;" +
+                      "-fx-cursor: hand;"
+      );
+      removablesCheckBoxes.add(box);
+    }
+
+    CheckBox[] removablesBoxes = removablesCheckBoxes.toArray(new CheckBox[0]);
+
     minusButton.setOnAction(e -> {
       if (App.selectedQuantity > 1) {
         App.selectedQuantity--;
@@ -179,6 +197,32 @@ public class MealSelectionScreen {
     extrasBox.setPadding(new Insets(24, 30, 24, 30));
     extrasBox.setStyle(createWhiteCardStyle());
 
+    Label removablesTitle = new Label("Remove Ingredients");
+    removablesTitle.setStyle(
+            "-fx-font-size: 24px;" +
+                    "-fx-font-weight: bold;" +
+                    "-fx-text-fill: #1f1f1f;"
+    );
+
+    Label removablesSubtitle = new Label("Remove unwanted parts");
+    removablesSubtitle.setWrapText(true);
+    removablesSubtitle.setStyle(
+            "-fx-font-size: 15px;" +
+                    "-fx-text-fill: #6f6f6f;" +
+                    "-fx-padding: 2 0 8 0;"
+    );
+
+    VBox removablesBox = new VBox(8);
+    removablesBox.getChildren().addAll(removablesTitle, removablesSubtitle);
+    removablesBox.getChildren().addAll(removablesCheckBoxes);
+    removablesBox.setAlignment(Pos.CENTER_LEFT);
+    removablesBox.setMaxWidth(560);
+    removablesBox.setPadding(new Insets(24, 30, 24, 30));
+    removablesBox.setStyle(createWhiteCardStyle());
+
+    HBox ingredientChanges = new HBox(30, extrasBox, removablesBox);
+    ingredientChanges.setAlignment(Pos.CENTER);
+
     Label statusLabel = new Label("");
     statusLabel.setOpacity(0);
     statusLabel.setStyle(
@@ -207,6 +251,7 @@ public class MealSelectionScreen {
     confirmButton.setOnAction(e -> {
       List<String> selectedExtras = getSelectedExtras(extrasBoxes);
       double extrasPrice = getSelectedExtrasPrice(extrasBoxes);
+      List<String> removedIngredients = getSelectedExtras(removablesBoxes);
 
       List<String> comboChoices = new ArrayList<>();
 
@@ -225,13 +270,22 @@ public class MealSelectionScreen {
               App.selectedQuantity,
               selectedExtras,
               extrasPrice,
+              removedIngredients,
               comboChoices
       );
 
-      if (selectedExtras.isEmpty()) {
-        statusLabel.setText("Added " + App.selectedQuantity + " x " + item.getName());
+      if (removedIngredients.isEmpty()) {
+        if (selectedExtras.isEmpty()) {
+          statusLabel.setText("Added " + App.selectedQuantity + " x " + item.getName());
+        } else {
+          statusLabel.setText("Added " + App.selectedQuantity + " x " + item.getName() + " with extras");
+        }
       } else {
-        statusLabel.setText("Added " + App.selectedQuantity + " x " + item.getName() + " with extras");
+        if (selectedExtras.isEmpty()) {
+          statusLabel.setText("Added " + App.selectedQuantity + " x " + item.getName() + " without some ingredients");
+        } else {
+          statusLabel.setText("Added " + App.selectedQuantity + " x " + item.getName() + " with extras, without some ingredients");
+        }
       }
 
       FadeTransition fadeIn = new FadeTransition(Duration.millis(400), statusLabel);
@@ -249,18 +303,7 @@ public class MealSelectionScreen {
       cartButton.setText("Cart (" + Cart.getInstance().getItemCount() + ")");
     });
 
-    Button viewCartButton = new Button("View Cart");
-    viewCartButton.setStyle(
-            "-fx-font-size: 18px;" +
-                    "-fx-font-weight: bold;" +
-                    "-fx-background-color: #4CAF50;" +
-                    "-fx-text-fill: white;" +
-                    "-fx-padding: 13 28;" +
-                    "-fx-background-radius: 14;" +
-                    "-fx-cursor: hand;" +
-                    "-fx-effect: dropshadow(gaussian, rgba(76,175,80,0.25), 8, 0, 0, 2);"
-    );
-    viewCartButton.setOnAction(e -> CartScreen.show(stage));
+    Button viewCartButton = getViewCartButton(stage);
 
     VBox centerContent = new VBox(18);
     centerContent.getChildren().addAll(title, description, priceLabel);
@@ -270,7 +313,7 @@ public class MealSelectionScreen {
     }
 
     centerContent.getChildren().addAll(
-            extrasBox,
+            ingredientChanges,
             quantityBox,
             itemTotalLabel,
             confirmButton,
@@ -298,6 +341,22 @@ public class MealSelectionScreen {
     stage.setScene(scene);
     stage.setTitle("Select Meal");
     stage.show();
+  }
+
+  private static @NonNull Button getViewCartButton(Stage stage) {
+    Button viewCartButton = new Button("View Cart");
+    viewCartButton.setStyle(
+            "-fx-font-size: 18px;" +
+                    "-fx-font-weight: bold;" +
+                    "-fx-background-color: #4CAF50;" +
+                    "-fx-text-fill: white;" +
+                    "-fx-padding: 13 28;" +
+                    "-fx-background-radius: 14;" +
+                    "-fx-cursor: hand;" +
+                    "-fx-effect: dropshadow(gaussian, rgba(76,175,80,0.25), 8, 0, 0, 2);"
+    );
+    viewCartButton.setOnAction(e -> CartScreen.show(stage));
+    return viewCartButton;
   }
 
   private static ComboSelection createComboSelection(MenuItem item) {

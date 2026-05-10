@@ -187,6 +187,19 @@ public class CartScreen {
                                 "-fx-text-fill: #666666;"
                 );
 
+                Label removedLabel = new Label();
+                if (cartItem.getRemoved().isEmpty()) {
+                    removedLabel.setText("Original variant");
+                } else {
+                    removedLabel.setText("Removed: " + cartItem.getRemovedText());
+                }
+
+                removedLabel.setWrapText(true);
+                removedLabel.setStyle(
+                        "-fx-font-size: 14px;" +
+                                "-fx-text-fill: #666666;"
+                );
+
                 Label unitPriceLabel = new Label(
                         "Unit: " + String.format("%.2f kr", cartItem.getUnitPriceWithExtras())
                 );
@@ -201,6 +214,7 @@ public class CartScreen {
                         itemNameLabel,
                         comboChoicesLabel,
                         extrasLabel,
+                        removedLabel,
                         unitPriceLabel
                 );
                 itemDetails.setAlignment(Pos.CENTER_LEFT);

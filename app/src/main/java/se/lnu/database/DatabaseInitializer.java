@@ -31,7 +31,28 @@ public class DatabaseInitializer {
               )
               """);
 
+      // Create Ingredient table
+      stmt.execute("""
+              CREATE TABLE IF NOT EXISTS RemovableIngredient (
+                  ingredient_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                  name TEXT NOT NULL UNIQUE
+              )
+              """);
+
+      // Create junction table
+      stmt.execute("""
+              CREATE TABLE IF NOT EXISTS MenuItemRemovableIngredient (
+                  menu_item_id INTEGER NOT NULL,
+                  ingredient_id INTEGER NOT NULL,
+                  PRIMARY KEY (menu_item_id, ingredient_id),
+                  FOREIGN KEY (menu_item_id) REFERENCES MenuItem(menu_item_id),
+                  FOREIGN KEY (ingredient_id) REFERENCES RemovableIngredient(ingredient_id)
+              )
+              """);
+
       // Reset database
+      stmt.execute("DELETE FROM MenuItemRemovableIngredient");
+      stmt.execute("DELETE FROM RemovableIngredient");
       stmt.execute("DELETE FROM MenuItem");
       stmt.execute("DELETE FROM Category");
 
@@ -79,6 +100,136 @@ public class DatabaseInitializer {
               (5, 'Chicken Combo', 'Chicken, side, and drink combo', 109.00),
 
               (5, 'Snack Box', 'Sides and drink combo', 89.00)
+              """);
+
+      stmt.execute("""
+              INSERT INTO RemovableIngredient (name) VALUES
+              ('Pickles'),
+              ('Caramelized onions'),
+              ('BBQ sauce'),
+              ('Mayo'),
+              ('Cheese'),
+              ('Bun (replace with gluten-free)'),
+              ('Lettuce'),
+              ('Tomato'),
+              ('Sugar syrup'),
+              ('Milk'),
+              ('Whipped cream'),
+              ('Ice'),
+              ('Mint'),
+              ('Soda (still water instead)'),
+              ('Jalapeños'),
+              ('Cheese sauce'),
+              ('Meat topping'),
+              ('Ketchup'),
+              ('Marinara dip'),
+              ('Breadcrumbs (replace with gluten-free)'),
+              ('Spicy sauce'),
+              ('Mayo dip'),
+              ('Breading'),
+              ('Nuts'),
+              ('Chocolate syrup'),
+              ('Ice cream'),
+              ('Sugar coating'),
+              ('Chocolate sauce'),
+              ('Caramel sauce'),
+              ('Cherry')
+              """);
+
+      stmt.execute("""
+              INSERT INTO MenuItemRemovableIngredient (menu_item_id, ingredient_id)
+              SELECT m.menu_item_id, i.ingredient_id
+              FROM MenuItem m, RemovableIngredient i
+              WHERE m.name = 'BBQ Smash Burger'
+              AND i.name IN ('Pickles', 'Caramelized onions', 'BBQ sauce', 'Mayo', 'Cheese', 'Bun (replace with gluten-free)')
+              """);
+
+      stmt.execute("""
+              INSERT INTO MenuItemRemovableIngredient (menu_item_id, ingredient_id)
+              SELECT m.menu_item_id, i.ingredient_id
+              FROM MenuItem m, RemovableIngredient i
+              WHERE m.name = 'Crispy Chicken Burger'
+              AND i.name IN ('Mayo', 'Lettuce', 'Pickles', 'Cheese', 'Bun (replace with gluten-free)')
+              """);
+
+      stmt.execute("""
+              INSERT INTO MenuItemRemovableIngredient (menu_item_id, ingredient_id)
+              SELECT m.menu_item_id, i.ingredient_id
+              FROM MenuItem m, RemovableIngredient i
+              WHERE m.name = 'Halloumi Burger'
+              AND i.name IN ('Tomato', 'Lettuce', 'Mayo', 'Bun (replace with gluten-free)')
+              """);
+
+      stmt.execute("""
+              INSERT INTO MenuItemRemovableIngredient (menu_item_id, ingredient_id)
+              SELECT m.menu_item_id, i.ingredient_id
+              FROM MenuItem m, RemovableIngredient i
+              WHERE m.name = 'Iced Coffee'
+              AND i.name IN ('Sugar syrup', 'Milk', 'Whipped cream', 'Ice')
+              """);
+
+      stmt.execute("""
+              INSERT INTO MenuItemRemovableIngredient (menu_item_id, ingredient_id)
+              SELECT m.menu_item_id, i.ingredient_id
+              FROM MenuItem m, RemovableIngredient i
+              WHERE m.name = 'Mango Smoothie'
+              AND i.name IN ('Sugar syrup', 'Milk', 'Ice')
+              """);
+
+      stmt.execute("""
+              INSERT INTO MenuItemRemovableIngredient (menu_item_id, ingredient_id)
+              SELECT m.menu_item_id, i.ingredient_id
+              FROM MenuItem m, RemovableIngredient i
+              WHERE m.name = 'Lemon Mint Cooler'
+              AND i.name IN ('Sugar syrup', 'Mint', 'Ice', 'Soda (still water instead)')
+              """);
+
+      stmt.execute("""
+              INSERT INTO MenuItemRemovableIngredient (menu_item_id, ingredient_id)
+              SELECT m.menu_item_id, i.ingredient_id
+              FROM MenuItem m, RemovableIngredient i
+              WHERE m.name = 'Loaded Fries'
+              AND i.name IN ('Jalapeños', 'Cheese sauce', 'Mayo', 'Ketchup', 'Meat topping')
+              """);
+
+      stmt.execute("""
+              INSERT INTO MenuItemRemovableIngredient (menu_item_id, ingredient_id)
+              SELECT m.menu_item_id, i.ingredient_id
+              FROM MenuItem m, RemovableIngredient i
+              WHERE m.name = 'Mozzarella Sticks'
+              AND i.name IN ('Marinara dip', 'Breadcrumbs (replace with gluten-free)')
+              """);
+
+      stmt.execute("""
+              INSERT INTO MenuItemRemovableIngredient (menu_item_id, ingredient_id)
+              SELECT m.menu_item_id, i.ingredient_id
+              FROM MenuItem m, RemovableIngredient i
+              WHERE m.name = 'Spicy Chicken Bites'
+              AND i.name IN ('Spicy sauce', 'Mayo dip', 'Breading')
+              """);
+
+      stmt.execute("""
+              INSERT INTO MenuItemRemovableIngredient (menu_item_id, ingredient_id)
+              SELECT m.menu_item_id, i.ingredient_id
+              FROM MenuItem m, RemovableIngredient i
+              WHERE m.name = 'Chocolate Brownie'
+              AND i.name IN ('Nuts', 'Chocolate syrup', 'Ice cream')
+              """);
+
+      stmt.execute("""
+              INSERT INTO MenuItemRemovableIngredient (menu_item_id, ingredient_id)
+              SELECT m.menu_item_id, i.ingredient_id
+              FROM MenuItem m, RemovableIngredient i
+              WHERE m.name = 'Mini Donuts'
+              AND i.name IN ('Sugar coating', 'Chocolate sauce', 'Caramel sauce')
+              """);
+
+      stmt.execute("""
+              INSERT INTO MenuItemRemovableIngredient (menu_item_id, ingredient_id)
+              SELECT m.menu_item_id, i.ingredient_id
+              FROM MenuItem m, RemovableIngredient i
+              WHERE m.name = 'Ice Cream Sundae'
+              AND i.name IN ('Nuts', 'Whipped cream', 'Chocolate syrup', 'Cherry')
               """);
 
       System.out.println("Database initialized successfully.");

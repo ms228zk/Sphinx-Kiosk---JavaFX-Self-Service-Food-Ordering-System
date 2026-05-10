@@ -2,6 +2,7 @@ package se.lnu.database;
 
 import se.lnu.Category;
 import se.lnu.MenuItem;
+import se.lnu.RemovableIngredient;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -49,12 +50,16 @@ public class DatabaseHelper {
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
-                    items.add(new MenuItem(
-                            rs.getInt("menu_item_id"),
+                    int itemId = rs.getInt("menu_item_id");
+                    MenuItem currentItem = new MenuItem(
+                            itemId,
                             rs.getString("name"),
                             rs.getString("description"),
                             rs.getDouble("price")
-                    ));
+                    );
+                    List<RemovableIngredient> currentRemovable = getRemovableIngredientsByItem(itemId);
+                    currentItem.setRemovableIngredients(currentRemovable);
+                    items.add(currentItem);
                 }
             }
 
@@ -63,5 +68,35 @@ public class DatabaseHelper {
         }
 
         return items;
+    }
+
+    public static List<RemovableIngredient> getRemovableIngredientsByItem(int itemId) {
+        List<RemovableIngredient> removableIngredients = new ArrayList<>();
+
+        String sql = """
+            SELECT r.ingredient_id, r.name
+            FROM RemovableIngredient r JOIN MenuItemRemovableIngredient m
+            ON r.ingredient_id = m.ingredient_id
+            WHERE m.menu_item_id = ?
+        """;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, itemId);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    removableIngredients.add(new RemovableIngredient(
+                            rs.getInt("ingredient_id"),
+                            rs.getString("name")
+                    ));
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("DB error (getRemovableIngredientsByItem) " + e.getMessage());
+        }
+
+        return removableIngredients;
     }
 }

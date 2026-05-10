@@ -1,11 +1,16 @@
 package se.lnu;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MenuItem {
 
   private final int id;
   private final String name;
   private final String description;
   private final double price;
+
+  private List<RemovableIngredient> removableIngredients = new ArrayList<>();
 
   public MenuItem(int id, String name, String description, double price) {
     this.id = id;
@@ -22,11 +27,21 @@ public class MenuItem {
     return name;
   }
 
-  public String getDescription() {
-    return description;
+  public String getDescription() { return description; }
+
+  public double getPrice() { return price; }
+
+  public void addRemovableIngredient(RemovableIngredient ingredient) {
+    removableIngredients.add(ingredient);
   }
 
-  public double getPrice() {
-    return price;
+  public void setRemovableIngredients(List<RemovableIngredient> ingredients) {
+    this.removableIngredients = ingredients;
+  }
+
+  public List<RemovableIngredient> getRemovableIngredients() {
+    return removableIngredients;
   }
 }
+
+
