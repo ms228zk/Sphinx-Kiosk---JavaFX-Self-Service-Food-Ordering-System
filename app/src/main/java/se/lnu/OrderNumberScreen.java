@@ -3,6 +3,7 @@ package se.lnu;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
@@ -64,7 +65,22 @@ public class OrderNumberScreen {
 
         ticket.getChildren().addAll(topBar, line1, numberLabel, line2, ticketMsg);
 
-        VBox centerContent = new VBox(30, title, ticket);
+        Button resetButton = new Button("New order");
+        resetButton.setStyle(
+                "-fx-background-color: #4CAF50; " +
+                        "-fx-text-fill: white; " +
+                        "-fx-font-size: 16px; " +
+                        "-fx-font-weight: bold; " +
+                        "-fx-padding: 15px 40px; " +
+                        "-fx-background-radius: 8px;"
+        );
+
+        resetButton.setOnAction(e -> {
+            Cart.getInstance().reset();
+            WelcomeScreen.show(stage);
+        });
+
+        VBox centerContent = new VBox(30, title, ticket, resetButton);
         centerContent.setAlignment(Pos.CENTER);
 
         BorderPane root = new BorderPane();
