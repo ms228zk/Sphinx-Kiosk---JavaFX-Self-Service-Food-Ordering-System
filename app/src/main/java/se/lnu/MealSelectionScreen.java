@@ -108,15 +108,21 @@ public class MealSelectionScreen {
     );
     quantityLabel.setAlignment(Pos.CENTER);
 
-    boolean isCombo = App.selectedCategoryName != null
-            && App.selectedCategoryName.equalsIgnoreCase("Combos");
+    boolean isCombo =
+            (App.selectedCategoryName != null && App.selectedCategoryName.equalsIgnoreCase("Combos"))
+                    || item.getName().toLowerCase().contains("combo")
+                    || item.getName().toLowerCase().contains("feast")
+                    || item.getName().toLowerCase().contains("snack box");
 
     ComboSelection comboSelection = null;
     VBox comboBox = null;
+    List<CheckBox> comboCustomizeBoxes = new ArrayList<>();
+    VBox comboCustomizeBox = null;
 
     if (isCombo) {
       comboSelection = createComboSelection(item);
       comboBox = comboSelection.comboBox;
+      comboCustomizeBox = createComboCustomizeBox(comboCustomizeBoxes);
     }
 
     List<ExtraOption> extraOptions = getExtrasForItem(item);
@@ -175,54 +181,24 @@ public class MealSelectionScreen {
     HBox quantityBox = new HBox(16, minusButton, quantityLabel, plusButton);
     quantityBox.setAlignment(Pos.CENTER);
 
-    Label extrasTitle = new Label("Optional Extras");
-    extrasTitle.setStyle(
-            "-fx-font-size: 24px;" +
-                    "-fx-font-weight: bold;" +
-                    "-fx-text-fill: #1f1f1f;"
-    );
+    VBox extrasBox = createExtrasBox(extrasCheckBoxes);
+    VBox removablesBox = createRemovablesBox(removablesCheckBoxes);
 
-    Label extrasSubtitle = new Label("Optional add-ons increase the item price");
-    extrasSubtitle.setWrapText(true);
-    extrasSubtitle.setStyle(
-            "-fx-font-size: 15px;" +
-                    "-fx-text-fill: #6f6f6f;" +
-                    "-fx-padding: 2 0 8 0;"
-    );
+    HBox ingredientChanges;
 
-    VBox extrasBox = new VBox(8);
-    extrasBox.getChildren().addAll(extrasTitle, extrasSubtitle);
-    extrasBox.getChildren().addAll(extrasCheckBoxes);
-    extrasBox.setAlignment(Pos.CENTER_LEFT);
-    extrasBox.setMaxWidth(560);
-    extrasBox.setPadding(new Insets(24, 30, 24, 30));
-    extrasBox.setStyle(createWhiteCardStyle());
+    if (isCombo) {
+      comboCustomizeBox.setPrefWidth(360);
+      comboCustomizeBox.setMaxWidth(360);
 
-    Label removablesTitle = new Label("Remove Ingredients");
-    removablesTitle.setStyle(
-            "-fx-font-size: 24px;" +
-                    "-fx-font-weight: bold;" +
-                    "-fx-text-fill: #1f1f1f;"
-    );
+      extrasBox.setPrefWidth(360);
+      extrasBox.setMaxWidth(360);
 
-    Label removablesSubtitle = new Label("Remove unwanted parts");
-    removablesSubtitle.setWrapText(true);
-    removablesSubtitle.setStyle(
-            "-fx-font-size: 15px;" +
-                    "-fx-text-fill: #6f6f6f;" +
-                    "-fx-padding: 2 0 8 0;"
-    );
-
-    VBox removablesBox = new VBox(8);
-    removablesBox.getChildren().addAll(removablesTitle, removablesSubtitle);
-    removablesBox.getChildren().addAll(removablesCheckBoxes);
-    removablesBox.setAlignment(Pos.CENTER_LEFT);
-    removablesBox.setMaxWidth(560);
-    removablesBox.setPadding(new Insets(24, 30, 24, 30));
-    removablesBox.setStyle(createWhiteCardStyle());
-
-    HBox ingredientChanges = new HBox(30, extrasBox, removablesBox);
-    ingredientChanges.setAlignment(Pos.CENTER);
+      ingredientChanges = new HBox(30, comboCustomizeBox, extrasBox);
+      ingredientChanges.setAlignment(Pos.TOP_CENTER);
+    } else {
+      ingredientChanges = new HBox(30, extrasBox, removablesBox);
+      ingredientChanges.setAlignment(Pos.CENTER);
+    }
 
     Label statusLabel = new Label("");
     statusLabel.setOpacity(0);
@@ -252,7 +228,10 @@ public class MealSelectionScreen {
     confirmButton.setOnAction(e -> {
       List<String> selectedExtras = getSelectedExtras(extrasBoxes);
       double extrasPrice = getSelectedExtrasPrice(extrasBoxes);
-      List<String> removedIngredients = getSelectedExtras(removablesBoxes);
+
+      List<String> removedIngredients = isCombo
+              ? new ArrayList<>()
+              : getSelectedExtras(removablesBoxes);
 
       List<String> comboChoices = new ArrayList<>();
 
@@ -260,6 +239,14 @@ public class MealSelectionScreen {
         comboChoices.add("Main: " + getSelectedRadioText(finalComboSelection.mainGroup));
         comboChoices.add("Side: " + getSelectedRadioText(finalComboSelection.sideGroup));
         comboChoices.add("Drink: " + getSelectedRadioText(finalComboSelection.drinkGroup));
+
+        List<String> comboCustomizations = getSelectedExtras(
+                comboCustomizeBoxes.toArray(new CheckBox[0])
+        );
+
+        if (!comboCustomizations.isEmpty()) {
+          comboChoices.add("Customizations: " + String.join(", ", comboCustomizations));
+        }
 
         if (!finalComboSelection.giftLabel.getText().isBlank()) {
           comboChoices.add(finalComboSelection.giftLabel.getText());
@@ -275,19 +262,7 @@ public class MealSelectionScreen {
               comboChoices
       );
 
-      if (removedIngredients.isEmpty()) {
-        if (selectedExtras.isEmpty()) {
-          statusLabel.setText("Added " + App.selectedQuantity + " x " + item.getName());
-        } else {
-          statusLabel.setText("Added " + App.selectedQuantity + " x " + item.getName() + " with extras");
-        }
-      } else {
-        if (selectedExtras.isEmpty()) {
-          statusLabel.setText("Added " + App.selectedQuantity + " x " + item.getName() + " without some ingredients");
-        } else {
-          statusLabel.setText("Added " + App.selectedQuantity + " x " + item.getName() + " with extras, without some ingredients");
-        }
-      }
+      statusLabel.setText("Added " + App.selectedQuantity + " x " + item.getName());
 
       FadeTransition fadeIn = new FadeTransition(Duration.millis(400), statusLabel);
       fadeIn.setFromValue(0);
@@ -342,6 +317,60 @@ public class MealSelectionScreen {
     stage.setScene(scene);
     stage.setTitle("Select Meal");
     stage.show();
+  }
+
+  private static VBox createExtrasBox(List<CheckBox> extrasCheckBoxes) {
+    Label extrasTitle = new Label("Optional Extras");
+    extrasTitle.setStyle(
+            "-fx-font-size: 24px;" +
+                    "-fx-font-weight: bold;" +
+                    "-fx-text-fill: #1f1f1f;"
+    );
+
+    Label extrasSubtitle = new Label("Optional add-ons increase the item price");
+    extrasSubtitle.setWrapText(true);
+    extrasSubtitle.setStyle(
+            "-fx-font-size: 15px;" +
+                    "-fx-text-fill: #6f6f6f;" +
+                    "-fx-padding: 2 0 8 0;"
+    );
+
+    VBox extrasBox = new VBox(8);
+    extrasBox.getChildren().addAll(extrasTitle, extrasSubtitle);
+    extrasBox.getChildren().addAll(extrasCheckBoxes);
+    extrasBox.setAlignment(Pos.CENTER_LEFT);
+    extrasBox.setMaxWidth(560);
+    extrasBox.setPadding(new Insets(24, 30, 24, 30));
+    extrasBox.setStyle(createWhiteCardStyle());
+
+    return extrasBox;
+  }
+
+  private static VBox createRemovablesBox(List<CheckBox> removablesCheckBoxes) {
+    Label removablesTitle = new Label("Remove Ingredients");
+    removablesTitle.setStyle(
+            "-fx-font-size: 24px;" +
+                    "-fx-font-weight: bold;" +
+                    "-fx-text-fill: #1f1f1f;"
+    );
+
+    Label removablesSubtitle = new Label("Remove unwanted parts");
+    removablesSubtitle.setWrapText(true);
+    removablesSubtitle.setStyle(
+            "-fx-font-size: 15px;" +
+                    "-fx-text-fill: #6f6f6f;" +
+                    "-fx-padding: 2 0 8 0;"
+    );
+
+    VBox removablesBox = new VBox(8);
+    removablesBox.getChildren().addAll(removablesTitle, removablesSubtitle);
+    removablesBox.getChildren().addAll(removablesCheckBoxes);
+    removablesBox.setAlignment(Pos.CENTER_LEFT);
+    removablesBox.setMaxWidth(560);
+    removablesBox.setPadding(new Insets(24, 30, 24, 30));
+    removablesBox.setStyle(createWhiteCardStyle());
+
+    return removablesBox;
   }
 
   private static @NonNull Button getViewCartButton(Stage stage) {
@@ -658,6 +687,56 @@ public class MealSelectionScreen {
     }
 
     return total;
+  }
+
+  private static VBox createComboCustomizeBox(List<CheckBox> comboCustomizeBoxes) {
+    Label title = new Label("Customize Combo Items");
+    title.setStyle(
+            "-fx-font-size: 24px;" +
+                    "-fx-font-weight: bold;" +
+                    "-fx-text-fill: #1f1f1f;"
+    );
+
+    Label subtitle = new Label("Choose small changes for the selected burger or drink.");
+    subtitle.setWrapText(true);
+    subtitle.setStyle(
+            "-fx-font-size: 15px;" +
+                    "-fx-text-fill: #6f6f6f;" +
+                    "-fx-padding: 2 0 8 0;"
+    );
+
+    String[] options = {
+            "No Onion",
+            "No Pickles",
+            "No Lettuce",
+            "No Sauce",
+            "Less Ice",
+            "No Sugar"
+    };
+
+    VBox box = new VBox(8);
+    box.getChildren().addAll(title, subtitle);
+
+    for (String option : options) {
+      CheckBox checkBox = new CheckBox(option);
+      checkBox.setStyle(
+              "-fx-font-size: 16px;" +
+                      "-fx-font-weight: 600;" +
+                      "-fx-text-fill: #202020;" +
+                      "-fx-padding: 4 0 4 0;" +
+                      "-fx-cursor: hand;"
+      );
+
+      comboCustomizeBoxes.add(checkBox);
+      box.getChildren().add(checkBox);
+    }
+
+    box.setAlignment(Pos.CENTER_LEFT);
+    box.setMaxWidth(560);
+    box.setPadding(new Insets(24, 30, 24, 30));
+    box.setStyle(createWhiteCardStyle());
+
+    return box;
   }
 
   private static Button createCartButton(Stage stage) {
