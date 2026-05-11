@@ -17,14 +17,16 @@ public class Order {
 
     private final String orderNumber;
     private final List<Cart.CartItem> items;
+    private final String paymentMethod;
 
     // Load saved data when class loads
     static {
         loadOrderData();
     }
 
-    public Order(List<Cart.CartItem> items) {
+    public Order(List<Cart.CartItem> items, String paymentMethod) {
         this.items = items;
+        this.paymentMethod = paymentMethod;
 
         // reset counter every new day
         String today = java.time.LocalDate.now().toString();
@@ -99,5 +101,8 @@ public class Order {
 
     public List<Cart.CartItem> getItems() {
         return items;
+    }
+    public String getPaymentMethod() {
+        return paymentMethod;
     }
 }
