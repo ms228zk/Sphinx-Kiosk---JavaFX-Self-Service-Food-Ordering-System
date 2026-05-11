@@ -8,6 +8,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -24,6 +26,14 @@ public class CartScreen {
                         "-fx-cursor: hand;"
         );
         backButton.setOnAction(e -> CategoryScreen.show(stage));
+
+        Button homeButton = ScreenStyle.createHomeButton(stage);
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        HBox topBar = new HBox(12, backButton, spacer, homeButton);
+        topBar.setAlignment(Pos.CENTER_LEFT);
 
         Label title = new Label("Your Cart");
         title.setStyle(
@@ -48,7 +58,7 @@ public class CartScreen {
         java.util.List<Cart.CartItem> items = Cart.getInstance().getItems();
 
         if (items.isEmpty()) {
-            Label cartIcon = new Label("🛒");
+            Label cartIcon = new Label("Cart");
             cartIcon.setStyle("-fx-font-size: 48px;");
 
             Label emptyHeading = new Label("Your cart is empty");
@@ -77,7 +87,7 @@ public class CartScreen {
                             "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.10), 16, 0, 0, 3);"
             );
 
-            Button browseButton = new Button("← Browse Menu");
+            Button browseButton = new Button("Browse Menu");
             browseButton.setStyle(
                     "-fx-font-size: 15px;" +
                             "-fx-font-weight: bold;" +
@@ -312,7 +322,7 @@ public class CartScreen {
         BorderPane root = new BorderPane();
         root.setPadding(new Insets(26));
         root.setBackground(ScreenStyle.createBackground());
-        root.setTop(backButton);
+        root.setTop(topBar);
         root.setCenter(scrollPane);
 
         Scene scene = new Scene(root, 1000, 650);

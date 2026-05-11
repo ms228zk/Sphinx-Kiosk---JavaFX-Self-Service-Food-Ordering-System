@@ -41,12 +41,13 @@ public class MealSelectionScreen {
     );
     backButton.setOnAction(e -> CategoryScreen.show(stage));
 
+    Button homeButton = ScreenStyle.createHomeButton(stage);
     Button cartButton = createCartButton(stage);
 
     Region spacer = new Region();
     HBox.setHgrow(spacer, Priority.ALWAYS);
 
-    HBox topBar = new HBox(backButton, spacer, cartButton);
+    HBox topBar = new HBox(12, backButton, spacer, homeButton, cartButton);
     topBar.setAlignment(Pos.CENTER_LEFT);
 
     Label title = new Label(item.getName());
@@ -527,7 +528,7 @@ public class MealSelectionScreen {
                     "-fx-text-fill: #666666;"
     );
 
-    Button rollButton = new Button("🎲 Roll Dice");
+    Button rollButton = new Button("Roll Dice");
     rollButton.setStyle(
             "-fx-font-size: 16px;" +
                     "-fx-font-weight: bold;" +
@@ -558,7 +559,7 @@ public class MealSelectionScreen {
       };
 
       int diceNumber = new Random().nextInt(6) + 1;
-      giftLabel.setText("Dice " + diceNumber + " → " + gifts[diceNumber - 1]);
+      giftLabel.setText("Dice " + diceNumber + " -> " + gifts[diceNumber - 1]);
     });
 
     VBox box = new VBox(10, title, subtitle, rollButton, giftLabel);
@@ -698,7 +699,7 @@ public class MealSelectionScreen {
       extras.add(new ExtraOption("Extra Chicken Patty", 20.00));
       extras.add(new ExtraOption("Extra Garlic Mayo", 7.00));
       extras.add(new ExtraOption("Extra Lettuce", 5.00));
-      extras.add(new ExtraOption("Extra Jalapeños", 8.00));
+      extras.add(new ExtraOption("Extra Jalapenos", 8.00));
 
     } else if (itemName.contains("halloumi burger")) {
       extras.add(new ExtraOption("Extra Halloumi", 18.00));
@@ -731,7 +732,7 @@ public class MealSelectionScreen {
     } else if (itemName.contains("loaded fries")) {
       extras.add(new ExtraOption("Extra Cheese Sauce", 10.00));
       extras.add(new ExtraOption("Extra BBQ Sauce", 7.00));
-      extras.add(new ExtraOption("Extra Jalapeños", 8.00));
+      extras.add(new ExtraOption("Extra Jalapenos", 8.00));
       extras.add(new ExtraOption("Extra Chicken Bites", 15.00));
       extras.add(new ExtraOption("Extra Onion", 5.00));
 
@@ -745,7 +746,7 @@ public class MealSelectionScreen {
       extras.add(new ExtraOption("Extra Spicy Sauce", 7.00));
       extras.add(new ExtraOption("Extra Garlic Mayo", 7.00));
       extras.add(new ExtraOption("Extra BBQ Sauce", 7.00));
-      extras.add(new ExtraOption("Extra Jalapeños", 8.00));
+      extras.add(new ExtraOption("Extra Jalapenos", 8.00));
 
     } else if (itemName.contains("chocolate brownie")) {
       extras.add(new ExtraOption("Extra Chocolate Sauce", 7.00));

@@ -19,6 +19,16 @@ public class App extends Application {
         System.out.println("Selected category: " + name + " (ID: " + id + ")");
     }
 
+    public static void resetOrder() {
+        selectedCategoryId = -1;
+        selectedCategoryName = "";
+        orderType = null;
+        selectedCategory = null;
+        selectedMenuItem = null;
+        selectedQuantity = 1;
+        Cart.getInstance().reset();
+    }
+
     @Override
     public void start(Stage primaryStage) {
         try {

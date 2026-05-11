@@ -33,7 +33,7 @@ public class Order {
             lastDate = today;
         }
 
-        // generate 4‑digit order number
+        // generate 4-digit order number
         this.orderNumber = String.format("%04d", counter);
 
         counter++;

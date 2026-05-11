@@ -1,8 +1,10 @@
 package se.lnu;
 
 import javafx.geometry.Insets;
+import javafx.scene.control.Button;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.stage.Stage;
 
 public class ScreenStyle {
 
@@ -19,5 +21,22 @@ public class ScreenStyle {
     );
 
     return new Background(new BackgroundFill[]{fallbackFill}, new BackgroundImage[]{image});
+  }
+
+  public static Button createHomeButton(Stage stage) {
+    Button homeButton = new Button("Home");
+    homeButton.setStyle(
+            "-fx-font-size: 16px;" +
+                    "-fx-background-color: #eeeeee;" +
+                    "-fx-text-fill: #333333;" +
+                    "-fx-padding: 10 20;" +
+                    "-fx-background-radius: 10;" +
+                    "-fx-cursor: hand;"
+    );
+    homeButton.setOnAction(e -> {
+      App.resetOrder();
+      WelcomeScreen.show(stage);
+    });
+    return homeButton;
   }
 }
