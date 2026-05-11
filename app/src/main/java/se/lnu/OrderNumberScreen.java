@@ -3,9 +3,10 @@ package se.lnu;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -70,6 +71,12 @@ public class OrderNumberScreen {
         BorderPane root = new BorderPane();
         root.setBackground(ScreenStyle.createBackground());
         root.setCenter(centerContent);
+
+        Button homeButton = ScreenStyle.createHomeButton(stage);
+        HBox bottomBox = new HBox(homeButton);
+        bottomBox.setAlignment(Pos.CENTER_RIGHT);
+        bottomBox.setPadding(new Insets(10, 20, 20, 20));
+        root.setBottom(bottomBox);
 
         Scene scene = new Scene(root, 600, 450);
         stage.setScene(scene);

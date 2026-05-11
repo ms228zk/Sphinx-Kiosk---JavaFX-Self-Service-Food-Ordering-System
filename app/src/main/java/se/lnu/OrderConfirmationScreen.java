@@ -122,7 +122,9 @@ public class OrderConfirmationScreen {
             ons.start(stage, order.getOrderNumber());
         });
 
-        HBox bottomBox = new HBox(finishBtn);
+        Button homeButton = ScreenStyle.createHomeButton(stage);
+
+        HBox bottomBox = new HBox(12, homeButton, finishBtn);
         bottomBox.setAlignment(Pos.CENTER_RIGHT);
         bottomBox.setPadding(new Insets(10, 20, 20, 20));
 

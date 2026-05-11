@@ -35,10 +35,11 @@ public class ItemListScreen {
     );
     backButton.setOnAction(e -> CategoryScreen.show(stage));
 
+    Button homeButton = ScreenStyle.createHomeButton(stage);
     Button cartButton = createCartButton(stage);
     Region spacer = new Region();
     HBox.setHgrow(spacer, Priority.ALWAYS);
-    HBox topBar = new HBox(backButton, spacer, cartButton);
+    HBox topBar = new HBox(12, backButton, spacer, homeButton, cartButton);
     topBar.setAlignment(Pos.CENTER_LEFT);
 
     VBox itemsBox = new VBox(15);

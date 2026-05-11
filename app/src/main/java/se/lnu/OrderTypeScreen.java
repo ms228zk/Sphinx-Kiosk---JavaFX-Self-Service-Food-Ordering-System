@@ -6,6 +6,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -26,6 +29,14 @@ public class OrderTypeScreen {
 
     // Navigate back to Welcome screen
     backButton.setOnAction(e -> WelcomeScreen.show(stage));
+
+    Button homeButton = ScreenStyle.createHomeButton(stage);
+
+    Region spacer = new Region();
+    HBox.setHgrow(spacer, Priority.ALWAYS);
+
+    HBox topBar = new HBox(backButton, spacer, homeButton);
+    topBar.setAlignment(Pos.CENTER_LEFT);
 
     // Title label
     Label title = new Label("How would you like to order?");
@@ -62,7 +73,7 @@ public class OrderTypeScreen {
     root.setBackground(ScreenStyle.createBackground());
 
     // Position elements
-    root.setTop(backButton);
+    root.setTop(topBar);
     root.setCenter(centerContent);
 
     // Scene setup

@@ -37,12 +37,13 @@ public class CategoryScreen {
     );
     backBtn.setOnAction(e -> OrderTypeScreen.show(stage));
 
+    Button homeButton = ScreenStyle.createHomeButton(stage);
     Button cartButton = createCartButton(stage);
 
     Region spacer = new Region();
     HBox.setHgrow(spacer, Priority.ALWAYS);
 
-    HBox topBar = new HBox(backBtn, spacer, cartButton);
+    HBox topBar = new HBox(12, backBtn, spacer, homeButton, cartButton);
     topBar.setAlignment(Pos.CENTER_LEFT);
 
     titleLabel = new Label("Choose a Category");
