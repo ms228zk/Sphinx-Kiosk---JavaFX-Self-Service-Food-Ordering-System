@@ -1,23 +1,23 @@
 package se.lnu;
 
+import javafx.animation.FadeTransition;
+import javafx.animation.PauseTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import org.jspecify.annotations.NonNull;
 
 public class OrderNumberScreen {
 
     public void start(Stage stage, String orderNumber) {
 
-        // Title
         Label title = new Label("THANK YOU FOR YOUR ORDER");
         title.setStyle(
                 "-fx-font-size: 55px;" +
@@ -26,7 +26,6 @@ public class OrderNumberScreen {
                         "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.35), 10, 0.3, 2, 2);"
         );
 
-        // BOX
         VBox ticket = new VBox();
         ticket.setAlignment(Pos.CENTER);
         ticket.setSpacing(0);
@@ -37,28 +36,23 @@ public class OrderNumberScreen {
         );
         ticket.setMaxWidth(600);
 
-        // Top bar
         Label topBar = new Label("****** ORDER NUMBER ******");
         topBar.setStyle("-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: black;");
         topBar.setPadding(new Insets(20, 0, 20, 0));
         topBar.setMaxWidth(Double.MAX_VALUE);
         topBar.setAlignment(Pos.CENTER);
 
-        // Separator line
         Rectangle line1 = new Rectangle(600, 3, Color.BLACK);
 
-        // centered number
         Label numberLabel = new Label(orderNumber);
         numberLabel.setStyle("-fx-font-size: 100px; -fx-font-weight: bold; -fx-text-fill: black;");
         numberLabel.setPadding(new Insets(40, 0, 40, 0));
         numberLabel.setMaxWidth(Double.MAX_VALUE);
         numberLabel.setAlignment(Pos.CENTER);
 
-        // Separator line
         Rectangle line2 = new Rectangle(600, 3, Color.BLACK);
 
-        // Bottom message
-        Label ticketMsg = new Label("Your order is being prepared ");
+        Label ticketMsg = new Label("Your order is being prepared");
         ticketMsg.setStyle("-fx-font-size: 30px; -fx-text-fill: black;");
         ticketMsg.setPadding(new Insets(20, 0, 20, 0));
         ticketMsg.setMaxWidth(Double.MAX_VALUE);
@@ -66,41 +60,36 @@ public class OrderNumberScreen {
 
         ticket.getChildren().addAll(topBar, line1, numberLabel, line2, ticketMsg);
 
-        VBox centerContent = getVBox(stage, title, ticket);
+        VBox centerContent = getVBox(title, ticket);
 
         BorderPane root = new BorderPane();
         root.setBackground(ScreenStyle.createBackground());
         root.setCenter(centerContent);
 
-        Button homeButton = ScreenStyle.createHomeButton(stage);
-        HBox bottomBox = new HBox(homeButton);
-        bottomBox.setAlignment(Pos.CENTER_RIGHT);
-        bottomBox.setPadding(new Insets(10, 20, 20, 20));
-        root.setBottom(bottomBox);
-
         Scene scene = new Scene(root, 600, 450);
         stage.setScene(scene);
         stage.setTitle("Order Number");
         stage.show();
-    }
 
-    private static @NonNull VBox getVBox(Stage stage, Label title, VBox ticket) {
-        Button resetButton = new Button("New order");
-        resetButton.setStyle(
-                "-fx-background-color: #4CAF50; " +
-                        "-fx-text-fill: white; " +
-                        "-fx-font-size: 16px; " +
-                        "-fx-font-weight: bold; " +
-                        "-fx-padding: 15px 40px; " +
-                        "-fx-background-radius: 8px;"
-        );
+        PauseTransition wait = new PauseTransition(Duration.seconds(5));
+        wait.setOnFinished(e -> {
+            FadeTransition fade = new FadeTransition(Duration.millis(700), root);
+            fade.setFromValue(1.0);
+            fade.setToValue(0.0);
 
-        resetButton.setOnAction(e -> {
-            Cart.getInstance().reset();
-            WelcomeScreen.show(stage);
+            fade.setOnFinished(event -> {
+                Cart.getInstance().reset();
+                WelcomeScreen.show(stage);
+            });
+
+            fade.play();
         });
 
-        VBox centerContent = new VBox(30, title, ticket, resetButton);
+        wait.play();
+    }
+
+    private static @NonNull VBox getVBox(Label title, VBox ticket) {
+        VBox centerContent = new VBox(30, title, ticket);
         centerContent.setAlignment(Pos.CENTER);
         return centerContent;
     }
