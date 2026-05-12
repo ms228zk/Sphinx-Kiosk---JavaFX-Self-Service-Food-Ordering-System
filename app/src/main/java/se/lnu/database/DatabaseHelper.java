@@ -4,6 +4,8 @@ import se.lnu.Category;
 import se.lnu.MenuItem;
 import se.lnu.RemovableIngredient;
 import se.lnu.ExtraOption;
+import se.lnu.ComboChoiceGroup;
+import se.lnu.ComboChoiceOption;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -131,5 +133,57 @@ public class DatabaseHelper {
         }
 
         return extras;
+    }
+    public static List<ComboChoiceGroup> getComboChoiceGroupsByItem(int comboItemId) {
+        List<ComboChoiceGroup> groups = new ArrayList<>();
+
+        String groupSql = """
+        SELECT group_id, group_name
+        FROM ComboChoiceGroup
+        WHERE combo_item_id = ?
+        ORDER BY display_order
+        """;
+
+        String optionSql = """
+        SELECT option_id, option_name
+        FROM ComboChoiceOption
+        WHERE group_id = ?
+        ORDER BY display_order
+        """;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement groupStmt = conn.prepareStatement(groupSql)) {
+
+            groupStmt.setInt(1, comboItemId);
+
+            try (ResultSet groupRs = groupStmt.executeQuery()) {
+                while (groupRs.next()) {
+                    ComboChoiceGroup group = new ComboChoiceGroup(
+                            groupRs.getInt("group_id"),
+                            groupRs.getString("group_name")
+                    );
+
+                    try (PreparedStatement optionStmt = conn.prepareStatement(optionSql)) {
+                        optionStmt.setInt(1, group.getId());
+
+                        try (ResultSet optionRs = optionStmt.executeQuery()) {
+                            while (optionRs.next()) {
+                                group.addOption(new ComboChoiceOption(
+                                        optionRs.getInt("option_id"),
+                                        optionRs.getString("option_name")
+                                ));
+                            }
+                        }
+                    }
+
+                    groups.add(group);
+                }
+            }
+
+        } catch (SQLException e) {
+            System.out.println("DB error (getComboChoiceGroupsByItem): " + e.getMessage());
+        }
+
+        return groups;
     }
 }

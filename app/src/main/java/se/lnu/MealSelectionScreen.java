@@ -126,6 +126,7 @@ public class MealSelectionScreen {
       comboCustomizeBox = createComboCustomizeBox(comboCustomizeBoxes);
     }
 
+    // Add-ons / extras now come from database
     List<ExtraOption> extraOptions = DatabaseHelper.getExtrasByItem(item.getId());
     List<CheckBox> extrasCheckBoxes = new ArrayList<>();
 
@@ -148,6 +149,7 @@ public class MealSelectionScreen {
       checkBox.setOnAction(e -> updateTotal.run());
     }
 
+    // Remove ingredients still come from database through MenuItem
     List<RemovableIngredient> removableIngredients = item.getRemovableIngredients();
     List<CheckBox> removablesCheckBoxes = new ArrayList<>();
 
@@ -237,9 +239,11 @@ public class MealSelectionScreen {
       List<String> comboChoices = new ArrayList<>();
 
       if (finalComboSelection != null) {
-        comboChoices.add("Main: " + getSelectedRadioText(finalComboSelection.mainGroup));
-        comboChoices.add("Side: " + getSelectedRadioText(finalComboSelection.sideGroup));
-        comboChoices.add("Drink: " + getSelectedRadioText(finalComboSelection.drinkGroup));
+        for (int i = 0; i < finalComboSelection.groupNames.size(); i++) {
+          String groupName = finalComboSelection.groupNames.get(i);
+          ToggleGroup group = finalComboSelection.toggleGroups.get(i);
+          comboChoices.add(groupName + ": " + getSelectedRadioText(group));
+        }
 
         List<String> comboCustomizations = getSelectedExtras(
                 comboCustomizeBoxes.toArray(new CheckBox[0])
@@ -391,11 +395,7 @@ public class MealSelectionScreen {
   }
 
   private static ComboSelection createComboSelection(MenuItem item) {
-    String itemName = item.getName().toLowerCase();
-
-    ToggleGroup mainGroup = new ToggleGroup();
-    ToggleGroup sideGroup = new ToggleGroup();
-    ToggleGroup drinkGroup = new ToggleGroup();
+    List<ComboChoiceGroup> comboGroups = DatabaseHelper.getComboChoiceGroupsByItem(item.getId());
 
     VBox comboBox = new VBox(18);
     comboBox.setAlignment(Pos.CENTER);
@@ -419,193 +419,51 @@ public class MealSelectionScreen {
                     "-fx-text-fill: #6f6f6f;"
     );
 
-    VBox mainSection;
-    VBox sideSection;
+    comboBox.getChildren().addAll(comboTitle, comboSubtitle);
 
-    if (itemName.contains("family feast")) {
-      mainSection = createRadioSection(
-              "Choose Family Main",
-              mainGroup,
-              "2 BBQ Smash Burgers + 2 Crispy Chicken Burgers",
-              "2 Halloumi Burgers + 2 Crispy Chicken Burgers",
-              "Mixed Burger Selection"
-      );
+    List<ToggleGroup> toggleGroups = new ArrayList<>();
+    List<String> groupNames = new ArrayList<>();
+    List<VBox> sections = new ArrayList<>();
 
-      sideSection = createRadioSection(
-              "Choose Sharing Side",
-              sideGroup,
-              "Loaded Fries",
-              "Mozzarella Sticks",
-              "Spicy Chicken Bites",
-              "No Side"
-      );
+    for (ComboChoiceGroup group : comboGroups) {
+      ToggleGroup toggleGroup = new ToggleGroup();
+      VBox section = createRadioSectionFromDatabase(group, toggleGroup);
 
-    } else if (itemName.contains("kids combo")) {
-      mainSection = createRadioSection(
-              "Choose Kids Main",
-              mainGroup,
-              "Crispy Chicken Burger",
-              "Halloumi Burger",
-              "Spicy Chicken Bites"
-      );
-
-      sideSection = createRadioSection(
-              "Choose Kids Side",
-              sideGroup,
-              "Mini Donuts",
-              "Loaded Fries",
-              "Mozzarella Sticks",
-              "No Side"
-      );
-
-    } else if (itemName.contains("burger combo")) {
-      mainSection = createRadioSection(
-              "Choose Burger",
-              mainGroup,
-              "BBQ Smash Burger",
-              "Crispy Chicken Burger",
-              "Halloumi Burger"
-      );
-
-      sideSection = createRadioSection(
-              "Choose Side",
-              sideGroup,
-              "Loaded Fries",
-              "Mozzarella Sticks",
-              "Spicy Chicken Bites",
-              "No Side"
-      );
-
-    } else if (itemName.contains("chicken combo")) {
-      mainSection = createRadioSection(
-              "Choose Chicken Main",
-              mainGroup,
-              "Crispy Chicken Burger",
-              "Spicy Chicken Bites",
-              "Chicken Bites + Mozzarella Sticks"
-      );
-
-      sideSection = createRadioSection(
-              "Choose Side",
-              sideGroup,
-              "Loaded Fries",
-              "Mozzarella Sticks",
-              "Spicy Chicken Bites",
-              "No Side"
-      );
-
-    } else {
-      mainSection = createRadioSection(
-              "Choose Snack Main",
-              mainGroup,
-              "Loaded Fries",
-              "Mozzarella Sticks",
-              "Spicy Chicken Bites"
-      );
-
-      sideSection = createRadioSection(
-              "Choose Extra Snack",
-              sideGroup,
-              "Mozzarella Sticks",
-              "Mini Donuts",
-              "Loaded Fries",
-              "No Side"
-      );
+      toggleGroups.add(toggleGroup);
+      groupNames.add(group.getGroupName());
+      sections.add(section);
     }
 
-    VBox drinkSection = createRadioSection(
-            "Choose Drink",
-            drinkGroup,
-            "Iced Coffee",
-            "Mango Smoothie",
-            "Lemon Mint Cooler"
-    );
+    if (sections.size() >= 2) {
+      HBox rowOne = new HBox(18, sections.get(0), sections.get(1));
+      rowOne.setAlignment(Pos.CENTER);
+      comboBox.getChildren().add(rowOne);
+    } else if (sections.size() == 1) {
+      comboBox.getChildren().add(sections.get(0));
+    }
 
-    HBox rowOne = new HBox(18, mainSection, sideSection);
-    rowOne.setAlignment(Pos.CENTER);
+    if (sections.size() >= 3) {
+      VBox rowTwo = new VBox(18, sections.get(2));
+      rowTwo.setAlignment(Pos.CENTER);
+      comboBox.getChildren().add(rowTwo);
+    }
 
-    VBox rowTwo = new VBox(18, drinkSection);
-    rowTwo.setAlignment(Pos.CENTER);
+    for (int i = 3; i < sections.size(); i++) {
+      comboBox.getChildren().add(sections.get(i));
+    }
 
     Label giftLabel = new Label("");
-    VBox giftBox = null;
 
-    if (itemName.contains("kids combo")) {
-      giftBox = createKidsGiftBox(giftLabel);
-    }
-
-    comboBox.getChildren().addAll(comboTitle, comboSubtitle, rowOne, rowTwo);
-
-    if (giftBox != null) {
+    if (item.getName().toLowerCase().contains("kids combo")) {
+      VBox giftBox = createKidsGiftBox(giftLabel);
       comboBox.getChildren().add(giftBox);
     }
 
-    return new ComboSelection(comboBox, mainGroup, sideGroup, drinkGroup, giftLabel);
+    return new ComboSelection(comboBox, toggleGroups, groupNames, giftLabel);
   }
 
-  private static VBox createKidsGiftBox(Label giftLabel) {
-    Label title = new Label("Surprise Gift Game");
-    title.setStyle(
-            "-fx-font-size: 20px;" +
-                    "-fx-font-weight: bold;" +
-                    "-fx-text-fill: #1f1f1f;"
-    );
-
-    Label subtitle = new Label("Roll the dice to reveal the kids meal surprise gift.");
-    subtitle.setWrapText(true);
-    subtitle.setStyle(
-            "-fx-font-size: 14px;" +
-                    "-fx-text-fill: #666666;"
-    );
-
-    Button rollButton = new Button("Roll Dice");
-    rollButton.setStyle(
-            "-fx-font-size: 16px;" +
-                    "-fx-font-weight: bold;" +
-                    "-fx-background-color: linear-gradient(to bottom, #ffae00, #ff8c00);" +
-                    "-fx-text-fill: white;" +
-                    "-fx-padding: 10 24;" +
-                    "-fx-background-radius: 14;" +
-                    "-fx-cursor: hand;"
-    );
-
-    giftLabel.setStyle(
-            "-fx-font-size: 15px;" +
-                    "-fx-font-weight: bold;" +
-                    "-fx-text-fill: #1f1f1f;" +
-                    "-fx-background-color: rgba(255,152,0,0.14);" +
-                    "-fx-background-radius: 14;" +
-                    "-fx-padding: 9 16 9 16;"
-    );
-
-    rollButton.setOnAction(e -> {
-      String[] gifts = {
-              "Gift: Mini Toy Car",
-              "Gift: Sticker Pack",
-              "Gift: Puzzle Card",
-              "Gift: Surprise Keychain",
-              "Gift: Coloring Sheet",
-              "Gift: Mystery Toy"
-      };
-
-      int diceNumber = new Random().nextInt(6) + 1;
-      giftLabel.setText("Dice " + diceNumber + " -> " + gifts[diceNumber - 1]);
-    });
-
-    VBox box = new VBox(10, title, subtitle, rollButton, giftLabel);
-    box.setAlignment(Pos.CENTER);
-    box.setMaxWidth(560);
-    box.setPadding(new Insets(18));
-    box.setStyle(
-            "-fx-background-color: rgba(255,248,238,0.95);" +
-                    "-fx-background-radius: 22;"
-    );
-
-    return box;
-  }
-
-  private static VBox createRadioSection(String title, ToggleGroup group, String... options) {
-    Label titleLabel = new Label(title);
+  private static VBox createRadioSectionFromDatabase(ComboChoiceGroup group, ToggleGroup toggleGroup) {
+    Label titleLabel = new Label(group.getGroupName());
     titleLabel.setStyle(
             "-fx-font-size: 17px;" +
                     "-fx-font-weight: bold;" +
@@ -623,10 +481,14 @@ public class MealSelectionScreen {
 
     section.getChildren().add(titleLabel);
 
-    for (int i = 0; i < options.length; i++) {
-      RadioButton radioButton = new RadioButton(options[i]);
-      radioButton.setToggleGroup(group);
-      radioButton.setUserData(options[i]);
+    List<ComboChoiceOption> options = group.getOptions();
+
+    for (int i = 0; i < options.size(); i++) {
+      ComboChoiceOption option = options.get(i);
+
+      RadioButton radioButton = new RadioButton(option.getOptionName());
+      radioButton.setToggleGroup(toggleGroup);
+      radioButton.setUserData(option.getOptionName());
       radioButton.setStyle(
               "-fx-font-size: 14px;" +
                       "-fx-text-fill: #202020;" +
@@ -740,6 +602,67 @@ public class MealSelectionScreen {
     return box;
   }
 
+  private static VBox createKidsGiftBox(Label giftLabel) {
+    Label title = new Label("Surprise Gift Game");
+    title.setStyle(
+            "-fx-font-size: 20px;" +
+                    "-fx-font-weight: bold;" +
+                    "-fx-text-fill: #1f1f1f;"
+    );
+
+    Label subtitle = new Label("Roll the dice to reveal the kids meal surprise gift.");
+    subtitle.setWrapText(true);
+    subtitle.setStyle(
+            "-fx-font-size: 14px;" +
+                    "-fx-text-fill: #666666;"
+    );
+
+    Button rollButton = new Button("Roll Dice");
+    rollButton.setStyle(
+            "-fx-font-size: 16px;" +
+                    "-fx-font-weight: bold;" +
+                    "-fx-background-color: linear-gradient(to bottom, #ffae00, #ff8c00);" +
+                    "-fx-text-fill: white;" +
+                    "-fx-padding: 10 24;" +
+                    "-fx-background-radius: 14;" +
+                    "-fx-cursor: hand;"
+    );
+
+    giftLabel.setStyle(
+            "-fx-font-size: 15px;" +
+                    "-fx-font-weight: bold;" +
+                    "-fx-text-fill: #1f1f1f;" +
+                    "-fx-background-color: rgba(255,152,0,0.14);" +
+                    "-fx-background-radius: 14;" +
+                    "-fx-padding: 9 16 9 16;"
+    );
+
+    rollButton.setOnAction(e -> {
+      String[] gifts = {
+              "Gift: Mini Toy Car",
+              "Gift: Sticker Pack",
+              "Gift: Puzzle Card",
+              "Gift: Surprise Keychain",
+              "Gift: Coloring Sheet",
+              "Gift: Mystery Toy"
+      };
+
+      int diceNumber = new Random().nextInt(6) + 1;
+      giftLabel.setText("Dice " + diceNumber + " -> " + gifts[diceNumber - 1]);
+    });
+
+    VBox box = new VBox(10, title, subtitle, rollButton, giftLabel);
+    box.setAlignment(Pos.CENTER);
+    box.setMaxWidth(560);
+    box.setPadding(new Insets(18));
+    box.setStyle(
+            "-fx-background-color: rgba(255,248,238,0.95);" +
+                    "-fx-background-radius: 22;"
+    );
+
+    return box;
+  }
+
   private static Button createCartButton(Stage stage) {
     Button cartButton = new Button("Cart (" + Cart.getInstance().getItemCount() + ")");
     cartButton.setStyle(
@@ -765,22 +688,19 @@ public class MealSelectionScreen {
 
   private static class ComboSelection {
     private final VBox comboBox;
-    private final ToggleGroup mainGroup;
-    private final ToggleGroup sideGroup;
-    private final ToggleGroup drinkGroup;
+    private final List<ToggleGroup> toggleGroups;
+    private final List<String> groupNames;
     private final Label giftLabel;
 
     public ComboSelection(
             VBox comboBox,
-            ToggleGroup mainGroup,
-            ToggleGroup sideGroup,
-            ToggleGroup drinkGroup,
+            List<ToggleGroup> toggleGroups,
+            List<String> groupNames,
             Label giftLabel
     ) {
       this.comboBox = comboBox;
-      this.mainGroup = mainGroup;
-      this.sideGroup = sideGroup;
-      this.drinkGroup = drinkGroup;
+      this.toggleGroups = toggleGroups;
+      this.groupNames = groupNames;
       this.giftLabel = giftLabel;
     }
   }
