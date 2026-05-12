@@ -16,15 +16,7 @@ import javafx.stage.Stage;
 public class CartScreen {
 
     public static void show(Stage stage) {
-        Button backButton = new Button("Back");
-        backButton.setStyle(
-                "-fx-font-size: 18px;" +
-                        "-fx-background-color: #eeeeee;" +
-                        "-fx-text-fill: #222222;" +
-                        "-fx-padding: 14 32;" +
-                        "-fx-background-radius: 16;" +
-                        "-fx-cursor: hand;"
-        );
+        Button backButton = ScreenStyle.createBackButton();
         backButton.setOnAction(e -> CategoryScreen.show(stage));
 
         Button homeButton = ScreenStyle.createHomeButton(stage);

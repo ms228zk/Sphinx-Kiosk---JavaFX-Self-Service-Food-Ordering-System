@@ -31,15 +31,7 @@ public class MealSelectionScreen {
     App.selectedMenuItem = item;
     App.selectedQuantity = 1;
 
-    Button backButton = new Button("Back");
-    backButton.setStyle(
-            "-fx-font-size: 16px;" +
-                    "-fx-background-color: #eeeeee;" +
-                    "-fx-text-fill: #333333;" +
-                    "-fx-padding: 10 20;" +
-                    "-fx-background-radius: 10;" +
-                    "-fx-cursor: hand;"
-    );
+    Button backButton = ScreenStyle.createBackButton();
     backButton.setOnAction(e -> CategoryScreen.show(stage));
 
     Button homeButton = ScreenStyle.createHomeButton(stage);

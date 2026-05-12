@@ -27,14 +27,7 @@ public class CategoryScreen {
 
   public static void show(Stage stage) {
 
-    Button backBtn = new Button("Back");
-    backBtn.setStyle(
-            "-fx-font-size: 16px;" +
-                    "-fx-background-color: #eeeeee;" +
-                    "-fx-text-fill: #333333;" +
-                    "-fx-padding: 10 20;" +
-                    "-fx-background-radius: 10;"
-    );
+    Button backBtn = ScreenStyle.createBackButton();
     backBtn.setOnAction(e -> OrderTypeScreen.show(stage));
 
     Button homeButton = ScreenStyle.createHomeButton(stage);

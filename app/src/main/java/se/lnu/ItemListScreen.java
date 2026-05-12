@@ -25,14 +25,7 @@ public class ItemListScreen {
     Label subtitle = new Label("Select an item to continue");
     subtitle.setStyle("-fx-font-size: 16px; -fx-text-fill: gray;");
 
-    Button backButton = new Button("Back");
-    backButton.setStyle(
-            "-fx-font-size: 16px;" +
-                    "-fx-background-color: #eeeeee;" +
-                    "-fx-text-fill: #333333;" +
-                    "-fx-padding: 10 20;" +
-                    "-fx-background-radius: 10;"
-    );
+    Button backButton = ScreenStyle.createBackButton();
     backButton.setOnAction(e -> CategoryScreen.show(stage));
 
     Button homeButton = ScreenStyle.createHomeButton(stage);

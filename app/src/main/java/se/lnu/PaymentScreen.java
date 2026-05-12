@@ -82,16 +82,7 @@ public class PaymentScreen {
         });
 
         // Back button
-        Button backButton = new Button("Back");
-
-        backButton.setStyle(
-                "-fx-font-size: 14px;" +
-                        "-fx-background-color: #eeeeee;" +
-                        "-fx-text-fill: #333333;" +
-                        "-fx-padding: 8 18;" +
-                        "-fx-background-radius: 10;"
-        );
-
+        Button backButton = ScreenStyle.createBackButton();
         backButton.setOnAction(e -> CartScreen.show(stage));
 
         VBox centerContent = new VBox(20);

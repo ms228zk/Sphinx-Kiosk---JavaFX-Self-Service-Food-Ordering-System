@@ -18,16 +18,7 @@ public class OrderTypeScreen {
   public static void show(Stage stage) {
 
     // Back button placed at the top
-    Button backButton = new Button("Back");
-    backButton.setStyle(
-            "-fx-font-size: 14px;" +
-                    "-fx-background-color: #eeeeee;" +
-                    "-fx-text-fill: #333333;" +
-                    "-fx-padding: 8 18;" +
-                    "-fx-background-radius: 10;"
-    );
-
-    // Navigate back to Welcome screen
+    Button backButton = ScreenStyle.createBackButton();
     backButton.setOnAction(e -> WelcomeScreen.show(stage));
 
     Button homeButton = ScreenStyle.createHomeButton(stage);
