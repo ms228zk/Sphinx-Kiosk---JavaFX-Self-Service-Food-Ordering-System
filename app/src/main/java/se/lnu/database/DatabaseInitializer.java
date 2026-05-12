@@ -11,7 +11,6 @@ public class DatabaseInitializer {
     try (Connection conn = DatabaseConnection.getConnection();
          Statement stmt = conn.createStatement()) {
 
-      // Create Category table
       stmt.execute("""
               CREATE TABLE IF NOT EXISTS Category (
                   category_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -19,7 +18,6 @@ public class DatabaseInitializer {
               )
               """);
 
-      // Create MenuItem table
       stmt.execute("""
               CREATE TABLE IF NOT EXISTS MenuItem (
                   menu_item_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -31,7 +29,6 @@ public class DatabaseInitializer {
               )
               """);
 
-      // Create Ingredient table
       stmt.execute("""
               CREATE TABLE IF NOT EXISTS RemovableIngredient (
                   ingredient_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -39,7 +36,6 @@ public class DatabaseInitializer {
               )
               """);
 
-      // Create junction table
       stmt.execute("""
               CREATE TABLE IF NOT EXISTS MenuItemRemovableIngredient (
                   menu_item_id INTEGER NOT NULL,
@@ -50,13 +46,31 @@ public class DatabaseInitializer {
               )
               """);
 
-      // Reset database
+      stmt.execute("""
+              CREATE TABLE IF NOT EXISTS ExtraOption (
+                  extra_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                  name TEXT NOT NULL,
+                  price REAL NOT NULL
+              )
+              """);
+
+      stmt.execute("""
+              CREATE TABLE IF NOT EXISTS MenuItemExtraOption (
+                  menu_item_id INTEGER NOT NULL,
+                  extra_id INTEGER NOT NULL,
+                  PRIMARY KEY (menu_item_id, extra_id),
+                  FOREIGN KEY (menu_item_id) REFERENCES MenuItem(menu_item_id),
+                  FOREIGN KEY (extra_id) REFERENCES ExtraOption(extra_id)
+              )
+              """);
+
+      stmt.execute("DELETE FROM MenuItemExtraOption");
+      stmt.execute("DELETE FROM ExtraOption");
       stmt.execute("DELETE FROM MenuItemRemovableIngredient");
       stmt.execute("DELETE FROM RemovableIngredient");
       stmt.execute("DELETE FROM MenuItem");
       stmt.execute("DELETE FROM Category");
 
-      // Insert Categories
       stmt.execute("""
               INSERT INTO Category (category_id, name) VALUES
               (1, 'Burgers'),
@@ -66,41 +80,101 @@ public class DatabaseInitializer {
               (5, 'Combos')
               """);
 
-      // Insert Menu Items
       stmt.execute("""
               INSERT INTO MenuItem (category_id, name, description, price) VALUES
-
-              -- Burgers
               (1, 'BBQ Smash Burger', 'Double beef patty with BBQ sauce', 49.00),
               (1, 'Crispy Chicken Burger', 'Crispy chicken with garlic mayo', 45.00),
               (1, 'Halloumi Burger', 'Grilled halloumi with salad', 42.00),
-
-              -- Drinks
               (2, 'Iced Coffee', 'Cold coffee with milk', 35.00),
               (2, 'Mango Smoothie', 'Fresh mango smoothie', 38.00),
               (2, 'Lemon Mint Cooler', 'Lemon drink with fresh mint', 30.00),
-
-              -- Sides
               (3, 'Loaded Fries', 'Fries with cheese and sauce', 39.00),
               (3, 'Mozzarella Sticks', 'Crispy cheese sticks with dip', 36.00),
               (3, 'Spicy Chicken Bites', 'Small crispy spicy chicken pieces', 42.00),
-
-              -- Desserts
               (4, 'Chocolate Brownie', 'Warm brownie with chocolate sauce', 32.00),
               (4, 'Mini Donuts', 'Three glazed mini donuts', 29.00),
               (4, 'Ice Cream Sundae', 'Ice cream with toppings and syrup', 35.00),
-
-              -- Combos
               (5, 'Family Feast', 'Great for sharing', 179.00),
-
               (5, 'Kids Combo', 'Simple meal for kids', 69.00),
-
               (5, 'Burger Combo', 'Burger, side, and drink combo', 99.00),
-
               (5, 'Chicken Combo', 'Chicken, side, and drink combo', 109.00),
-
               (5, 'Snack Box', 'Sides and drink combo', 89.00)
               """);
+
+      stmt.execute("""
+              INSERT INTO ExtraOption (name, price) VALUES
+              ('Extra Cheese', 10.00),
+              ('Extra Beef Patty', 20.00),
+              ('Extra BBQ Sauce', 7.00),
+              ('Extra Onion', 5.00),
+              ('Extra Pickles', 5.00),
+              ('Extra Chicken Patty', 20.00),
+              ('Extra Garlic Mayo', 7.00),
+              ('Extra Lettuce', 5.00),
+              ('Extra Jalapenos', 8.00),
+              ('Extra Halloumi', 18.00),
+              ('Extra Salad', 5.00),
+              ('Extra Garlic Sauce', 7.00),
+              ('Extra Tomato', 5.00),
+              ('Extra Shot', 10.00),
+              ('Oat Milk', 6.00),
+              ('Vanilla Syrup', 7.00),
+              ('Caramel Syrup', 7.00),
+              ('Whipped Cream', 8.00),
+              ('Extra Mango', 8.00),
+              ('Protein Boost', 12.00),
+              ('Coconut Milk', 6.00),
+              ('Chia Seeds', 6.00),
+              ('Extra Mint', 5.00),
+              ('Extra Lemon', 5.00),
+              ('Ice Cubes', 3.00),
+              ('Sugar Syrup', 5.00),
+              ('Sparkling Water', 6.00),
+              ('Extra Cheese Sauce', 10.00),
+              ('Extra Chicken Bites', 15.00),
+              ('Extra Marinara Dip', 7.00),
+              ('Extra Garlic Dip', 7.00),
+              ('Extra Cheese Dust', 6.00),
+              ('Extra Spicy Dip', 7.00),
+              ('Extra Spicy Sauce', 7.00),
+              ('Vanilla Ice Cream', 12.00),
+              ('Sprinkles', 5.00),
+              ('Extra Glaze', 6.00),
+              ('Chocolate Dip', 7.00),
+              ('Caramel Dip', 7.00),
+              ('Extra Caramel Sauce', 7.00),
+              ('Extra Toppings', 8.00),
+              ('Extra Large Fries', 25.00),
+              ('Extra Drink', 20.00),
+              ('Extra Sauce Pack', 15.00),
+              ('Extra Juice', 15.00),
+              ('Extra Small Fries', 15.00),
+              ('Extra Dip', 5.00),
+              ('Extra Patty', 20.00),
+              ('Extra Fries', 20.00),
+              ('Extra Sauce', 7.00),
+              ('Extra Chicken', 20.00),
+              ('Extra Nuggets', 20.00),
+              ('Extra Mozzarella Sticks', 18.00)
+              """);
+
+      linkExtras(stmt, "BBQ Smash Burger", "'Extra Cheese','Extra Beef Patty','Extra BBQ Sauce','Extra Onion','Extra Pickles'");
+      linkExtras(stmt, "Crispy Chicken Burger", "'Extra Cheese','Extra Chicken Patty','Extra Garlic Mayo','Extra Lettuce','Extra Jalapenos'");
+      linkExtras(stmt, "Halloumi Burger", "'Extra Halloumi','Extra Salad','Extra Garlic Sauce','Extra Tomato','Extra Onion'");
+      linkExtras(stmt, "Iced Coffee", "'Extra Shot','Oat Milk','Vanilla Syrup','Caramel Syrup','Whipped Cream'");
+      linkExtras(stmt, "Mango Smoothie", "'Extra Mango','Protein Boost','Coconut Milk','Chia Seeds','Whipped Cream'");
+      linkExtras(stmt, "Lemon Mint Cooler", "'Extra Mint','Extra Lemon','Ice Cubes','Sugar Syrup','Sparkling Water'");
+      linkExtras(stmt, "Loaded Fries", "'Extra Cheese Sauce','Extra BBQ Sauce','Extra Jalapenos','Extra Chicken Bites','Extra Onion'");
+      linkExtras(stmt, "Mozzarella Sticks", "'Extra Marinara Dip','Extra Garlic Dip','Extra Cheese Dust','Extra Spicy Dip'");
+      linkExtras(stmt, "Spicy Chicken Bites", "'Extra Spicy Sauce','Extra Garlic Mayo','Extra BBQ Sauce','Extra Jalapenos'");
+      linkExtras(stmt, "Chocolate Brownie", "'Extra Chocolate Sauce','Vanilla Ice Cream','Whipped Cream','Sprinkles'");
+      linkExtras(stmt, "Mini Donuts", "'Extra Glaze','Chocolate Dip','Caramel Dip','Sprinkles'");
+      linkExtras(stmt, "Ice Cream Sundae", "'Extra Chocolate Sauce','Extra Caramel Sauce','Extra Toppings','Whipped Cream'");
+      linkExtras(stmt, "Family Feast", "'Extra Large Fries','Extra Drink','Extra Sauce Pack','Extra Chicken Bites'");
+      linkExtras(stmt, "Kids Combo", "'Extra Juice','Extra Small Fries','Extra Dip'");
+      linkExtras(stmt, "Burger Combo", "'Extra Cheese','Extra Patty','Extra Fries','Extra Sauce'");
+      linkExtras(stmt, "Chicken Combo", "'Extra Chicken','Extra Garlic Mayo','Extra Fries','Extra Spicy Sauce'");
+      linkExtras(stmt, "Snack Box", "'Extra Nuggets','Extra Mozzarella Sticks','Extra Dip','Extra Drink'");
 
       stmt.execute("""
               INSERT INTO RemovableIngredient (name) VALUES
@@ -136,106 +210,43 @@ public class DatabaseInitializer {
               ('Cherry')
               """);
 
-      stmt.execute("""
-              INSERT INTO MenuItemRemovableIngredient (menu_item_id, ingredient_id)
-              SELECT m.menu_item_id, i.ingredient_id
-              FROM MenuItem m, RemovableIngredient i
-              WHERE m.name = 'BBQ Smash Burger'
-              AND i.name IN ('Pickles', 'Caramelized onions', 'BBQ sauce', 'Mayo', 'Cheese', 'Bun (replace with gluten-free)')
-              """);
-
-      stmt.execute("""
-              INSERT INTO MenuItemRemovableIngredient (menu_item_id, ingredient_id)
-              SELECT m.menu_item_id, i.ingredient_id
-              FROM MenuItem m, RemovableIngredient i
-              WHERE m.name = 'Crispy Chicken Burger'
-              AND i.name IN ('Mayo', 'Lettuce', 'Pickles', 'Cheese', 'Bun (replace with gluten-free)')
-              """);
-
-      stmt.execute("""
-              INSERT INTO MenuItemRemovableIngredient (menu_item_id, ingredient_id)
-              SELECT m.menu_item_id, i.ingredient_id
-              FROM MenuItem m, RemovableIngredient i
-              WHERE m.name = 'Halloumi Burger'
-              AND i.name IN ('Tomato', 'Lettuce', 'Mayo', 'Bun (replace with gluten-free)')
-              """);
-
-      stmt.execute("""
-              INSERT INTO MenuItemRemovableIngredient (menu_item_id, ingredient_id)
-              SELECT m.menu_item_id, i.ingredient_id
-              FROM MenuItem m, RemovableIngredient i
-              WHERE m.name = 'Iced Coffee'
-              AND i.name IN ('Sugar syrup', 'Milk', 'Whipped cream', 'Ice')
-              """);
-
-      stmt.execute("""
-              INSERT INTO MenuItemRemovableIngredient (menu_item_id, ingredient_id)
-              SELECT m.menu_item_id, i.ingredient_id
-              FROM MenuItem m, RemovableIngredient i
-              WHERE m.name = 'Mango Smoothie'
-              AND i.name IN ('Sugar syrup', 'Milk', 'Ice')
-              """);
-
-      stmt.execute("""
-              INSERT INTO MenuItemRemovableIngredient (menu_item_id, ingredient_id)
-              SELECT m.menu_item_id, i.ingredient_id
-              FROM MenuItem m, RemovableIngredient i
-              WHERE m.name = 'Lemon Mint Cooler'
-              AND i.name IN ('Sugar syrup', 'Mint', 'Ice', 'Soda (still water instead)')
-              """);
-
-      stmt.execute("""
-              INSERT INTO MenuItemRemovableIngredient (menu_item_id, ingredient_id)
-              SELECT m.menu_item_id, i.ingredient_id
-              FROM MenuItem m, RemovableIngredient i
-              WHERE m.name = 'Loaded Fries'
-              AND i.name IN ('Jalapeños', 'Cheese sauce', 'Mayo', 'Ketchup', 'Meat topping')
-              """);
-
-      stmt.execute("""
-              INSERT INTO MenuItemRemovableIngredient (menu_item_id, ingredient_id)
-              SELECT m.menu_item_id, i.ingredient_id
-              FROM MenuItem m, RemovableIngredient i
-              WHERE m.name = 'Mozzarella Sticks'
-              AND i.name IN ('Marinara dip', 'Breadcrumbs (replace with gluten-free)')
-              """);
-
-      stmt.execute("""
-              INSERT INTO MenuItemRemovableIngredient (menu_item_id, ingredient_id)
-              SELECT m.menu_item_id, i.ingredient_id
-              FROM MenuItem m, RemovableIngredient i
-              WHERE m.name = 'Spicy Chicken Bites'
-              AND i.name IN ('Spicy sauce', 'Mayo dip', 'Breading')
-              """);
-
-      stmt.execute("""
-              INSERT INTO MenuItemRemovableIngredient (menu_item_id, ingredient_id)
-              SELECT m.menu_item_id, i.ingredient_id
-              FROM MenuItem m, RemovableIngredient i
-              WHERE m.name = 'Chocolate Brownie'
-              AND i.name IN ('Nuts', 'Chocolate syrup', 'Ice cream')
-              """);
-
-      stmt.execute("""
-              INSERT INTO MenuItemRemovableIngredient (menu_item_id, ingredient_id)
-              SELECT m.menu_item_id, i.ingredient_id
-              FROM MenuItem m, RemovableIngredient i
-              WHERE m.name = 'Mini Donuts'
-              AND i.name IN ('Sugar coating', 'Chocolate sauce', 'Caramel sauce')
-              """);
-
-      stmt.execute("""
-              INSERT INTO MenuItemRemovableIngredient (menu_item_id, ingredient_id)
-              SELECT m.menu_item_id, i.ingredient_id
-              FROM MenuItem m, RemovableIngredient i
-              WHERE m.name = 'Ice Cream Sundae'
-              AND i.name IN ('Nuts', 'Whipped cream', 'Chocolate syrup', 'Cherry')
-              """);
+      linkRemovables(stmt, "BBQ Smash Burger", "'Pickles','Caramelized onions','BBQ sauce','Mayo','Cheese','Bun (replace with gluten-free)'");
+      linkRemovables(stmt, "Crispy Chicken Burger", "'Mayo','Lettuce','Pickles','Cheese','Bun (replace with gluten-free)'");
+      linkRemovables(stmt, "Halloumi Burger", "'Tomato','Lettuce','Mayo','Bun (replace with gluten-free)'");
+      linkRemovables(stmt, "Iced Coffee", "'Sugar syrup','Milk','Whipped cream','Ice'");
+      linkRemovables(stmt, "Mango Smoothie", "'Sugar syrup','Milk','Ice'");
+      linkRemovables(stmt, "Lemon Mint Cooler", "'Sugar syrup','Mint','Ice','Soda (still water instead)'");
+      linkRemovables(stmt, "Loaded Fries", "'Jalapeños','Cheese sauce','Mayo','Ketchup','Meat topping'");
+      linkRemovables(stmt, "Mozzarella Sticks", "'Marinara dip','Breadcrumbs (replace with gluten-free)'");
+      linkRemovables(stmt, "Spicy Chicken Bites", "'Spicy sauce','Mayo dip','Breading'");
+      linkRemovables(stmt, "Chocolate Brownie", "'Nuts','Chocolate syrup','Ice cream'");
+      linkRemovables(stmt, "Mini Donuts", "'Sugar coating','Chocolate sauce','Caramel sauce'");
+      linkRemovables(stmt, "Ice Cream Sundae", "'Nuts','Whipped cream','Chocolate syrup','Cherry'");
 
       System.out.println("Database initialized successfully.");
 
     } catch (SQLException e) {
       System.out.println("Database initialization error: " + e.getMessage());
     }
+  }
+
+  private static void linkExtras(Statement stmt, String itemName, String extraNames) throws SQLException {
+    stmt.execute("""
+            INSERT INTO MenuItemExtraOption (menu_item_id, extra_id)
+            SELECT m.menu_item_id, e.extra_id
+            FROM MenuItem m, ExtraOption e
+            WHERE m.name = '%s'
+            AND e.name IN (%s)
+            """.formatted(itemName, extraNames));
+  }
+
+  private static void linkRemovables(Statement stmt, String itemName, String ingredientNames) throws SQLException {
+    stmt.execute("""
+            INSERT INTO MenuItemRemovableIngredient (menu_item_id, ingredient_id)
+            SELECT m.menu_item_id, i.ingredient_id
+            FROM MenuItem m, RemovableIngredient i
+            WHERE m.name = '%s'
+            AND i.name IN (%s)
+            """.formatted(itemName, ingredientNames));
   }
 }

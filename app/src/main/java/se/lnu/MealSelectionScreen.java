@@ -19,6 +19,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.jspecify.annotations.NonNull;
+import se.lnu.database.DatabaseHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -125,7 +126,7 @@ public class MealSelectionScreen {
       comboCustomizeBox = createComboCustomizeBox(comboCustomizeBoxes);
     }
 
-    List<ExtraOption> extraOptions = getExtrasForItem(item);
+    List<ExtraOption> extraOptions = DatabaseHelper.getExtrasByItem(item.getId());
     List<CheckBox> extrasCheckBoxes = new ArrayList<>();
 
     for (ExtraOption option : extraOptions) {
@@ -762,122 +763,6 @@ public class MealSelectionScreen {
             "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.10), 18, 0, 0, 4);";
   }
 
-  private static List<ExtraOption> getExtrasForItem(MenuItem item) {
-    List<ExtraOption> extras = new ArrayList<>();
-    String itemName = item.getName().toLowerCase();
-
-    if (itemName.contains("bbq smash burger")) {
-      extras.add(new ExtraOption("Extra Cheese", 10.00));
-      extras.add(new ExtraOption("Extra Beef Patty", 20.00));
-      extras.add(new ExtraOption("Extra BBQ Sauce", 7.00));
-      extras.add(new ExtraOption("Extra Onion", 5.00));
-      extras.add(new ExtraOption("Extra Pickles", 5.00));
-
-    } else if (itemName.contains("crispy chicken burger")) {
-      extras.add(new ExtraOption("Extra Cheese", 10.00));
-      extras.add(new ExtraOption("Extra Chicken Patty", 20.00));
-      extras.add(new ExtraOption("Extra Garlic Mayo", 7.00));
-      extras.add(new ExtraOption("Extra Lettuce", 5.00));
-      extras.add(new ExtraOption("Extra Jalapenos", 8.00));
-
-    } else if (itemName.contains("halloumi burger")) {
-      extras.add(new ExtraOption("Extra Halloumi", 18.00));
-      extras.add(new ExtraOption("Extra Salad", 5.00));
-      extras.add(new ExtraOption("Extra Garlic Sauce", 7.00));
-      extras.add(new ExtraOption("Extra Tomato", 5.00));
-      extras.add(new ExtraOption("Extra Onion", 5.00));
-
-    } else if (itemName.contains("iced coffee")) {
-      extras.add(new ExtraOption("Extra Shot", 10.00));
-      extras.add(new ExtraOption("Oat Milk", 6.00));
-      extras.add(new ExtraOption("Vanilla Syrup", 7.00));
-      extras.add(new ExtraOption("Caramel Syrup", 7.00));
-      extras.add(new ExtraOption("Whipped Cream", 8.00));
-
-    } else if (itemName.contains("mango smoothie")) {
-      extras.add(new ExtraOption("Extra Mango", 8.00));
-      extras.add(new ExtraOption("Protein Boost", 12.00));
-      extras.add(new ExtraOption("Coconut Milk", 6.00));
-      extras.add(new ExtraOption("Chia Seeds", 6.00));
-      extras.add(new ExtraOption("Whipped Cream", 8.00));
-
-    } else if (itemName.contains("lemon mint cooler")) {
-      extras.add(new ExtraOption("Extra Mint", 5.00));
-      extras.add(new ExtraOption("Extra Lemon", 5.00));
-      extras.add(new ExtraOption("Ice Cubes", 3.00));
-      extras.add(new ExtraOption("Sugar Syrup", 5.00));
-      extras.add(new ExtraOption("Sparkling Water", 6.00));
-
-    } else if (itemName.contains("loaded fries")) {
-      extras.add(new ExtraOption("Extra Cheese Sauce", 10.00));
-      extras.add(new ExtraOption("Extra BBQ Sauce", 7.00));
-      extras.add(new ExtraOption("Extra Jalapenos", 8.00));
-      extras.add(new ExtraOption("Extra Chicken Bites", 15.00));
-      extras.add(new ExtraOption("Extra Onion", 5.00));
-
-    } else if (itemName.contains("mozzarella sticks")) {
-      extras.add(new ExtraOption("Extra Marinara Dip", 7.00));
-      extras.add(new ExtraOption("Extra Garlic Dip", 7.00));
-      extras.add(new ExtraOption("Extra Cheese Dust", 6.00));
-      extras.add(new ExtraOption("Extra Spicy Dip", 7.00));
-
-    } else if (itemName.contains("spicy chicken bites")) {
-      extras.add(new ExtraOption("Extra Spicy Sauce", 7.00));
-      extras.add(new ExtraOption("Extra Garlic Mayo", 7.00));
-      extras.add(new ExtraOption("Extra BBQ Sauce", 7.00));
-      extras.add(new ExtraOption("Extra Jalapenos", 8.00));
-
-    } else if (itemName.contains("chocolate brownie")) {
-      extras.add(new ExtraOption("Extra Chocolate Sauce", 7.00));
-      extras.add(new ExtraOption("Vanilla Ice Cream", 12.00));
-      extras.add(new ExtraOption("Whipped Cream", 8.00));
-      extras.add(new ExtraOption("Sprinkles", 5.00));
-
-    } else if (itemName.contains("mini donuts")) {
-      extras.add(new ExtraOption("Extra Glaze", 6.00));
-      extras.add(new ExtraOption("Chocolate Dip", 7.00));
-      extras.add(new ExtraOption("Caramel Dip", 7.00));
-      extras.add(new ExtraOption("Sprinkles", 5.00));
-
-    } else if (itemName.contains("ice cream sundae")) {
-      extras.add(new ExtraOption("Extra Chocolate Sauce", 7.00));
-      extras.add(new ExtraOption("Extra Caramel Sauce", 7.00));
-      extras.add(new ExtraOption("Extra Toppings", 8.00));
-      extras.add(new ExtraOption("Whipped Cream", 8.00));
-
-    } else if (itemName.contains("family feast")) {
-      extras.add(new ExtraOption("Extra Large Fries", 25.00));
-      extras.add(new ExtraOption("Extra Drink", 20.00));
-      extras.add(new ExtraOption("Extra Sauce Pack", 15.00));
-      extras.add(new ExtraOption("Extra Chicken Bites", 25.00));
-
-    } else if (itemName.contains("kids combo")) {
-      extras.add(new ExtraOption("Extra Juice", 15.00));
-      extras.add(new ExtraOption("Extra Small Fries", 15.00));
-      extras.add(new ExtraOption("Extra Dip", 5.00));
-
-    } else if (itemName.contains("burger combo")) {
-      extras.add(new ExtraOption("Extra Cheese", 10.00));
-      extras.add(new ExtraOption("Extra Patty", 20.00));
-      extras.add(new ExtraOption("Extra Fries", 20.00));
-      extras.add(new ExtraOption("Extra Sauce", 7.00));
-
-    } else if (itemName.contains("chicken combo")) {
-      extras.add(new ExtraOption("Extra Chicken", 20.00));
-      extras.add(new ExtraOption("Extra Garlic Mayo", 7.00));
-      extras.add(new ExtraOption("Extra Fries", 20.00));
-      extras.add(new ExtraOption("Extra Spicy Sauce", 7.00));
-
-    } else if (itemName.contains("snack box")) {
-      extras.add(new ExtraOption("Extra Nuggets", 20.00));
-      extras.add(new ExtraOption("Extra Mozzarella Sticks", 18.00));
-      extras.add(new ExtraOption("Extra Dip", 7.00));
-      extras.add(new ExtraOption("Extra Drink", 20.00));
-    }
-
-    return extras;
-  }
-
   private static class ComboSelection {
     private final VBox comboBox;
     private final ToggleGroup mainGroup;
@@ -897,24 +782,6 @@ public class MealSelectionScreen {
       this.sideGroup = sideGroup;
       this.drinkGroup = drinkGroup;
       this.giftLabel = giftLabel;
-    }
-  }
-
-  private static class ExtraOption {
-    private final String name;
-    private final double price;
-
-    public ExtraOption(String name, double price) {
-      this.name = name;
-      this.price = price;
-    }
-
-    public String getName() {
-      return name;
-    }
-
-    public double getPrice() {
-      return price;
     }
   }
 }

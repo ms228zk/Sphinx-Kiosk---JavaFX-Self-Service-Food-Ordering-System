@@ -3,6 +3,7 @@ package se.lnu.database;
 import se.lnu.Category;
 import se.lnu.MenuItem;
 import se.lnu.RemovableIngredient;
+import se.lnu.ExtraOption;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -98,5 +99,37 @@ public class DatabaseHelper {
         }
 
         return removableIngredients;
+    }
+    public static List<ExtraOption> getExtrasByItem(int itemId) {
+        List<ExtraOption> extras = new ArrayList<>();
+
+        String sql = """
+        SELECT e.extra_id, e.name, e.price
+        FROM ExtraOption e
+        JOIN MenuItemExtraOption m
+        ON e.extra_id = m.extra_id
+        WHERE m.menu_item_id = ?
+        """;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, itemId);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    extras.add(new ExtraOption(
+                            rs.getInt("extra_id"),
+                            rs.getString("name"),
+                            rs.getDouble("price")
+                    ));
+                }
+            }
+
+        } catch (SQLException e) {
+            System.out.println("DB error (getExtrasByItem): " + e.getMessage());
+        }
+
+        return extras;
     }
 }
