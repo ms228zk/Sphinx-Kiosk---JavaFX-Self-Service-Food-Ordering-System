@@ -20,16 +20,330 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.jspecify.annotations.NonNull;
 import se.lnu.database.DatabaseHelper;
+import javafx.scene.control.ToggleButton;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 public class MealSelectionScreen {
+  private static VBox createCompactSizeSelector(
+    String[] selectedSize,
+    double[] selectedPrice,
+    Runnable updateTotal
+  ) {
 
+    Label title = new Label("Choose Combo Size");
+    title.setStyle(
+      "-fx-font-size: 18px;" +
+        "-fx-font-weight: bold;" +
+        "-fx-text-fill: #1f1f1f;"
+    );
+
+    ToggleButton small = new ToggleButton("Small (+0 kr)");
+    ToggleButton medium = new ToggleButton("Medium (+15 kr)");
+    ToggleButton large = new ToggleButton("Large (+25 kr)");
+
+    String normalStyle =
+      "-fx-background-color: transparent;" +
+        "-fx-border-color: #ff9800;" +
+        "-fx-border-radius: 30;" +
+        "-fx-background-radius: 30;" +
+        "-fx-padding: 8 24;" +
+        "-fx-font-size: 15px;" +
+        "-fx-font-weight: bold;" +
+        "-fx-cursor: hand;";
+
+    String selectedStyle =
+      "-fx-background-color: linear-gradient(to bottom, #ffae00, #ff8c00);" +
+        "-fx-text-fill: white;" +
+        "-fx-border-radius: 30;" +
+        "-fx-background-radius: 30;" +
+        "-fx-padding: 8 24;" +
+        "-fx-font-size: 15px;" +
+        "-fx-font-weight: bold;" +
+        "-fx-cursor: hand;";
+
+    small.setStyle(selectedStyle);
+    medium.setStyle(normalStyle);
+    large.setStyle(normalStyle);
+
+    selectedSize[0] = "Small";
+    selectedPrice[0] = 0;
+
+    Runnable resetStyles = () -> {
+      small.setStyle(normalStyle);
+      medium.setStyle(normalStyle);
+      large.setStyle(normalStyle);
+    };
+
+    small.setOnAction(e -> {
+      resetStyles.run();
+      small.setStyle(selectedStyle);
+
+      selectedSize[0] = "Small";
+      selectedPrice[0] = 0;
+
+      updateTotal.run();
+    });
+
+    medium.setOnAction(e -> {
+      resetStyles.run();
+      medium.setStyle(selectedStyle);
+
+      selectedSize[0] = "Medium";
+      selectedPrice[0] = 15;
+
+      updateTotal.run();
+    });
+
+    large.setOnAction(e -> {
+      resetStyles.run();
+      large.setStyle(selectedStyle);
+
+      selectedSize[0] = "Large";
+      selectedPrice[0] = 25;
+
+      updateTotal.run();
+    });
+
+    HBox buttons = new HBox(12, small, medium, large);
+    buttons.setAlignment(Pos.CENTER);
+
+    VBox wrapper = new VBox(12, title, buttons);
+    wrapper.setAlignment(Pos.CENTER);
+    wrapper.setPadding(new Insets(10));
+
+    return wrapper;
+  }
+  private static VBox createDrinkSizeSelector(
+    String[] drinkSize,
+    Runnable updateTotal
+  ) {
+
+    Label title = new Label("Drink Size");
+
+    title.setStyle(
+      "-fx-font-size: 16px;" +
+        "-fx-font-weight: bold;" +
+        "-fx-text-fill: #1f1f1f;"
+    );
+
+    ToggleButton same = new ToggleButton("Same(0)");
+    ToggleButton small = new ToggleButton("Small (0)");
+    ToggleButton medium = new ToggleButton("Medium(+4)");
+    ToggleButton large = new ToggleButton("Large(+7)");
+
+    String normalStyle =
+      "-fx-background-color: transparent;" +
+        "-fx-border-color: #ff9800;" +
+        "-fx-border-radius: 30;" +
+        "-fx-background-radius: 30;" +
+        "-fx-padding: 6 18;" +
+        "-fx-font-size: 13px;" +
+        "-fx-font-weight: bold;" +
+        "-fx-cursor: hand;";
+
+    String selectedStyle =
+      "-fx-background-color: linear-gradient(to bottom, #ffae00, #ff8c00);" +
+        "-fx-text-fill: white;" +
+        "-fx-border-radius: 30;" +
+        "-fx-background-radius: 30;" +
+        "-fx-padding: 6 18;" +
+        "-fx-font-size: 13px;" +
+        "-fx-font-weight: bold;" +
+        "-fx-cursor: hand;";
+
+    same.setStyle(selectedStyle);
+    small.setStyle(normalStyle);
+    medium.setStyle(normalStyle);
+    large.setStyle(normalStyle);
+
+    drinkSize[0] = "Same";
+
+    Runnable reset = () -> {
+
+      same.setStyle(normalStyle);
+      small.setStyle(normalStyle);
+      medium.setStyle(normalStyle);
+      large.setStyle(normalStyle);
+    };
+
+    same.setOnAction(e -> {
+
+      reset.run();
+      same.setStyle(selectedStyle);
+
+      drinkSize[0] = "Same";
+
+      updateTotal.run();
+    });
+
+    small.setOnAction(e -> {
+
+      reset.run();
+      small.setStyle(selectedStyle);
+
+      drinkSize[0] = "Small";
+
+      updateTotal.run();
+    });
+
+    medium.setOnAction(e -> {
+
+      reset.run();
+      medium.setStyle(selectedStyle);
+
+      drinkSize[0] = "Medium";
+
+      updateTotal.run();
+    });
+
+    large.setOnAction(e -> {
+
+      reset.run();
+      large.setStyle(selectedStyle);
+
+      drinkSize[0] = "Large";
+
+      updateTotal.run();
+    });
+
+    HBox buttons = new HBox(
+      10,
+      same,
+      small,
+      medium,
+      large
+    );
+
+    buttons.setAlignment(Pos.CENTER);
+
+    VBox wrapper = new VBox(10, title, buttons);
+
+    wrapper.setAlignment(Pos.CENTER);
+
+    return wrapper;
+  }
+  private static VBox createSideSizeSelector(
+    String[] sideSize,
+    Runnable updateTotal
+  ) {
+
+    Label title = new Label("Side Size");
+
+    title.setStyle(
+      "-fx-font-size: 16px;" +
+        "-fx-font-weight: bold;" +
+        "-fx-text-fill: #1f1f1f;"
+    );
+
+    ToggleButton same = new ToggleButton("Same (0)");
+    ToggleButton small = new ToggleButton("Small(0)");
+    ToggleButton medium = new ToggleButton("Medium(+4)");
+    ToggleButton large = new ToggleButton("Large(+7)");
+
+    String normalStyle =
+      "-fx-background-color: transparent;" +
+        "-fx-border-color: #ff9800;" +
+        "-fx-border-radius: 30;" +
+        "-fx-background-radius: 30;" +
+        "-fx-padding: 6 18;" +
+        "-fx-font-size: 13px;" +
+        "-fx-font-weight: bold;" +
+        "-fx-cursor: hand;";
+
+    String selectedStyle =
+      "-fx-background-color: linear-gradient(to bottom, #ffae00, #ff8c00);" +
+        "-fx-text-fill: white;" +
+        "-fx-border-radius: 30;" +
+        "-fx-background-radius: 30;" +
+        "-fx-padding: 6 18;" +
+        "-fx-font-size: 13px;" +
+        "-fx-font-weight: bold;" +
+        "-fx-cursor: hand;";
+
+    same.setStyle(selectedStyle);
+    small.setStyle(normalStyle);
+    medium.setStyle(normalStyle);
+    large.setStyle(normalStyle);
+
+    sideSize[0] = "Same";
+
+    Runnable reset = () -> {
+
+      same.setStyle(normalStyle);
+      small.setStyle(normalStyle);
+      medium.setStyle(normalStyle);
+      large.setStyle(normalStyle);
+    };
+
+    same.setOnAction(e -> {
+
+      reset.run();
+      same.setStyle(selectedStyle);
+
+      sideSize[0] = "Same";
+
+      updateTotal.run();
+    });
+
+    small.setOnAction(e -> {
+
+      reset.run();
+      small.setStyle(selectedStyle);
+
+      sideSize[0] = "Small";
+
+      updateTotal.run();
+    });
+
+    medium.setOnAction(e -> {
+
+      reset.run();
+      medium.setStyle(selectedStyle);
+
+      sideSize[0] = "Medium";
+
+      updateTotal.run();
+    });
+
+    large.setOnAction(e -> {
+
+      reset.run();
+      large.setStyle(selectedStyle);
+
+      sideSize[0] = "Large";
+
+      updateTotal.run();
+    });
+
+    HBox buttons = new HBox(
+      10,
+      same,
+      small,
+      medium,
+      large
+    );
+
+    buttons.setAlignment(Pos.CENTER);
+
+    VBox wrapper = new VBox(10, title, buttons);
+
+    wrapper.setAlignment(Pos.CENTER);
+
+    return wrapper;
+  }
   public static void show(Stage stage, MenuItem item) {
     App.selectedMenuItem = item;
     App.selectedQuantity = 1;
+
+    String[] comboSize = {"Small"};
+    double[] comboPrice = {0};
+    String[] drinkSize = {"Same"};
+    String[] sideSize = {"Same"};
+
+
 
     Button backButton = new Button("Back");
     backButton.setStyle(
@@ -138,13 +452,47 @@ public class MealSelectionScreen {
     CheckBox[] extrasBoxes = extrasCheckBoxes.toArray(new CheckBox[0]);
 
     Runnable updateTotal = () -> {
+
       double extrasPrice = getSelectedExtrasPrice(extrasBoxes);
-      double finalTotal = (item.getPrice() + extrasPrice) * App.selectedQuantity;
-      itemTotalLabel.setText("Item total: " + String.format("%.2f kr", finalTotal));
+
+      if (drinkSize[0].equals(comboSize[0])) {
+        drinkSize[0] = "Same";
+      }
+
+      if (sideSize[0].equals(comboSize[0])) {
+        sideSize[0] = "Same";
+      }
+
+      double drinkExtra = switch (drinkSize[0]) {
+
+        case "Small" -> 0;
+        case "Medium" -> 4;
+        case "Large" -> 7;
+        default -> 0;
+      };
+
+      double sideExtra = switch (sideSize[0]) {
+
+        case "Small" -> 0;
+        case "Medium" -> 4;
+        case "Large" -> 7;
+        default -> 0;
+      };
+
+      double finalTotal =
+        (
+          item.getPrice() +
+            extrasPrice +
+            comboPrice[0] +
+            drinkExtra +
+            sideExtra
+        ) * App.selectedQuantity;
+
+      itemTotalLabel.setText(
+        "Item total: "
+          + String.format("%.2f kr", finalTotal)
+      );
     };
-
-    updateTotal.run();
-
     for (CheckBox checkBox : extrasBoxes) {
       checkBox.setOnAction(e -> updateTotal.run());
     }
@@ -181,7 +529,36 @@ public class MealSelectionScreen {
       updateTotal.run();
     });
 
-    HBox quantityBox = new HBox(16, minusButton, quantityLabel, plusButton);
+    HBox quantityBox = new HBox(
+      16,
+      minusButton,
+      quantityLabel,
+      plusButton
+    );
+
+    quantityBox.setAlignment(Pos.CENTER);
+    VBox sizeSelector = null;
+    VBox drinkSelector = null;
+    VBox sideSelector = null;
+
+    if (isCombo) {
+
+      sizeSelector = createCompactSizeSelector(
+        comboSize,
+        comboPrice,
+        updateTotal
+      );
+
+      drinkSelector = createDrinkSizeSelector(
+        drinkSize,
+        updateTotal
+      );
+      sideSelector = createSideSizeSelector(
+        sideSize,
+        updateTotal
+      );
+    }
+
     quantityBox.setAlignment(Pos.CENTER);
 
     VBox extrasBox = createExtrasBox(extrasCheckBoxes);
@@ -287,7 +664,31 @@ public class MealSelectionScreen {
     Button viewCartButton = getViewCartButton(stage);
 
     VBox centerContent = new VBox(18);
-    centerContent.getChildren().addAll(title, description, priceLabel);
+
+    centerContent.getChildren().addAll(
+      title,
+      description,
+      priceLabel
+    );
+
+    if (sizeSelector != null) {
+      centerContent
+        .getChildren()
+        .addAll(
+          sizeSelector,
+          drinkSelector,
+          sideSelector
+        );
+      double sideExtra = switch (sideSize[0]) {
+
+        case "Small" -> -5;
+        case "Medium" -> 5;
+        case "Large" -> 10;
+        default -> 0;
+      };
+    }
+
+
 
     if (comboBox != null) {
       centerContent.getChildren().add(comboBox);
