@@ -1,5 +1,7 @@
 package se.lnu;
 
+import java.util.List;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -13,8 +15,6 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import se.lnu.database.DatabaseHelper;
-
-import java.util.List;
 
 public class ItemListScreen {
 
@@ -80,10 +80,10 @@ public class ItemListScreen {
     root.setTop(topBar);
     root.setCenter(scrollPane);
 
-    Scene scene = new Scene(root, 600, 450);
+    Scene scene = new Scene(root, WindowManager.WINDOW_WIDTH, WindowManager.WINDOW_HEIGHT);
     stage.setScene(scene);
     stage.setTitle("Items");
-    stage.show();
+    WindowManager.enforceStandardSize(stage);
   }
 
   private static Button createCartButton(Stage stage) {

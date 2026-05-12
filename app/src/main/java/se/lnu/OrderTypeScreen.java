@@ -77,11 +77,11 @@ public class OrderTypeScreen {
     root.setCenter(centerContent);
 
     // Scene setup
-    Scene scene = new Scene(root, 600, 400);
+    Scene scene = new Scene(root, WindowManager.WINDOW_WIDTH, WindowManager.WINDOW_HEIGHT);
 
     stage.setTitle("Choose Order Type");
     stage.setScene(scene);
-    stage.show();
+    WindowManager.enforceStandardSize(stage);
   }
 
   // Helper method to create styled buttons

@@ -1,5 +1,7 @@
 package se.lnu;
 
+import java.util.List;
+
 import javafx.animation.FadeTransition;
 import javafx.animation.ScaleTransition;
 import javafx.geometry.Insets;
@@ -17,8 +19,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import se.lnu.database.DatabaseHelper;
-
-import java.util.List;
 
 public class CategoryScreen {
 
@@ -101,10 +101,10 @@ public class CategoryScreen {
     root.setTop(topBar);
     root.setCenter(scrollPane);
 
-    Scene scene = new Scene(root, 900, 600);
+    Scene scene = new Scene(root, WindowManager.WINDOW_WIDTH, WindowManager.WINDOW_HEIGHT);
     stage.setScene(scene);
     stage.setTitle("Select Category");
-    stage.show();
+    WindowManager.enforceStandardSize(stage);
   }
 
   private static void showItems(Stage stage, int categoryId) {

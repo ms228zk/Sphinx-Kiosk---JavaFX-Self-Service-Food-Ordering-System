@@ -1,5 +1,11 @@
 package se.lnu;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import org.jspecify.annotations.NonNull;
+
 import javafx.animation.FadeTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -18,11 +24,6 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import org.jspecify.annotations.NonNull;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
 
 public class MealSelectionScreen {
 
@@ -313,10 +314,10 @@ public class MealSelectionScreen {
     root.setTop(topBar);
     root.setCenter(scrollPane);
 
-    Scene scene = new Scene(root, 900, 650);
+    Scene scene = new Scene(root, WindowManager.WINDOW_WIDTH, WindowManager.WINDOW_HEIGHT);
     stage.setScene(scene);
     stage.setTitle("Select Meal");
-    stage.show();
+    WindowManager.enforceStandardSize(stage);
   }
 
   private static VBox createExtrasBox(List<CheckBox> extrasCheckBoxes) {

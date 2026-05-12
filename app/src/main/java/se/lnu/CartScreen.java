@@ -317,9 +317,9 @@ public class CartScreen {
         root.setTop(topBar);
         root.setCenter(scrollPane);
 
-        Scene scene = new Scene(root, 1000, 650);
+        Scene scene = new Scene(root, WindowManager.WINDOW_WIDTH, WindowManager.WINDOW_HEIGHT);
         stage.setScene(scene);
         stage.setTitle("Cart");
-        stage.show();
+        WindowManager.enforceStandardSize(stage);
     }
 }

@@ -3,7 +3,10 @@ package se.lnu;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -112,10 +115,10 @@ public class PaymentScreen {
         root.setTop(backButton);
         root.setCenter(centerContent);
 
-        Scene scene = new Scene(root, 600, 400);
+        Scene scene = new Scene(root, WindowManager.WINDOW_WIDTH, WindowManager.WINDOW_HEIGHT);
 
         stage.setTitle("Payment");
         stage.setScene(scene);
-        stage.show();
+        WindowManager.enforceStandardSize(stage);
     }
 }
