@@ -81,9 +81,17 @@ public class PaymentScreen {
             new OrderConfirmationScreen().start(stage, order);
         });
 
-        // Back button
+        // Top bar with back button
         Button backButton = ScreenStyle.createBackButton();
         backButton.setOnAction(e -> CartScreen.show(stage));
+        
+        Button homeButton = ScreenStyle.createHomeButton(stage);
+        
+        javafx.scene.layout.Region spacer = new javafx.scene.layout.Region();
+        javafx.scene.layout.HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
+        
+        javafx.scene.layout.HBox topBar = new javafx.scene.layout.HBox(12, backButton, spacer, homeButton);
+        topBar.setAlignment(Pos.CENTER_LEFT);
 
         VBox centerContent = new VBox(20);
 
@@ -100,10 +108,10 @@ public class PaymentScreen {
 
         BorderPane root = new BorderPane();
 
-        root.setPadding(new Insets(25));
+        root.setPadding(new Insets(20));
         root.setBackground(ScreenStyle.createBackground());
 
-        root.setTop(backButton);
+        root.setTop(topBar);
         root.setCenter(centerContent);
 
         Scene scene = new Scene(root, WindowManager.WINDOW_WIDTH, WindowManager.WINDOW_HEIGHT);

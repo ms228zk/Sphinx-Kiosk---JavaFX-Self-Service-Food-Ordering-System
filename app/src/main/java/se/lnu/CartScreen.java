@@ -304,7 +304,7 @@ public class CartScreen {
         scrollPane.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
 
         BorderPane root = new BorderPane();
-        root.setPadding(new Insets(26));
+        root.setPadding(new Insets(20));
         root.setBackground(ScreenStyle.createBackground());
         root.setTop(topBar);
         root.setCenter(scrollPane);

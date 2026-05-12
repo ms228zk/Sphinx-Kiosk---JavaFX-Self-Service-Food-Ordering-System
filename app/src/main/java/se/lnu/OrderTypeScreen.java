@@ -26,7 +26,7 @@ public class OrderTypeScreen {
     Region spacer = new Region();
     HBox.setHgrow(spacer, Priority.ALWAYS);
 
-    HBox topBar = new HBox(backButton, spacer, homeButton);
+    HBox topBar = new HBox(12, backButton, spacer, homeButton);
     topBar.setAlignment(Pos.CENTER_LEFT);
 
     // Title label
@@ -60,7 +60,7 @@ public class OrderTypeScreen {
 
     // Root layout
     BorderPane root = new BorderPane();
-    root.setPadding(new Insets(25));
+    root.setPadding(new Insets(20));
     root.setBackground(ScreenStyle.createBackground());
 
     // Position elements
