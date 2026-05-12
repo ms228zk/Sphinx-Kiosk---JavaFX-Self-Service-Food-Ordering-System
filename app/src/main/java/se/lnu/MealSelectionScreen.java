@@ -19,6 +19,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.jspecify.annotations.NonNull;
+import se.lnu.database.DatabaseHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -125,7 +126,8 @@ public class MealSelectionScreen {
       comboCustomizeBox = createComboCustomizeBox(comboCustomizeBoxes);
     }
 
-    List<ExtraOption> extraOptions = getExtrasForItem(item);
+    // Add-ons / extras now come from database
+    List<ExtraOption> extraOptions = DatabaseHelper.getExtrasByItem(item.getId());
     List<CheckBox> extrasCheckBoxes = new ArrayList<>();
 
     for (ExtraOption option : extraOptions) {
@@ -147,6 +149,7 @@ public class MealSelectionScreen {
       checkBox.setOnAction(e -> updateTotal.run());
     }
 
+    // Remove ingredients still come from database through MenuItem
     List<RemovableIngredient> removableIngredients = item.getRemovableIngredients();
     List<CheckBox> removablesCheckBoxes = new ArrayList<>();
 
@@ -236,9 +239,11 @@ public class MealSelectionScreen {
       List<String> comboChoices = new ArrayList<>();
 
       if (finalComboSelection != null) {
-        comboChoices.add("Main: " + getSelectedRadioText(finalComboSelection.mainGroup));
-        comboChoices.add("Side: " + getSelectedRadioText(finalComboSelection.sideGroup));
-        comboChoices.add("Drink: " + getSelectedRadioText(finalComboSelection.drinkGroup));
+        for (int i = 0; i < finalComboSelection.groupNames.size(); i++) {
+          String groupName = finalComboSelection.groupNames.get(i);
+          ToggleGroup group = finalComboSelection.toggleGroups.get(i);
+          comboChoices.add(groupName + ": " + getSelectedRadioText(group));
+        }
 
         List<String> comboCustomizations = getSelectedExtras(
                 comboCustomizeBoxes.toArray(new CheckBox[0])
@@ -390,11 +395,7 @@ public class MealSelectionScreen {
   }
 
   private static ComboSelection createComboSelection(MenuItem item) {
-    String itemName = item.getName().toLowerCase();
-
-    ToggleGroup mainGroup = new ToggleGroup();
-    ToggleGroup sideGroup = new ToggleGroup();
-    ToggleGroup drinkGroup = new ToggleGroup();
+    List<ComboChoiceGroup> comboGroups = DatabaseHelper.getComboChoiceGroupsByItem(item.getId());
 
     VBox comboBox = new VBox(18);
     comboBox.setAlignment(Pos.CENTER);
@@ -418,193 +419,51 @@ public class MealSelectionScreen {
                     "-fx-text-fill: #6f6f6f;"
     );
 
-    VBox mainSection;
-    VBox sideSection;
+    comboBox.getChildren().addAll(comboTitle, comboSubtitle);
 
-    if (itemName.contains("family feast")) {
-      mainSection = createRadioSection(
-              "Choose Family Main",
-              mainGroup,
-              "2 BBQ Smash Burgers + 2 Crispy Chicken Burgers",
-              "2 Halloumi Burgers + 2 Crispy Chicken Burgers",
-              "Mixed Burger Selection"
-      );
+    List<ToggleGroup> toggleGroups = new ArrayList<>();
+    List<String> groupNames = new ArrayList<>();
+    List<VBox> sections = new ArrayList<>();
 
-      sideSection = createRadioSection(
-              "Choose Sharing Side",
-              sideGroup,
-              "Loaded Fries",
-              "Mozzarella Sticks",
-              "Spicy Chicken Bites",
-              "No Side"
-      );
+    for (ComboChoiceGroup group : comboGroups) {
+      ToggleGroup toggleGroup = new ToggleGroup();
+      VBox section = createRadioSectionFromDatabase(group, toggleGroup);
 
-    } else if (itemName.contains("kids combo")) {
-      mainSection = createRadioSection(
-              "Choose Kids Main",
-              mainGroup,
-              "Crispy Chicken Burger",
-              "Halloumi Burger",
-              "Spicy Chicken Bites"
-      );
-
-      sideSection = createRadioSection(
-              "Choose Kids Side",
-              sideGroup,
-              "Mini Donuts",
-              "Loaded Fries",
-              "Mozzarella Sticks",
-              "No Side"
-      );
-
-    } else if (itemName.contains("burger combo")) {
-      mainSection = createRadioSection(
-              "Choose Burger",
-              mainGroup,
-              "BBQ Smash Burger",
-              "Crispy Chicken Burger",
-              "Halloumi Burger"
-      );
-
-      sideSection = createRadioSection(
-              "Choose Side",
-              sideGroup,
-              "Loaded Fries",
-              "Mozzarella Sticks",
-              "Spicy Chicken Bites",
-              "No Side"
-      );
-
-    } else if (itemName.contains("chicken combo")) {
-      mainSection = createRadioSection(
-              "Choose Chicken Main",
-              mainGroup,
-              "Crispy Chicken Burger",
-              "Spicy Chicken Bites",
-              "Chicken Bites + Mozzarella Sticks"
-      );
-
-      sideSection = createRadioSection(
-              "Choose Side",
-              sideGroup,
-              "Loaded Fries",
-              "Mozzarella Sticks",
-              "Spicy Chicken Bites",
-              "No Side"
-      );
-
-    } else {
-      mainSection = createRadioSection(
-              "Choose Snack Main",
-              mainGroup,
-              "Loaded Fries",
-              "Mozzarella Sticks",
-              "Spicy Chicken Bites"
-      );
-
-      sideSection = createRadioSection(
-              "Choose Extra Snack",
-              sideGroup,
-              "Mozzarella Sticks",
-              "Mini Donuts",
-              "Loaded Fries",
-              "No Side"
-      );
+      toggleGroups.add(toggleGroup);
+      groupNames.add(group.getGroupName());
+      sections.add(section);
     }
 
-    VBox drinkSection = createRadioSection(
-            "Choose Drink",
-            drinkGroup,
-            "Iced Coffee",
-            "Mango Smoothie",
-            "Lemon Mint Cooler"
-    );
+    if (sections.size() >= 2) {
+      HBox rowOne = new HBox(18, sections.get(0), sections.get(1));
+      rowOne.setAlignment(Pos.CENTER);
+      comboBox.getChildren().add(rowOne);
+    } else if (sections.size() == 1) {
+      comboBox.getChildren().add(sections.get(0));
+    }
 
-    HBox rowOne = new HBox(18, mainSection, sideSection);
-    rowOne.setAlignment(Pos.CENTER);
+    if (sections.size() >= 3) {
+      VBox rowTwo = new VBox(18, sections.get(2));
+      rowTwo.setAlignment(Pos.CENTER);
+      comboBox.getChildren().add(rowTwo);
+    }
 
-    VBox rowTwo = new VBox(18, drinkSection);
-    rowTwo.setAlignment(Pos.CENTER);
+    for (int i = 3; i < sections.size(); i++) {
+      comboBox.getChildren().add(sections.get(i));
+    }
 
     Label giftLabel = new Label("");
-    VBox giftBox = null;
 
-    if (itemName.contains("kids combo")) {
-      giftBox = createKidsGiftBox(giftLabel);
-    }
-
-    comboBox.getChildren().addAll(comboTitle, comboSubtitle, rowOne, rowTwo);
-
-    if (giftBox != null) {
+    if (item.getName().toLowerCase().contains("kids combo")) {
+      VBox giftBox = createKidsGiftBox(giftLabel);
       comboBox.getChildren().add(giftBox);
     }
 
-    return new ComboSelection(comboBox, mainGroup, sideGroup, drinkGroup, giftLabel);
+    return new ComboSelection(comboBox, toggleGroups, groupNames, giftLabel);
   }
 
-  private static VBox createKidsGiftBox(Label giftLabel) {
-    Label title = new Label("Surprise Gift Game");
-    title.setStyle(
-            "-fx-font-size: 20px;" +
-                    "-fx-font-weight: bold;" +
-                    "-fx-text-fill: #1f1f1f;"
-    );
-
-    Label subtitle = new Label("Roll the dice to reveal the kids meal surprise gift.");
-    subtitle.setWrapText(true);
-    subtitle.setStyle(
-            "-fx-font-size: 14px;" +
-                    "-fx-text-fill: #666666;"
-    );
-
-    Button rollButton = new Button("Roll Dice");
-    rollButton.setStyle(
-            "-fx-font-size: 16px;" +
-                    "-fx-font-weight: bold;" +
-                    "-fx-background-color: linear-gradient(to bottom, #ffae00, #ff8c00);" +
-                    "-fx-text-fill: white;" +
-                    "-fx-padding: 10 24;" +
-                    "-fx-background-radius: 14;" +
-                    "-fx-cursor: hand;"
-    );
-
-    giftLabel.setStyle(
-            "-fx-font-size: 15px;" +
-                    "-fx-font-weight: bold;" +
-                    "-fx-text-fill: #1f1f1f;" +
-                    "-fx-background-color: rgba(255,152,0,0.14);" +
-                    "-fx-background-radius: 14;" +
-                    "-fx-padding: 9 16 9 16;"
-    );
-
-    rollButton.setOnAction(e -> {
-      String[] gifts = {
-              "Gift: Mini Toy Car",
-              "Gift: Sticker Pack",
-              "Gift: Puzzle Card",
-              "Gift: Surprise Keychain",
-              "Gift: Coloring Sheet",
-              "Gift: Mystery Toy"
-      };
-
-      int diceNumber = new Random().nextInt(6) + 1;
-      giftLabel.setText("Dice " + diceNumber + " -> " + gifts[diceNumber - 1]);
-    });
-
-    VBox box = new VBox(10, title, subtitle, rollButton, giftLabel);
-    box.setAlignment(Pos.CENTER);
-    box.setMaxWidth(560);
-    box.setPadding(new Insets(18));
-    box.setStyle(
-            "-fx-background-color: rgba(255,248,238,0.95);" +
-                    "-fx-background-radius: 22;"
-    );
-
-    return box;
-  }
-
-  private static VBox createRadioSection(String title, ToggleGroup group, String... options) {
-    Label titleLabel = new Label(title);
+  private static VBox createRadioSectionFromDatabase(ComboChoiceGroup group, ToggleGroup toggleGroup) {
+    Label titleLabel = new Label(group.getGroupName());
     titleLabel.setStyle(
             "-fx-font-size: 17px;" +
                     "-fx-font-weight: bold;" +
@@ -622,10 +481,14 @@ public class MealSelectionScreen {
 
     section.getChildren().add(titleLabel);
 
-    for (int i = 0; i < options.length; i++) {
-      RadioButton radioButton = new RadioButton(options[i]);
-      radioButton.setToggleGroup(group);
-      radioButton.setUserData(options[i]);
+    List<ComboChoiceOption> options = group.getOptions();
+
+    for (int i = 0; i < options.size(); i++) {
+      ComboChoiceOption option = options.get(i);
+
+      RadioButton radioButton = new RadioButton(option.getOptionName());
+      radioButton.setToggleGroup(toggleGroup);
+      radioButton.setUserData(option.getOptionName());
       radioButton.setStyle(
               "-fx-font-size: 14px;" +
                       "-fx-text-fill: #202020;" +
@@ -739,6 +602,67 @@ public class MealSelectionScreen {
     return box;
   }
 
+  private static VBox createKidsGiftBox(Label giftLabel) {
+    Label title = new Label("Surprise Gift Game");
+    title.setStyle(
+            "-fx-font-size: 20px;" +
+                    "-fx-font-weight: bold;" +
+                    "-fx-text-fill: #1f1f1f;"
+    );
+
+    Label subtitle = new Label("Roll the dice to reveal the kids meal surprise gift.");
+    subtitle.setWrapText(true);
+    subtitle.setStyle(
+            "-fx-font-size: 14px;" +
+                    "-fx-text-fill: #666666;"
+    );
+
+    Button rollButton = new Button("Roll Dice");
+    rollButton.setStyle(
+            "-fx-font-size: 16px;" +
+                    "-fx-font-weight: bold;" +
+                    "-fx-background-color: linear-gradient(to bottom, #ffae00, #ff8c00);" +
+                    "-fx-text-fill: white;" +
+                    "-fx-padding: 10 24;" +
+                    "-fx-background-radius: 14;" +
+                    "-fx-cursor: hand;"
+    );
+
+    giftLabel.setStyle(
+            "-fx-font-size: 15px;" +
+                    "-fx-font-weight: bold;" +
+                    "-fx-text-fill: #1f1f1f;" +
+                    "-fx-background-color: rgba(255,152,0,0.14);" +
+                    "-fx-background-radius: 14;" +
+                    "-fx-padding: 9 16 9 16;"
+    );
+
+    rollButton.setOnAction(e -> {
+      String[] gifts = {
+              "Gift: Mini Toy Car",
+              "Gift: Sticker Pack",
+              "Gift: Puzzle Card",
+              "Gift: Surprise Keychain",
+              "Gift: Coloring Sheet",
+              "Gift: Mystery Toy"
+      };
+
+      int diceNumber = new Random().nextInt(6) + 1;
+      giftLabel.setText("Dice " + diceNumber + " -> " + gifts[diceNumber - 1]);
+    });
+
+    VBox box = new VBox(10, title, subtitle, rollButton, giftLabel);
+    box.setAlignment(Pos.CENTER);
+    box.setMaxWidth(560);
+    box.setPadding(new Insets(18));
+    box.setStyle(
+            "-fx-background-color: rgba(255,248,238,0.95);" +
+                    "-fx-background-radius: 22;"
+    );
+
+    return box;
+  }
+
   private static Button createCartButton(Stage stage) {
     Button cartButton = new Button("Cart (" + Cart.getInstance().getItemCount() + ")");
     cartButton.setStyle(
@@ -762,159 +686,22 @@ public class MealSelectionScreen {
             "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.10), 18, 0, 0, 4);";
   }
 
-  private static List<ExtraOption> getExtrasForItem(MenuItem item) {
-    List<ExtraOption> extras = new ArrayList<>();
-    String itemName = item.getName().toLowerCase();
-
-    if (itemName.contains("bbq smash burger")) {
-      extras.add(new ExtraOption("Extra Cheese", 10.00));
-      extras.add(new ExtraOption("Extra Beef Patty", 20.00));
-      extras.add(new ExtraOption("Extra BBQ Sauce", 7.00));
-      extras.add(new ExtraOption("Extra Onion", 5.00));
-      extras.add(new ExtraOption("Extra Pickles", 5.00));
-
-    } else if (itemName.contains("crispy chicken burger")) {
-      extras.add(new ExtraOption("Extra Cheese", 10.00));
-      extras.add(new ExtraOption("Extra Chicken Patty", 20.00));
-      extras.add(new ExtraOption("Extra Garlic Mayo", 7.00));
-      extras.add(new ExtraOption("Extra Lettuce", 5.00));
-      extras.add(new ExtraOption("Extra Jalapenos", 8.00));
-
-    } else if (itemName.contains("halloumi burger")) {
-      extras.add(new ExtraOption("Extra Halloumi", 18.00));
-      extras.add(new ExtraOption("Extra Salad", 5.00));
-      extras.add(new ExtraOption("Extra Garlic Sauce", 7.00));
-      extras.add(new ExtraOption("Extra Tomato", 5.00));
-      extras.add(new ExtraOption("Extra Onion", 5.00));
-
-    } else if (itemName.contains("iced coffee")) {
-      extras.add(new ExtraOption("Extra Shot", 10.00));
-      extras.add(new ExtraOption("Oat Milk", 6.00));
-      extras.add(new ExtraOption("Vanilla Syrup", 7.00));
-      extras.add(new ExtraOption("Caramel Syrup", 7.00));
-      extras.add(new ExtraOption("Whipped Cream", 8.00));
-
-    } else if (itemName.contains("mango smoothie")) {
-      extras.add(new ExtraOption("Extra Mango", 8.00));
-      extras.add(new ExtraOption("Protein Boost", 12.00));
-      extras.add(new ExtraOption("Coconut Milk", 6.00));
-      extras.add(new ExtraOption("Chia Seeds", 6.00));
-      extras.add(new ExtraOption("Whipped Cream", 8.00));
-
-    } else if (itemName.contains("lemon mint cooler")) {
-      extras.add(new ExtraOption("Extra Mint", 5.00));
-      extras.add(new ExtraOption("Extra Lemon", 5.00));
-      extras.add(new ExtraOption("Ice Cubes", 3.00));
-      extras.add(new ExtraOption("Sugar Syrup", 5.00));
-      extras.add(new ExtraOption("Sparkling Water", 6.00));
-
-    } else if (itemName.contains("loaded fries")) {
-      extras.add(new ExtraOption("Extra Cheese Sauce", 10.00));
-      extras.add(new ExtraOption("Extra BBQ Sauce", 7.00));
-      extras.add(new ExtraOption("Extra Jalapenos", 8.00));
-      extras.add(new ExtraOption("Extra Chicken Bites", 15.00));
-      extras.add(new ExtraOption("Extra Onion", 5.00));
-
-    } else if (itemName.contains("mozzarella sticks")) {
-      extras.add(new ExtraOption("Extra Marinara Dip", 7.00));
-      extras.add(new ExtraOption("Extra Garlic Dip", 7.00));
-      extras.add(new ExtraOption("Extra Cheese Dust", 6.00));
-      extras.add(new ExtraOption("Extra Spicy Dip", 7.00));
-
-    } else if (itemName.contains("spicy chicken bites")) {
-      extras.add(new ExtraOption("Extra Spicy Sauce", 7.00));
-      extras.add(new ExtraOption("Extra Garlic Mayo", 7.00));
-      extras.add(new ExtraOption("Extra BBQ Sauce", 7.00));
-      extras.add(new ExtraOption("Extra Jalapenos", 8.00));
-
-    } else if (itemName.contains("chocolate brownie")) {
-      extras.add(new ExtraOption("Extra Chocolate Sauce", 7.00));
-      extras.add(new ExtraOption("Vanilla Ice Cream", 12.00));
-      extras.add(new ExtraOption("Whipped Cream", 8.00));
-      extras.add(new ExtraOption("Sprinkles", 5.00));
-
-    } else if (itemName.contains("mini donuts")) {
-      extras.add(new ExtraOption("Extra Glaze", 6.00));
-      extras.add(new ExtraOption("Chocolate Dip", 7.00));
-      extras.add(new ExtraOption("Caramel Dip", 7.00));
-      extras.add(new ExtraOption("Sprinkles", 5.00));
-
-    } else if (itemName.contains("ice cream sundae")) {
-      extras.add(new ExtraOption("Extra Chocolate Sauce", 7.00));
-      extras.add(new ExtraOption("Extra Caramel Sauce", 7.00));
-      extras.add(new ExtraOption("Extra Toppings", 8.00));
-      extras.add(new ExtraOption("Whipped Cream", 8.00));
-
-    } else if (itemName.contains("family feast")) {
-      extras.add(new ExtraOption("Extra Large Fries", 25.00));
-      extras.add(new ExtraOption("Extra Drink", 20.00));
-      extras.add(new ExtraOption("Extra Sauce Pack", 15.00));
-      extras.add(new ExtraOption("Extra Chicken Bites", 25.00));
-
-    } else if (itemName.contains("kids combo")) {
-      extras.add(new ExtraOption("Extra Juice", 15.00));
-      extras.add(new ExtraOption("Extra Small Fries", 15.00));
-      extras.add(new ExtraOption("Extra Dip", 5.00));
-
-    } else if (itemName.contains("burger combo")) {
-      extras.add(new ExtraOption("Extra Cheese", 10.00));
-      extras.add(new ExtraOption("Extra Patty", 20.00));
-      extras.add(new ExtraOption("Extra Fries", 20.00));
-      extras.add(new ExtraOption("Extra Sauce", 7.00));
-
-    } else if (itemName.contains("chicken combo")) {
-      extras.add(new ExtraOption("Extra Chicken", 20.00));
-      extras.add(new ExtraOption("Extra Garlic Mayo", 7.00));
-      extras.add(new ExtraOption("Extra Fries", 20.00));
-      extras.add(new ExtraOption("Extra Spicy Sauce", 7.00));
-
-    } else if (itemName.contains("snack box")) {
-      extras.add(new ExtraOption("Extra Nuggets", 20.00));
-      extras.add(new ExtraOption("Extra Mozzarella Sticks", 18.00));
-      extras.add(new ExtraOption("Extra Dip", 7.00));
-      extras.add(new ExtraOption("Extra Drink", 20.00));
-    }
-
-    return extras;
-  }
-
   private static class ComboSelection {
     private final VBox comboBox;
-    private final ToggleGroup mainGroup;
-    private final ToggleGroup sideGroup;
-    private final ToggleGroup drinkGroup;
+    private final List<ToggleGroup> toggleGroups;
+    private final List<String> groupNames;
     private final Label giftLabel;
 
     public ComboSelection(
             VBox comboBox,
-            ToggleGroup mainGroup,
-            ToggleGroup sideGroup,
-            ToggleGroup drinkGroup,
+            List<ToggleGroup> toggleGroups,
+            List<String> groupNames,
             Label giftLabel
     ) {
       this.comboBox = comboBox;
-      this.mainGroup = mainGroup;
-      this.sideGroup = sideGroup;
-      this.drinkGroup = drinkGroup;
+      this.toggleGroups = toggleGroups;
+      this.groupNames = groupNames;
       this.giftLabel = giftLabel;
-    }
-  }
-
-  private static class ExtraOption {
-    private final String name;
-    private final double price;
-
-    public ExtraOption(String name, double price) {
-      this.name = name;
-      this.price = price;
-    }
-
-    public String getName() {
-      return name;
-    }
-
-    public double getPrice() {
-      return price;
     }
   }
 }
