@@ -38,6 +38,7 @@ public class App extends Application {
             System.out.println("Database error: " + e.getMessage());
         }
 
+        WindowManager.initializeStage(primaryStage);
         WelcomeScreen.show(primaryStage);
         primaryStage.show();
     }
