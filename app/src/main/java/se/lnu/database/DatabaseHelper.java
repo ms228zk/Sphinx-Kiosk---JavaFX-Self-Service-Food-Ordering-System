@@ -1,12 +1,15 @@
 package se.lnu.database;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
 import se.lnu.Category;
 import se.lnu.MenuItem;
 import se.lnu.RemovableIngredient;
-
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
 
 public class DatabaseHelper {
 
@@ -51,11 +54,16 @@ public class DatabaseHelper {
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
                     int itemId = rs.getInt("menu_item_id");
+                    String itemName = rs.getString("name");
+                    // Generate image filename from item name
+                    String imageFileName = sanitizeImageName(itemName) + ".png";
+                    
                     MenuItem currentItem = new MenuItem(
                             itemId,
-                            rs.getString("name"),
+                            itemName,
                             rs.getString("description"),
-                            rs.getDouble("price")
+                            rs.getDouble("price"),
+                            imageFileName
                     );
                     List<RemovableIngredient> currentRemovable = getRemovableIngredientsByItem(itemId);
                     currentItem.setRemovableIngredients(currentRemovable);
@@ -68,6 +76,16 @@ public class DatabaseHelper {
         }
 
         return items;
+    }
+
+    /**
+     * Converts item name to image filename format
+     * e.g., "BBQ Smash Burger" -> "bbq_smash_burger.png"
+     */
+    private static String sanitizeImageName(String name) {
+        return name.toLowerCase()
+                .replaceAll("\\s+", "_")
+                .replaceAll("[^a-z0-9_]", "");
     }
 
     public static List<RemovableIngredient> getRemovableIngredientsByItem(int itemId) {
