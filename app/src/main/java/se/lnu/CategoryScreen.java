@@ -10,6 +10,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
@@ -143,6 +144,18 @@ public class CategoryScreen {
   }
 
   private static VBox createItemCard(Stage stage, MenuItem item) {
+    // Item image (small box above name)
+    ImageView itemImage = ImageLoader.createImageView(item.getImageFileName(), 180, 140);
+    VBox imageBox = new VBox();
+    imageBox.setStyle(
+            "-fx-background-color: #f0f0f0;" +
+                    "-fx-background-radius: 16;" +
+                    "-fx-padding: 8;"
+    );
+    imageBox.setAlignment(Pos.CENTER);
+    imageBox.setPrefHeight(150);
+    imageBox.getChildren().add(itemImage);
+
     Label nameLabel = new Label(item.getName());
     nameLabel.setStyle(
             "-fx-font-size: 20px;" +
@@ -193,7 +206,7 @@ public class CategoryScreen {
     buttonBox.setAlignment(Pos.CENTER);
     buttonBox.getChildren().addAll(detailsButton, selectButton);
 
-    VBox card = new VBox(12, nameLabel, descriptionLabel, priceLabel, buttonBox);
+    VBox card = new VBox(12, imageBox, nameLabel, descriptionLabel, priceLabel, buttonBox);
     card.setAlignment(Pos.CENTER);
     card.setPadding(new Insets(20));
     card.setPrefWidth(250);
