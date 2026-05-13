@@ -6,7 +6,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -156,55 +155,7 @@ public class ItemDetailsScreen {
      * Creates an ImageView for the item with a placeholder if image not found
      */
     private static ImageView createItemImage(MenuItem item) {
-        ImageView imageView = new ImageView();
-        imageView.setPreserveRatio(true);
-        imageView.setFitWidth(320);
-        imageView.setFitHeight(320);
-
-        try {
-            // Try to load image from resources
-            String imagePath = "/images/items/" + sanitizeImageName(item.getName()) + ".png";
-            Image image = new Image(ItemDetailsScreen.class.getResource(imagePath).toExternalForm());
-
-            if (!image.isError()) {
-                imageView.setImage(image);
-            } else {
-                imageView.setImage(createPlaceholderImage());
-            }
-        } catch (Exception e) {
-            // Fallback to placeholder
-            imageView.setImage(createPlaceholderImage());
-        }
-
-        return imageView;
-    }
-
-    /**
-     * Creates a placeholder image when item image is not available
-     */
-    private static Image createPlaceholderImage() {
-        // Create a simple placeholder with a solid color background
-        javafx.scene.image.WritableImage placeholder = new javafx.scene.image.WritableImage(320, 320);
-        javafx.scene.image.PixelWriter writer = placeholder.getPixelWriter();
-
-        // Fill with light gray background
-        javafx.scene.paint.Color bgColor = javafx.scene.paint.Color.web("#e0e0e0");
-        for (int y = 0; y < 320; y++) {
-            for (int x = 0; x < 320; x++) {
-                writer.setColor(x, y, bgColor);
-            }
-        }
-
-        return placeholder;
-    }
-
-    /**
-     * Sanitizes item name to create valid image filename
-     */
-    private static String sanitizeImageName(String name) {
-        return name.toLowerCase()
-                .replaceAll("\\s+", "_")
-                .replaceAll("[^a-z0-9_]", "");
+        return ImageLoader.createImageView(item.getImageFileName(), 320, 320);
     }
 
     /**
