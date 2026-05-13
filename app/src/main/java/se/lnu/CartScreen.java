@@ -6,6 +6,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -155,6 +156,23 @@ public class CartScreen {
                                 "-fx-text-fill: #1f1f1f;"
                 );
 
+                // Item image
+                ImageView itemImage = ImageLoader.createImageView(
+                        cartItem.getMenuItem().getImageFileName(), 
+                        100, 
+                        80
+                );
+                VBox imageBox = new VBox();
+                imageBox.setStyle(
+                        "-fx-background-color: #f0f0f0;" +
+                                "-fx-background-radius: 12;" +
+                                "-fx-padding: 6;"
+                );
+                imageBox.setAlignment(Pos.CENTER);
+                imageBox.setPrefWidth(110);
+                imageBox.setPrefHeight(90);
+                imageBox.getChildren().add(itemImage);
+
                 Label comboChoicesLabel = new Label();
                 if (cartItem.getComboChoices().isEmpty()) {
                     comboChoicesLabel.setText("");
@@ -214,6 +232,7 @@ public class CartScreen {
                 VBox itemDetails = new VBox(
                         7,
                         itemNameLabel,
+                        imageBox,
                         comboChoicesLabel,
                         extrasLabel,
                         removedLabel,
@@ -304,7 +323,7 @@ public class CartScreen {
         scrollPane.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
 
         BorderPane root = new BorderPane();
-        root.setPadding(new Insets(20));
+        root.setPadding(new Insets(26));
         root.setBackground(ScreenStyle.createBackground());
         root.setTop(topBar);
         root.setCenter(scrollPane);
