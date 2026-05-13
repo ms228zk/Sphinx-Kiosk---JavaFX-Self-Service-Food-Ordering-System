@@ -164,6 +164,19 @@ public class CategoryScreen {
                     "-fx-text-fill: #FF9800;"
     );
 
+    // View Details button
+    Button detailsButton = new Button("View Details");
+    detailsButton.setStyle(
+            "-fx-font-size: 13px;" +
+                    "-fx-background-color: #2196F3;" +
+                    "-fx-text-fill: white;" +
+                    "-fx-padding: 8 16;" +
+                    "-fx-background-radius: 12;" +
+                    "-fx-cursor: hand;"
+    );
+    detailsButton.setOnAction(e -> ItemDetailsScreen.show(stage, item));
+
+    // Select button
     Button selectButton = new Button("Select");
     selectButton.setStyle(
             "-fx-font-size: 15px;" +
@@ -175,11 +188,16 @@ public class CategoryScreen {
     );
     selectButton.setOnAction(e -> MealSelectionScreen.show(stage, item));
 
-    VBox card = new VBox(12, nameLabel, descriptionLabel, priceLabel, selectButton);
+    // Button container
+    HBox buttonBox = new HBox(8);
+    buttonBox.setAlignment(Pos.CENTER);
+    buttonBox.getChildren().addAll(detailsButton, selectButton);
+
+    VBox card = new VBox(12, nameLabel, descriptionLabel, priceLabel, buttonBox);
     card.setAlignment(Pos.CENTER);
     card.setPadding(new Insets(20));
     card.setPrefWidth(250);
-    card.setMinHeight(190);
+    card.setMinHeight(210);
     card.setStyle(
             "-fx-background-color: rgba(255,255,255,0.95);" +
                     "-fx-background-radius: 28;" +
