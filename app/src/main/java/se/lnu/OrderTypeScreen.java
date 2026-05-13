@@ -18,16 +18,7 @@ public class OrderTypeScreen {
   public static void show(Stage stage) {
 
     // Back button placed at the top
-    Button backButton = new Button("Back");
-    backButton.setStyle(
-            "-fx-font-size: 14px;" +
-                    "-fx-background-color: #eeeeee;" +
-                    "-fx-text-fill: #333333;" +
-                    "-fx-padding: 8 18;" +
-                    "-fx-background-radius: 10;"
-    );
-
-    // Navigate back to Welcome screen
+    Button backButton = ScreenStyle.createBackButton();
     backButton.setOnAction(e -> WelcomeScreen.show(stage));
 
     Button homeButton = ScreenStyle.createHomeButton(stage);
@@ -35,7 +26,7 @@ public class OrderTypeScreen {
     Region spacer = new Region();
     HBox.setHgrow(spacer, Priority.ALWAYS);
 
-    HBox topBar = new HBox(backButton, spacer, homeButton);
+    HBox topBar = new HBox(12, backButton, spacer, homeButton);
     topBar.setAlignment(Pos.CENTER_LEFT);
 
     // Title label
@@ -69,7 +60,7 @@ public class OrderTypeScreen {
 
     // Root layout
     BorderPane root = new BorderPane();
-    root.setPadding(new Insets(25));
+    root.setPadding(new Insets(20));
     root.setBackground(ScreenStyle.createBackground());
 
     // Position elements
@@ -77,11 +68,11 @@ public class OrderTypeScreen {
     root.setCenter(centerContent);
 
     // Scene setup
-    Scene scene = new Scene(root, 600, 400);
+    Scene scene = new Scene(root, WindowManager.WINDOW_WIDTH, WindowManager.WINDOW_HEIGHT);
 
     stage.setTitle("Choose Order Type");
     stage.setScene(scene);
-    stage.show();
+    WindowManager.enforceStandardSize(stage);
   }
 
   // Helper method to create styled buttons

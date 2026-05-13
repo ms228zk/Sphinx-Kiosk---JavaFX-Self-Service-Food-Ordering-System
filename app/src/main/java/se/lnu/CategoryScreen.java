@@ -1,5 +1,7 @@
 package se.lnu;
 
+import java.util.List;
+
 import javafx.animation.FadeTransition;
 import javafx.animation.ScaleTransition;
 import javafx.geometry.Insets;
@@ -8,6 +10,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
@@ -18,8 +21,6 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import se.lnu.database.DatabaseHelper;
 
-import java.util.List;
-
 public class CategoryScreen {
 
   private static FlowPane itemsPane;
@@ -27,14 +28,7 @@ public class CategoryScreen {
 
   public static void show(Stage stage) {
 
-    Button backBtn = new Button("Back");
-    backBtn.setStyle(
-            "-fx-font-size: 16px;" +
-                    "-fx-background-color: #eeeeee;" +
-                    "-fx-text-fill: #333333;" +
-                    "-fx-padding: 10 20;" +
-                    "-fx-background-radius: 10;"
-    );
+    Button backBtn = ScreenStyle.createBackButton();
     backBtn.setOnAction(e -> OrderTypeScreen.show(stage));
 
     Button homeButton = ScreenStyle.createHomeButton(stage);
@@ -101,10 +95,10 @@ public class CategoryScreen {
     root.setTop(topBar);
     root.setCenter(scrollPane);
 
-    Scene scene = new Scene(root, 900, 600);
+    Scene scene = new Scene(root, WindowManager.WINDOW_WIDTH, WindowManager.WINDOW_HEIGHT);
     stage.setScene(scene);
     stage.setTitle("Select Category");
-    stage.show();
+    WindowManager.enforceStandardSize(stage);
   }
 
   private static void showItems(Stage stage, int categoryId) {
@@ -150,6 +144,18 @@ public class CategoryScreen {
   }
 
   private static VBox createItemCard(Stage stage, MenuItem item) {
+    // Item image (small box above name)
+    ImageView itemImage = ImageLoader.createImageView(item.getImageFileName(), 180, 140);
+    VBox imageBox = new VBox();
+    imageBox.setStyle(
+            "-fx-background-color: #f0f0f0;" +
+                    "-fx-background-radius: 16;" +
+                    "-fx-padding: 8;"
+    );
+    imageBox.setAlignment(Pos.CENTER);
+    imageBox.setPrefHeight(150);
+    imageBox.getChildren().add(itemImage);
+
     Label nameLabel = new Label(item.getName());
     nameLabel.setStyle(
             "-fx-font-size: 20px;" +
@@ -171,6 +177,19 @@ public class CategoryScreen {
                     "-fx-text-fill: #FF9800;"
     );
 
+    // View Details button
+    Button detailsButton = new Button("View Details");
+    detailsButton.setStyle(
+            "-fx-font-size: 13px;" +
+                    "-fx-background-color: #2196F3;" +
+                    "-fx-text-fill: white;" +
+                    "-fx-padding: 8 16;" +
+                    "-fx-background-radius: 12;" +
+                    "-fx-cursor: hand;"
+    );
+    detailsButton.setOnAction(e -> ItemDetailsScreen.show(stage, item));
+
+    // Select button
     Button selectButton = new Button("Select");
     selectButton.setStyle(
             "-fx-font-size: 15px;" +
@@ -182,11 +201,16 @@ public class CategoryScreen {
     );
     selectButton.setOnAction(e -> MealSelectionScreen.show(stage, item));
 
-    VBox card = new VBox(12, nameLabel, descriptionLabel, priceLabel, selectButton);
+    // Button container
+    HBox buttonBox = new HBox(8);
+    buttonBox.setAlignment(Pos.CENTER);
+    buttonBox.getChildren().addAll(detailsButton, selectButton);
+
+    VBox card = new VBox(12, imageBox, nameLabel, descriptionLabel, priceLabel, buttonBox);
     card.setAlignment(Pos.CENTER);
     card.setPadding(new Insets(20));
     card.setPrefWidth(250);
-    card.setMinHeight(190);
+    card.setMinHeight(210);
     card.setStyle(
             "-fx-background-color: rgba(255,255,255,0.95);" +
                     "-fx-background-radius: 28;" +

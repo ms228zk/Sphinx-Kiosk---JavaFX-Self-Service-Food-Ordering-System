@@ -3,7 +3,10 @@ package se.lnu;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -78,18 +81,17 @@ public class PaymentScreen {
             new OrderConfirmationScreen().start(stage, order);
         });
 
-        // Back button
-        Button backButton = new Button("Back");
-
-        backButton.setStyle(
-                "-fx-font-size: 14px;" +
-                        "-fx-background-color: #eeeeee;" +
-                        "-fx-text-fill: #333333;" +
-                        "-fx-padding: 8 18;" +
-                        "-fx-background-radius: 10;"
-        );
-
+        // Top bar with back button
+        Button backButton = ScreenStyle.createBackButton();
         backButton.setOnAction(e -> CartScreen.show(stage));
+        
+        Button homeButton = ScreenStyle.createHomeButton(stage);
+        
+        javafx.scene.layout.Region spacer = new javafx.scene.layout.Region();
+        javafx.scene.layout.HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
+        
+        javafx.scene.layout.HBox topBar = new javafx.scene.layout.HBox(12, backButton, spacer, homeButton);
+        topBar.setAlignment(Pos.CENTER_LEFT);
 
         VBox centerContent = new VBox(20);
 
@@ -106,16 +108,16 @@ public class PaymentScreen {
 
         BorderPane root = new BorderPane();
 
-        root.setPadding(new Insets(25));
+        root.setPadding(new Insets(20));
         root.setBackground(ScreenStyle.createBackground());
 
-        root.setTop(backButton);
+        root.setTop(topBar);
         root.setCenter(centerContent);
 
-        Scene scene = new Scene(root, 600, 400);
+        Scene scene = new Scene(root, WindowManager.WINDOW_WIDTH, WindowManager.WINDOW_HEIGHT);
 
         stage.setTitle("Payment");
         stage.setScene(scene);
-        stage.show();
+        WindowManager.enforceStandardSize(stage);
     }
 }

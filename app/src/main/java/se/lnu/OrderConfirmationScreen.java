@@ -1,17 +1,18 @@
 package se.lnu;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import javafx.scene.control.Button;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 public class OrderConfirmationScreen {
 
@@ -144,10 +145,10 @@ public class OrderConfirmationScreen {
 
         root.setBottom(bottomBox);
 
-        Scene scene = new Scene(root, 600, 450);
+        Scene scene = new Scene(root, WindowManager.WINDOW_WIDTH, WindowManager.WINDOW_HEIGHT);
         stage.setScene(scene);
         stage.setTitle("Order Confirmation");
-        stage.show();
+        WindowManager.enforceStandardSize(stage);
 
 
     }

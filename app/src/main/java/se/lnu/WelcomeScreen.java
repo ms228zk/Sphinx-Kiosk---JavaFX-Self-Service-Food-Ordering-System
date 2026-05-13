@@ -36,10 +36,10 @@ public class WelcomeScreen {
     layout.setBackground(ScreenStyle.createBackground());
     layout.getChildren().addAll(title, subtitle, startButton);
 
-    Scene scene = new Scene(layout, 600, 400);
+    Scene scene = new Scene(layout, WindowManager.WINDOW_WIDTH, WindowManager.WINDOW_HEIGHT);
 
     stage.setTitle("Kiosk");
     stage.setScene(scene);
-    stage.show();
+    WindowManager.enforceStandardSize(stage);
   }
 }

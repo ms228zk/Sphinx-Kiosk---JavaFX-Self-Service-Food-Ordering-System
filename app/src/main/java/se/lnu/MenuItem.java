@@ -9,14 +9,20 @@ public class MenuItem {
   private final String name;
   private final String description;
   private final double price;
+  private final String imageFileName;
 
   private List<RemovableIngredient> removableIngredients = new ArrayList<>();
 
   public MenuItem(int id, String name, String description, double price) {
+    this(id, name, description, price, null);
+  }
+
+  public MenuItem(int id, String name, String description, double price, String imageFileName) {
     this.id = id;
     this.name = name;
     this.description = description;
     this.price = price;
+    this.imageFileName = imageFileName;
   }
 
   public int getId() {
@@ -31,6 +37,8 @@ public class MenuItem {
 
   public double getPrice() { return price; }
 
+  public String getImageFileName() { return imageFileName; }
+
   public void addRemovableIngredient(RemovableIngredient ingredient) {
     removableIngredients.add(ingredient);
   }
@@ -43,5 +51,3 @@ public class MenuItem {
     return removableIngredients;
   }
 }
-
-

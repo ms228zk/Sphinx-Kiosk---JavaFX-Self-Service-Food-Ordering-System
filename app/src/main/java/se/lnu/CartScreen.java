@@ -6,6 +6,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -16,15 +17,7 @@ import javafx.stage.Stage;
 public class CartScreen {
 
     public static void show(Stage stage) {
-        Button backButton = new Button("Back");
-        backButton.setStyle(
-                "-fx-font-size: 18px;" +
-                        "-fx-background-color: #eeeeee;" +
-                        "-fx-text-fill: #222222;" +
-                        "-fx-padding: 14 32;" +
-                        "-fx-background-radius: 16;" +
-                        "-fx-cursor: hand;"
-        );
+        Button backButton = ScreenStyle.createBackButton();
         backButton.setOnAction(e -> CategoryScreen.show(stage));
 
         Button homeButton = ScreenStyle.createHomeButton(stage);
@@ -163,6 +156,23 @@ public class CartScreen {
                                 "-fx-text-fill: #1f1f1f;"
                 );
 
+                // Item image
+                ImageView itemImage = ImageLoader.createImageView(
+                        cartItem.getMenuItem().getImageFileName(), 
+                        100, 
+                        80
+                );
+                VBox imageBox = new VBox();
+                imageBox.setStyle(
+                        "-fx-background-color: #f0f0f0;" +
+                                "-fx-background-radius: 12;" +
+                                "-fx-padding: 6;"
+                );
+                imageBox.setAlignment(Pos.CENTER);
+                imageBox.setPrefWidth(110);
+                imageBox.setPrefHeight(90);
+                imageBox.getChildren().add(itemImage);
+
                 Label comboChoicesLabel = new Label();
                 if (cartItem.getComboChoices().isEmpty()) {
                     comboChoicesLabel.setText("");
@@ -222,6 +232,7 @@ public class CartScreen {
                 VBox itemDetails = new VBox(
                         7,
                         itemNameLabel,
+                        imageBox,
                         comboChoicesLabel,
                         extrasLabel,
                         removedLabel,
@@ -317,9 +328,9 @@ public class CartScreen {
         root.setTop(topBar);
         root.setCenter(scrollPane);
 
-        Scene scene = new Scene(root, 1000, 650);
+        Scene scene = new Scene(root, WindowManager.WINDOW_WIDTH, WindowManager.WINDOW_HEIGHT);
         stage.setScene(scene);
         stage.setTitle("Cart");
-        stage.show();
+        WindowManager.enforceStandardSize(stage);
     }
 }

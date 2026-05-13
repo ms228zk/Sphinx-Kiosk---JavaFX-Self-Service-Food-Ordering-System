@@ -1,5 +1,7 @@
 package se.lnu;
 
+import org.jspecify.annotations.NonNull;
+
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
 import javafx.geometry.Insets;
@@ -12,7 +14,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import org.jspecify.annotations.NonNull;
 
 public class OrderNumberScreen {
 
@@ -66,10 +67,10 @@ public class OrderNumberScreen {
         root.setBackground(ScreenStyle.createBackground());
         root.setCenter(centerContent);
 
-        Scene scene = new Scene(root, 600, 450);
+        Scene scene = new Scene(root, WindowManager.WINDOW_WIDTH, WindowManager.WINDOW_HEIGHT);
         stage.setScene(scene);
         stage.setTitle("Order Number");
-        stage.show();
+        WindowManager.enforceStandardSize(stage);
 
         PauseTransition wait = new PauseTransition(Duration.seconds(5));
         wait.setOnFinished(e -> {

@@ -1,5 +1,7 @@
 package se.lnu;
 
+import java.util.List;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -14,8 +16,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import se.lnu.database.DatabaseHelper;
 
-import java.util.List;
-
 public class ItemListScreen {
 
   public static void show(Stage stage) {
@@ -25,14 +25,7 @@ public class ItemListScreen {
     Label subtitle = new Label("Select an item to continue");
     subtitle.setStyle("-fx-font-size: 16px; -fx-text-fill: gray;");
 
-    Button backButton = new Button("Back");
-    backButton.setStyle(
-            "-fx-font-size: 16px;" +
-                    "-fx-background-color: #eeeeee;" +
-                    "-fx-text-fill: #333333;" +
-                    "-fx-padding: 10 20;" +
-                    "-fx-background-radius: 10;"
-    );
+    Button backButton = ScreenStyle.createBackButton();
     backButton.setOnAction(e -> CategoryScreen.show(stage));
 
     Button homeButton = ScreenStyle.createHomeButton(stage);
@@ -80,10 +73,10 @@ public class ItemListScreen {
     root.setTop(topBar);
     root.setCenter(scrollPane);
 
-    Scene scene = new Scene(root, 600, 450);
+    Scene scene = new Scene(root, WindowManager.WINDOW_WIDTH, WindowManager.WINDOW_HEIGHT);
     stage.setScene(scene);
     stage.setTitle("Items");
-    stage.show();
+    WindowManager.enforceStandardSize(stage);
   }
 
   private static Button createCartButton(Stage stage) {
