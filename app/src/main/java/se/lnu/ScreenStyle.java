@@ -82,10 +82,12 @@ public class ScreenStyle {
   }
 
   public static Button createHomeButton(Stage stage) {
-    Button homeButton = new Button("🏠");
+    Button homeButton = new Button("\u2302"); // ⌂ safer home symbol
 
     String normalStyle =
-            "-fx-font-size: 20px;" +
+            "-fx-font-family: 'Segoe UI Symbol', 'Arial Unicode MS', 'Arial';" +
+                    "-fx-font-size: 25px;" +
+                    "-fx-font-weight: bold;" +
                     "-fx-background-color: rgba(255,255,255,0.94);" +
                     "-fx-text-fill: #222222;" +
                     "-fx-min-width: 56px;" +
@@ -98,7 +100,9 @@ public class ScreenStyle {
                     "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.20), 14, 0.25, 0, 4);";
 
     String hoverStyle =
-            "-fx-font-size: 20px;" +
+            "-fx-font-family: 'Segoe UI Symbol', 'Arial Unicode MS', 'Arial';" +
+                    "-fx-font-size: 25px;" +
+                    "-fx-font-weight: bold;" +
                     "-fx-background-color: linear-gradient(to bottom, #ffb300, #ff6d00);" +
                     "-fx-text-fill: white;" +
                     "-fx-min-width: 56px;" +
@@ -137,10 +141,11 @@ public class ScreenStyle {
   }
 
   public static Button createBackButton() {
-    Button backButton = new Button("←");
+    Button backButton = new Button("\u2190"); // ← safer back arrow
 
     String normalStyle =
-            "-fx-font-size: 24px;" +
+            "-fx-font-family: 'Segoe UI Symbol', 'Arial Unicode MS', 'Arial';" +
+                    "-fx-font-size: 25px;" +
                     "-fx-font-weight: bold;" +
                     "-fx-background-color: linear-gradient(to bottom, #ffb300, #ff6d00);" +
                     "-fx-text-fill: white;" +
@@ -154,7 +159,8 @@ public class ScreenStyle {
                     "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.24), 14, 0.25, 0, 4);";
 
     String hoverStyle =
-            "-fx-font-size: 24px;" +
+            "-fx-font-family: 'Segoe UI Symbol', 'Arial Unicode MS', 'Arial';" +
+                    "-fx-font-size: 25px;" +
                     "-fx-font-weight: bold;" +
                     "-fx-background-color: linear-gradient(to bottom, #ff3d00, #c62828);" +
                     "-fx-text-fill: white;" +

@@ -20,7 +20,7 @@ public class WelcomeScreen {
             "-fx-font-size: 13px;" +
                     "-fx-font-weight: bold;" +
                     "-fx-text-fill: #c62828;" +
-                    "-fx-background-color: rgba(255, 193, 7, 0.28);" +
+                    "-fx-background-color: rgba(255, 193, 7, 0.30);" +
                     "-fx-padding: 8 18;" +
                     "-fx-background-radius: 22;"
     );
@@ -81,35 +81,32 @@ public class WelcomeScreen {
 
   private static StackPane createHeroVisual() {
     StackPane visual = new StackPane();
-    visual.setMinWidth(340);
-    visual.setMinHeight(370);
-    visual.setMaxWidth(380);
-    visual.setMaxHeight(400);
+    visual.setMinWidth(360);
+    visual.setMinHeight(390);
+    visual.setMaxWidth(390);
+    visual.setMaxHeight(420);
 
     Region glow = new Region();
-    glow.setPrefSize(340, 340);
+    glow.setPrefSize(355, 355);
     glow.setStyle(
-            "-fx-background-color: radial-gradient(center 50% 50%, radius 62%, rgba(255,179,0,0.45), rgba(255,109,0,0.14), transparent);" +
-                    "-fx-background-radius: 190;"
+            "-fx-background-color: radial-gradient(center 50% 50%, radius 63%, rgba(255,179,0,0.50), rgba(255,109,0,0.18), transparent);" +
+                    "-fx-background-radius: 200;"
     );
 
     VBox foodCard = new VBox(18);
     foodCard.setAlignment(Pos.CENTER);
-    foodCard.setPadding(new Insets(32));
-    foodCard.setMaxWidth(310);
+    foodCard.setPadding(new Insets(34));
+    foodCard.setMaxWidth(320);
     foodCard.setStyle(
-            "-fx-background-color: linear-gradient(to bottom right, #fff8e1, #ffffff);" +
-                    "-fx-background-radius: 34;" +
-                    "-fx-border-color: rgba(255,152,0,0.38);" +
-                    "-fx-border-width: 1.4;" +
-                    "-fx-border-radius: 34;" +
-                    "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.20), 26, 0, 0, 8);"
+            "-fx-background-color: linear-gradient(to bottom right, #fff4cf, #ffffff);" +
+                    "-fx-background-radius: 36;" +
+                    "-fx-border-color: rgba(255,152,0,0.45);" +
+                    "-fx-border-width: 1.6;" +
+                    "-fx-border-radius: 36;" +
+                    "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.22), 28, 0, 0, 9);"
     );
 
-    Label foodIcon = new Label("🍔");
-    foodIcon.setStyle(
-            "-fx-font-size: 92px;"
-    );
+    VBox burgerIcon = createColorBurgerIcon();
 
     Label foodTitle = new Label("Today’s Favorites");
     foodTitle.setStyle(
@@ -128,16 +125,19 @@ public class WelcomeScreen {
                     "-fx-background-radius: 22;"
     );
 
-    foodCard.getChildren().addAll(foodIcon, foodTitle, promo);
+    HBox miniTags = new HBox(10);
+    miniTags.setAlignment(Pos.CENTER);
+    miniTags.getChildren().addAll(
+            createSmallTag("HOT"),
+            createSmallTag("FRESH"),
+            createSmallTag("NEW")
+    );
 
-    Label bubbleOne = new Label("🔥");
-    bubbleOne.setStyle(createBubbleStyle(54));
+    foodCard.getChildren().addAll(burgerIcon, foodTitle, promo, miniTags);
 
-    Label bubbleTwo = new Label("🍟");
-    bubbleTwo.setStyle(createBubbleStyle(58));
-
-    Label bubbleThree = new Label("🥤");
-    bubbleThree.setStyle(createBubbleStyle(54));
+    Label bubbleOne = createBubble("HOT", 54);
+    Label bubbleTwo = createBubble("FRESH", 58);
+    Label bubbleThree = createBubble("NEW", 54);
 
     StackPane.setAlignment(glow, Pos.CENTER);
     StackPane.setAlignment(foodCard, Pos.CENTER);
@@ -154,17 +154,89 @@ public class WelcomeScreen {
     return visual;
   }
 
-  private static String createBubbleStyle(int size) {
-    return "-fx-font-size: 25px;" +
-            "-fx-alignment: center;" +
-            "-fx-min-width: " + size + "px;" +
-            "-fx-min-height: " + size + "px;" +
-            "-fx-background-color: rgba(255,255,255,0.96);" +
-            "-fx-background-radius: " + (size / 2) + "px;" +
-            "-fx-border-color: rgba(255,152,0,0.34);" +
-            "-fx-border-width: 1.2;" +
-            "-fx-border-radius: " + (size / 2) + "px;" +
-            "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 15, 0, 0, 4);";
+  private static VBox createColorBurgerIcon() {
+    Region topBun = new Region();
+    topBun.setPrefSize(120, 30);
+    topBun.setStyle(
+            "-fx-background-color: linear-gradient(to bottom, #ffb300, #ff8f00);" +
+                    "-fx-background-radius: 30 30 10 10;" +
+                    "-fx-effect: dropshadow(gaussian, rgba(255,143,0,0.25), 8, 0, 0, 2);"
+    );
+
+    Region lettuce = new Region();
+    lettuce.setPrefSize(128, 11);
+    lettuce.setStyle(
+            "-fx-background-color: #43a047;" +
+                    "-fx-background-radius: 8;"
+    );
+
+    Region cheese = new Region();
+    cheese.setPrefSize(112, 12);
+    cheese.setStyle(
+            "-fx-background-color: #ffca28;" +
+                    "-fx-background-radius: 8;"
+    );
+
+    Region patty = new Region();
+    patty.setPrefSize(122, 16);
+    patty.setStyle(
+            "-fx-background-color: #5d4037;" +
+                    "-fx-background-radius: 10;"
+    );
+
+    Region sauce = new Region();
+    sauce.setPrefSize(108, 10);
+    sauce.setStyle(
+            "-fx-background-color: #e53935;" +
+                    "-fx-background-radius: 8;"
+    );
+
+    Region bottomBun = new Region();
+    bottomBun.setPrefSize(116, 25);
+    bottomBun.setStyle(
+            "-fx-background-color: linear-gradient(to bottom, #ff9800, #f57c00);" +
+                    "-fx-background-radius: 8 8 26 26;"
+    );
+
+    VBox burger = new VBox(5, topBun, lettuce, cheese, patty, sauce, bottomBun);
+    burger.setAlignment(Pos.CENTER);
+    burger.setPadding(new Insets(8));
+
+    return burger;
+  }
+
+  private static Label createSmallTag(String text) {
+    Label tag = new Label(text);
+    tag.setStyle(
+            "-fx-font-size: 11px;" +
+                    "-fx-font-weight: bold;" +
+                    "-fx-text-fill: #c62828;" +
+                    "-fx-background-color: rgba(255,193,7,0.26);" +
+                    "-fx-padding: 6 12;" +
+                    "-fx-background-radius: 16;"
+    );
+    return tag;
+  }
+
+  private static Label createBubble(String text, int size) {
+    Label bubble = new Label(text);
+
+    bubble.setStyle(
+            "-fx-font-size: 12px;" +
+                    "-fx-font-weight: bold;" +
+                    "-fx-text-fill: #ff6d00;" +
+                    "-fx-alignment: center;" +
+                    "-fx-min-width: " + size + "px;" +
+                    "-fx-min-height: " + size + "px;" +
+                    "-fx-background-color: rgba(255,255,255,0.96);" +
+                    "-fx-background-radius: " + (size / 2) + "px;" +
+                    "-fx-border-color: rgba(255,152,0,0.38);" +
+                    "-fx-border-width: 1.3;" +
+                    "-fx-border-radius: " + (size / 2) + "px;" +
+                    "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 15, 0, 0, 4);"
+    );
+
+    return bubble;
   }
 
   private static Button createMainButton(String text) {
