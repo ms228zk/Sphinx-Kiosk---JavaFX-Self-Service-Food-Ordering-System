@@ -52,7 +52,7 @@ public class AdminDashboardScreen {
         });
 
         manageCategoriesButton.setOnAction(e -> {
-            System.out.println("Manage categories clicked");
+            CategoryAdminScreen.show(stage);
         });
 
         logoutButton.setOnAction(e -> {
