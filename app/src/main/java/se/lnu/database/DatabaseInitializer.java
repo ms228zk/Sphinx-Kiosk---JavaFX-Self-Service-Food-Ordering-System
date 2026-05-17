@@ -3,6 +3,7 @@ package se.lnu.database;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.ResultSet;
 
 public class DatabaseInitializer {
 
@@ -83,6 +84,14 @@ public class DatabaseInitializer {
                   FOREIGN KEY (group_id) REFERENCES ComboChoiceGroup(group_id)
               )
               """);
+      ResultSet checkData = stmt.executeQuery(
+        "SELECT COUNT(*) AS total FROM MenuItem"
+      );
+
+      if (checkData.next() && checkData.getInt("total") > 0) {
+        System.out.println("Database already initialized.");
+        return;
+      }
 
       // Reset database
       stmt.execute("DELETE FROM ComboChoiceOption");
