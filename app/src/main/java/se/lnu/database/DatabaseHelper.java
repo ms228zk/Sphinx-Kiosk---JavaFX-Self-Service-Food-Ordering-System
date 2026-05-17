@@ -39,6 +39,42 @@ public class DatabaseHelper {
         return categories;
     }
 
+    // ADD CATEGORY
+    public static boolean addCategory(String name) {
+        String sql = "INSERT INTO Category (name) VALUES (?)";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, name);
+            pstmt.executeUpdate();
+            return true;
+
+        } catch (SQLException e) {
+            System.out.println("DB error (addCategory): " + e.getMessage());
+            return false;
+        }
+    }
+
+    // DELETE CATEGORY
+    public static boolean deleteCategory(int id) {
+        String sql = "DELETE FROM Category WHERE category_id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, id);
+            pstmt.executeUpdate();
+            return true;
+
+        } catch (SQLException e) {
+            System.out.println("DB error (deleteCategory): " + e.getMessage());
+            return false;
+        }
+    }
+
+
+
     public static List<MenuItem> getItemsByCategory(int categoryId) {
         List<MenuItem> items = new ArrayList<>();
 
