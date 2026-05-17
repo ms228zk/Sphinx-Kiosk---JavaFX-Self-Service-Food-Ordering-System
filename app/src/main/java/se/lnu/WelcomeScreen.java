@@ -52,7 +52,7 @@ public class WelcomeScreen {
 
     StackPane heroVisual = createHeroVisual();
 
-    HBox heroLayout = new HBox(70, leftContent, heroVisual);
+    HBox heroLayout = new HBox(72, leftContent, heroVisual);
     heroLayout.setAlignment(Pos.CENTER);
     heroLayout.setPadding(new Insets(56, 72, 56, 72));
 
@@ -95,7 +95,7 @@ public class WelcomeScreen {
 
     VBox foodCard = new VBox(18);
     foodCard.setAlignment(Pos.CENTER);
-    foodCard.setPadding(new Insets(34));
+    foodCard.setPadding(new Insets(34, 32, 34, 32));
     foodCard.setMaxWidth(320);
     foodCard.setStyle(
             "-fx-background-color: linear-gradient(to bottom right, #fff4cf, #ffffff);" +
@@ -135,21 +135,7 @@ public class WelcomeScreen {
 
     foodCard.getChildren().addAll(burgerIcon, foodTitle, promo, miniTags);
 
-    Label bubbleOne = createBubble("HOT", 54);
-    Label bubbleTwo = createBubble("FRESH", 58);
-    Label bubbleThree = createBubble("NEW", 54);
-
-    StackPane.setAlignment(glow, Pos.CENTER);
-    StackPane.setAlignment(foodCard, Pos.CENTER);
-    StackPane.setAlignment(bubbleOne, Pos.TOP_LEFT);
-    StackPane.setAlignment(bubbleTwo, Pos.BOTTOM_LEFT);
-    StackPane.setAlignment(bubbleThree, Pos.TOP_RIGHT);
-
-    StackPane.setMargin(bubbleOne, new Insets(28, 0, 0, 18));
-    StackPane.setMargin(bubbleTwo, new Insets(0, 0, 28, 8));
-    StackPane.setMargin(bubbleThree, new Insets(22, 10, 0, 0));
-
-    visual.getChildren().addAll(glow, foodCard, bubbleOne, bubbleTwo, bubbleThree);
+    visual.getChildren().addAll(glow, foodCard);
 
     return visual;
   }
@@ -207,6 +193,7 @@ public class WelcomeScreen {
 
   private static Label createSmallTag(String text) {
     Label tag = new Label(text);
+
     tag.setStyle(
             "-fx-font-size: 11px;" +
                     "-fx-font-weight: bold;" +
@@ -215,28 +202,8 @@ public class WelcomeScreen {
                     "-fx-padding: 6 12;" +
                     "-fx-background-radius: 16;"
     );
+
     return tag;
-  }
-
-  private static Label createBubble(String text, int size) {
-    Label bubble = new Label(text);
-
-    bubble.setStyle(
-            "-fx-font-size: 12px;" +
-                    "-fx-font-weight: bold;" +
-                    "-fx-text-fill: #ff6d00;" +
-                    "-fx-alignment: center;" +
-                    "-fx-min-width: " + size + "px;" +
-                    "-fx-min-height: " + size + "px;" +
-                    "-fx-background-color: rgba(255,255,255,0.96);" +
-                    "-fx-background-radius: " + (size / 2) + "px;" +
-                    "-fx-border-color: rgba(255,152,0,0.38);" +
-                    "-fx-border-width: 1.3;" +
-                    "-fx-border-radius: " + (size / 2) + "px;" +
-                    "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 15, 0, 0, 4);"
-    );
-
-    return bubble;
   }
 
   private static Button createMainButton(String text) {
