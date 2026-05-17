@@ -46,7 +46,20 @@ public class WelcomeScreen {
     Button startButton = createMainButton("Start Order");
     startButton.setOnAction(e -> OrderTypeScreen.show(stage));
 
-    VBox leftContent = new VBox(24, badge, title, subtitle, startButton);
+    // Hidden admin access button
+    Button adminButton = new Button("⚙");
+    adminButton.setStyle(
+            "-fx-background-color: transparent;" +
+                    "-fx-text-fill: rgba(0,0,0,0.15);" +
+                    "-fx-font-size: 14px;" +
+                    "-fx-cursor: hand;"
+    );
+
+    adminButton.setOnAction(e -> {
+      se.lnu.admin.AdminLoginScreen.show(stage);
+    });
+
+    VBox leftContent = new VBox(24, badge, title, subtitle, startButton, adminButton);
     leftContent.setAlignment(Pos.CENTER_LEFT);
     leftContent.setMaxWidth(500);
 
