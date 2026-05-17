@@ -18,7 +18,6 @@ public class CategoryAdminScreen {
 
     public static void show(Stage stage) {
 
-
         Button backButton = ScreenStyle.createBackButton();
         backButton.setOnAction(e -> AdminDashboardScreen.show(stage));
 
@@ -29,11 +28,9 @@ public class CategoryAdminScreen {
         topBar.setAlignment(Pos.CENTER_LEFT);
         topBar.setPadding(new Insets(10, 20, 10, 20));
 
-
         Label title = new Label("Manage Categories");
         title.setStyle("-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #222;");
 
-        // EXISTING CATEGORY LIST
         Label existingLabel = new Label("Existing categories:");
         existingLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
 
@@ -42,7 +39,6 @@ public class CategoryAdminScreen {
         categoryListBox.setStyle("-fx-border-color: #ccc; -fx-border-width: 1px; -fx-background-color: white;");
         refreshCategoryList(categoryListBox);
 
-        // CREATE CATEGORY
         Label createLabel = new Label("Create new category");
         createLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
         HBox createLabelBox = new HBox(createLabel);
@@ -65,14 +61,12 @@ public class CategoryAdminScreen {
         HBox addRow = new HBox(10, nameField, saveBtn);
         addRow.setAlignment(Pos.CENTER);
 
-
         Label statusLabel = new Label("");
         statusLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: #1f1f1f;");
         statusLabel.setMaxWidth(300);
         statusLabel.setAlignment(Pos.CENTER);
         statusLabel.setWrapText(true);
 
-        // DELETE CATEGORY
         Label deleteLabel = new Label("Delete category");
         deleteLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
         HBox deleteLabelBox = new HBox(deleteLabel);
@@ -80,7 +74,6 @@ public class CategoryAdminScreen {
 
         ComboBox<Category> deleteDropdown = new ComboBox<>();
         deleteDropdown.setPrefWidth(300);
-
 
         deleteDropdown.setCellFactory(lv -> new ListCell<>() {
             @Override
@@ -112,23 +105,44 @@ public class CategoryAdminScreen {
         HBox deleteRow = new HBox(10, deleteDropdown, deleteBtn);
         deleteRow.setAlignment(Pos.CENTER);
 
-
         Runnable clearMessage = () -> {
             PauseTransition pause = new PauseTransition(Duration.seconds(2));
             pause.setOnFinished(ev -> statusLabel.setText(""));
             pause.play();
         };
 
-        // SAVE CATEGORY
+        // ADD CATEGORY
         saveBtn.setOnAction(e -> {
             String name = nameField.getText().trim();
 
+            // Validate empty input
             if (name.isEmpty()) {
                 statusLabel.setText("Category name cannot be empty.");
                 clearMessage.run();
                 return;
             }
 
+            // Capitalize
+            if (name.length() == 1) {
+                name = name.toUpperCase();
+            } else {
+                name = name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
+            }
+
+
+            String finalName = name;
+
+            // Prevent duplicates
+            boolean exists = DatabaseHelper.getCategories()
+                    .stream()
+                    .anyMatch(c -> c.getName().equalsIgnoreCase(finalName));
+
+            if (exists) {
+                statusLabel.setText("Category already exists!");
+                clearMessage.run();
+                return;
+            }
+            // Add category to database
             boolean success = DatabaseHelper.addCategory(name);
 
             if (success) {
@@ -146,13 +160,13 @@ public class CategoryAdminScreen {
         // DELETE CATEGORY
         deleteBtn.setOnAction(e -> {
             Category selected = deleteDropdown.getValue();
-
+            // Validate selection
             if (selected == null) {
                 statusLabel.setText("Please select a category to delete.");
                 clearMessage.run();
                 return;
             }
-
+            // Delete category from database
             boolean success = DatabaseHelper.deleteCategory(selected.getId());
 
             if (success) {
@@ -165,7 +179,6 @@ public class CategoryAdminScreen {
 
             clearMessage.run();
         });
-
 
         VBox content = new VBox(
                 20,
@@ -192,7 +205,7 @@ public class CategoryAdminScreen {
         stage.setTitle("Manage Categories");
         WindowManager.enforceStandardSize(stage);
     }
-
+    // Refresh category list display
     private static void refreshCategoryList(VBox listBox) {
         listBox.getChildren().clear();
 
