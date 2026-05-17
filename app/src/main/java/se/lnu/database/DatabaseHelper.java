@@ -117,6 +117,51 @@ public class DatabaseHelper {
         return items;
     }
 
+    public static boolean deleteMenuItem(int menuItemId) {
+        String deleteComboOptionsSql = """
+            DELETE FROM ComboChoiceOption
+            WHERE group_id IN (
+                SELECT group_id
+                FROM ComboChoiceGroup
+                WHERE combo_item_id = ?
+            )
+        """;
+        String deleteComboGroupsSql = "DELETE FROM ComboChoiceGroup WHERE combo_item_id = ?";
+        String deleteExtrasSql = "DELETE FROM MenuItemExtraOption WHERE menu_item_id = ?";
+        String deleteRemovablesSql = "DELETE FROM MenuItemRemovableIngredient WHERE menu_item_id = ?";
+        String deleteMenuItemSql = "DELETE FROM MenuItem WHERE menu_item_id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            conn.setAutoCommit(false);
+
+            try {
+                executeDelete(conn, deleteComboOptionsSql, menuItemId);
+                executeDelete(conn, deleteComboGroupsSql, menuItemId);
+                executeDelete(conn, deleteExtrasSql, menuItemId);
+                executeDelete(conn, deleteRemovablesSql, menuItemId);
+
+                int deletedRows = executeDelete(conn, deleteMenuItemSql, menuItemId);
+                conn.commit();
+                return deletedRows > 0;
+
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            }
+
+        } catch (SQLException e) {
+            System.out.println("DB error (deleteMenuItem): " + e.getMessage());
+            return false;
+        }
+    }
+
+    private static int executeDelete(Connection conn, String sql, int menuItemId) throws SQLException {
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, menuItemId);
+            return pstmt.executeUpdate();
+        }
+    }
+
     /**
      * Converts item name to image filename format
      * e.g., "BBQ Smash Burger" -> "bbq_smash_burger.png"

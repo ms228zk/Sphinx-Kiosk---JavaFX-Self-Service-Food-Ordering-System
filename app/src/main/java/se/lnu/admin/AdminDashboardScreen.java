@@ -46,9 +46,8 @@ public class AdminDashboardScreen {
         manageCategoriesButton.setStyle(buttonStyle);
         logoutButton.setStyle(buttonStyle);
 
-        // Placeholder actions for next sprint
         manageItemsButton.setOnAction(e -> {
-            System.out.println("Manage items clicked");
+            AdminMenuItemsScreen.show(stage);
         });
 
         manageCategoriesButton.setOnAction(e -> {
