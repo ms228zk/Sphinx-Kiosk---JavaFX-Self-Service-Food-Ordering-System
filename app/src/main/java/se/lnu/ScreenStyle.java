@@ -16,6 +16,9 @@ import java.util.Optional;
 
 public class ScreenStyle {
 
+  private static final String SYMBOL_FONT =
+          "-fx-font-family: 'Segoe UI Symbol', 'Arial Unicode MS', 'Arial';";
+
   public static Background createBackground() {
     LinearGradient baseGradient = new LinearGradient(
             0, 0,
@@ -82,33 +85,21 @@ public class ScreenStyle {
   }
 
   public static Button createHomeButton(Stage stage) {
-    Button homeButton = new Button("🏠");
+    Button homeButton = new Button("\u2302"); // ⌂ safe home symbol
 
-    String normalStyle =
-            "-fx-font-size: 20px;" +
-                    "-fx-background-color: rgba(255,255,255,0.94);" +
-                    "-fx-text-fill: #222222;" +
-                    "-fx-min-width: 56px;" +
-                    "-fx-min-height: 56px;" +
-                    "-fx-background-radius: 28px;" +
-                    "-fx-border-color: rgba(255,152,0,0.75);" +
-                    "-fx-border-width: 1.8px;" +
-                    "-fx-border-radius: 28px;" +
-                    "-fx-cursor: hand;" +
-                    "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.20), 14, 0.25, 0, 4);";
+    String normalStyle = createCircleIconButtonStyle(
+            "rgba(255,255,255,0.94)",
+            "#222222",
+            "rgba(255,152,0,0.75)",
+            "rgba(0,0,0,0.20)"
+    );
 
-    String hoverStyle =
-            "-fx-font-size: 20px;" +
-                    "-fx-background-color: linear-gradient(to bottom, #ffb300, #ff6d00);" +
-                    "-fx-text-fill: white;" +
-                    "-fx-min-width: 56px;" +
-                    "-fx-min-height: 56px;" +
-                    "-fx-background-radius: 28px;" +
-                    "-fx-border-color: white;" +
-                    "-fx-border-width: 1.8px;" +
-                    "-fx-border-radius: 28px;" +
-                    "-fx-cursor: hand;" +
-                    "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.30), 16, 0.30, 0, 5);";
+    String hoverStyle = createCircleIconButtonStyle(
+            "linear-gradient(to bottom, #ffb300, #ff6d00)",
+            "white",
+            "white",
+            "rgba(0,0,0,0.30)"
+    );
 
     homeButton.setStyle(normalStyle);
     homeButton.setOnMouseEntered(e -> homeButton.setStyle(hoverStyle));
@@ -137,41 +128,48 @@ public class ScreenStyle {
   }
 
   public static Button createBackButton() {
-    Button backButton = new Button("←");
+    Button backButton = new Button("\u2190"); // ← safe back arrow
 
-    String normalStyle =
-            "-fx-font-size: 24px;" +
-                    "-fx-font-weight: bold;" +
-                    "-fx-background-color: linear-gradient(to bottom, #ffb300, #ff6d00);" +
-                    "-fx-text-fill: white;" +
-                    "-fx-min-width: 56px;" +
-                    "-fx-min-height: 56px;" +
-                    "-fx-background-radius: 28px;" +
-                    "-fx-border-color: white;" +
-                    "-fx-border-width: 1.8px;" +
-                    "-fx-border-radius: 28px;" +
-                    "-fx-cursor: hand;" +
-                    "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.24), 14, 0.25, 0, 4);";
+    String normalStyle = createCircleIconButtonStyle(
+            "linear-gradient(to bottom, #ffb300, #ff6d00)",
+            "white",
+            "white",
+            "rgba(0,0,0,0.24)"
+    );
 
-    String hoverStyle =
-            "-fx-font-size: 24px;" +
-                    "-fx-font-weight: bold;" +
-                    "-fx-background-color: linear-gradient(to bottom, #ff3d00, #c62828);" +
-                    "-fx-text-fill: white;" +
-                    "-fx-min-width: 56px;" +
-                    "-fx-min-height: 56px;" +
-                    "-fx-background-radius: 28px;" +
-                    "-fx-border-color: white;" +
-                    "-fx-border-width: 1.8px;" +
-                    "-fx-border-radius: 28px;" +
-                    "-fx-cursor: hand;" +
-                    "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.34), 16, 0.30, 0, 5);";
+    String hoverStyle = createCircleIconButtonStyle(
+            "linear-gradient(to bottom, #ff3d00, #c62828)",
+            "white",
+            "white",
+            "rgba(0,0,0,0.34)"
+    );
 
     backButton.setStyle(normalStyle);
     backButton.setOnMouseEntered(e -> backButton.setStyle(hoverStyle));
     backButton.setOnMouseExited(e -> backButton.setStyle(normalStyle));
 
     return backButton;
+  }
+
+  private static String createCircleIconButtonStyle(
+          String backgroundColor,
+          String textColor,
+          String borderColor,
+          String shadowColor
+  ) {
+    return SYMBOL_FONT +
+            "-fx-font-size: 25px;" +
+            "-fx-font-weight: bold;" +
+            "-fx-background-color: " + backgroundColor + ";" +
+            "-fx-text-fill: " + textColor + ";" +
+            "-fx-min-width: 56px;" +
+            "-fx-min-height: 56px;" +
+            "-fx-background-radius: 28px;" +
+            "-fx-border-color: " + borderColor + ";" +
+            "-fx-border-width: 1.8px;" +
+            "-fx-border-radius: 28px;" +
+            "-fx-cursor: hand;" +
+            "-fx-effect: dropshadow(gaussian, " + shadowColor + ", 14, 0.25, 0, 4);";
   }
 
   public static String createPrimaryButtonStyle() {
