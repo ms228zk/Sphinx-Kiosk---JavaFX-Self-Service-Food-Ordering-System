@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.ResultSet;
 
 public class DatabaseInitializer {
 
@@ -27,9 +26,21 @@ public class DatabaseInitializer {
                   name TEXT NOT NULL,
                   description TEXT,
                   price REAL NOT NULL,
+                  available INTEGER NOT NULL DEFAULT 1,
                   FOREIGN KEY (category_id) REFERENCES Category(category_id)
               )
               """);
+
+      /*
+       * If the database was created before the available column existed,
+       * this safely adds it. If it already exists, SQLite throws an error,
+       * which we ignore because that means the column is already there.
+       */
+      try {
+        stmt.execute("ALTER TABLE MenuItem ADD COLUMN available INTEGER NOT NULL DEFAULT 1");
+      } catch (SQLException e) {
+        // Column already exists, so nothing needs to be done.
+      }
 
       stmt.execute("""
               CREATE TABLE IF NOT EXISTS RemovableIngredient (
@@ -85,25 +96,33 @@ public class DatabaseInitializer {
                   FOREIGN KEY (group_id) REFERENCES ComboChoiceGroup(group_id)
               )
               """);
-      ResultSet checkData = stmt.executeQuery(
-        "SELECT COUNT(*) AS total FROM MenuItem"
-      );
 
-      if (checkData.next() && checkData.getInt("total") > 0) {
-        System.out.println("Database already initialized.");
+      /*
+       * Important:
+       * Only skip default seeding if MenuItem already has data.
+       *
+       * This prevents two problems:
+       * 1. Admin-added items disappearing every time the app restarts.
+       * 2. Categories existing but MenuItem being empty, which causes
+       *    the customer side to show "No items available".
+       */
+      if (hasData(conn, "MenuItem")) {
+        System.out.println("Database already contains menu items. Skipping default seed.");
         return;
       }
 
       /*
-       * Important:
-       * Do NOT delete/reset the tables here.
-       * If we delete MenuItem/Category every time the app starts,
-       * admin-added menu items disappear after restarting the app.
+       * If MenuItem is empty, reset the seed-related tables and insert
+       * the default menu data again.
        */
-      if (hasData(conn, "Category") || hasData(conn, "MenuItem")) {
-        System.out.println("Database already contains data. Skipping default seed.");
-        return;
-      }
+      stmt.execute("DELETE FROM ComboChoiceOption");
+      stmt.execute("DELETE FROM ComboChoiceGroup");
+      stmt.execute("DELETE FROM MenuItemExtraOption");
+      stmt.execute("DELETE FROM ExtraOption");
+      stmt.execute("DELETE FROM MenuItemRemovableIngredient");
+      stmt.execute("DELETE FROM RemovableIngredient");
+      stmt.execute("DELETE FROM MenuItem");
+      stmt.execute("DELETE FROM Category");
 
       // Insert Categories
       stmt.execute("""
@@ -117,24 +136,24 @@ public class DatabaseInitializer {
 
       // Insert Menu Items
       stmt.execute("""
-              INSERT INTO MenuItem (category_id, name, description, price) VALUES
-              (1, 'BBQ Smash Burger', 'Double beef patty with BBQ sauce', 49.00),
-              (1, 'Crispy Chicken Burger', 'Crispy chicken with garlic mayo', 45.00),
-              (1, 'Halloumi Burger', 'Grilled halloumi with salad', 42.00),
-              (2, 'Iced Coffee', 'Cold coffee with milk', 35.00),
-              (2, 'Mango Smoothie', 'Fresh mango smoothie', 38.00),
-              (2, 'Lemon Mint Cooler', 'Lemon drink with fresh mint', 30.00),
-              (3, 'Loaded Fries', 'Fries with cheese and sauce', 39.00),
-              (3, 'Mozzarella Sticks', 'Crispy cheese sticks with dip', 36.00),
-              (3, 'Spicy Chicken Bites', 'Small crispy spicy chicken pieces', 42.00),
-              (4, 'Chocolate Brownie', 'Warm brownie with chocolate sauce', 32.00),
-              (4, 'Mini Donuts', 'Three glazed mini donuts', 29.00),
-              (4, 'Ice Cream Sundae', 'Ice cream with toppings and syrup', 35.00),
-              (5, 'Family Feast', 'Great for sharing', 179.00),
-              (5, 'Kids Combo', 'Simple meal for kids', 69.00),
-              (5, 'Burger Combo', 'Burger, side, and drink combo', 99.00),
-              (5, 'Chicken Combo', 'Chicken, side, and drink combo', 109.00),
-              (5, 'Snack Box', 'Sides and drink combo', 89.00)
+              INSERT INTO MenuItem (category_id, name, description, price, available) VALUES
+              (1, 'BBQ Smash Burger', 'Double beef patty with BBQ sauce', 49.00, 1),
+              (1, 'Crispy Chicken Burger', 'Crispy chicken with garlic mayo', 45.00, 1),
+              (1, 'Halloumi Burger', 'Grilled halloumi with salad', 42.00, 1),
+              (2, 'Iced Coffee', 'Cold coffee with milk', 35.00, 1),
+              (2, 'Mango Smoothie', 'Fresh mango smoothie', 38.00, 1),
+              (2, 'Lemon Mint Cooler', 'Lemon drink with fresh mint', 30.00, 1),
+              (3, 'Loaded Fries', 'Fries with cheese and sauce', 39.00, 1),
+              (3, 'Mozzarella Sticks', 'Crispy cheese sticks with dip', 36.00, 1),
+              (3, 'Spicy Chicken Bites', 'Small crispy spicy chicken pieces', 42.00, 1),
+              (4, 'Chocolate Brownie', 'Warm brownie with chocolate sauce', 32.00, 1),
+              (4, 'Mini Donuts', 'Three glazed mini donuts', 29.00, 1),
+              (4, 'Ice Cream Sundae', 'Ice cream with toppings and syrup', 35.00, 1),
+              (5, 'Family Feast', 'Great for sharing', 179.00, 1),
+              (5, 'Kids Combo', 'Simple meal for kids', 69.00, 1),
+              (5, 'Burger Combo', 'Burger, side, and drink combo', 99.00, 1),
+              (5, 'Chicken Combo', 'Chicken, side, and drink combo', 109.00, 1),
+              (5, 'Snack Box', 'Sides and drink combo', 89.00, 1)
               """);
 
       // Insert Extras
