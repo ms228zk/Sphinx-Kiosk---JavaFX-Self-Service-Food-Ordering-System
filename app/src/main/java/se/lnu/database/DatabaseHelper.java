@@ -13,7 +13,6 @@ import se.lnu.RemovableIngredient;
 import se.lnu.ExtraOption;
 import se.lnu.ComboChoiceGroup;
 import se.lnu.ComboChoiceOption;
-import java.sql.Statement;
 
 public class DatabaseHelper {
 
@@ -74,17 +73,20 @@ public class DatabaseHelper {
         }
     }
 
-
-
     public static List<MenuItem> getItemsByCategory(int categoryId) {
         List<MenuItem> items = new ArrayList<>();
 
         String sql = """
-            SELECT menu_item_id, name, description, price
+            SELECT menu_item_id,
+                   name,
+                   description,
+                   price,
+                   available
             FROM MenuItem
             WHERE category_id = ?
+            AND available = 1
             ORDER BY name
-        """;
+            """;
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -95,9 +97,9 @@ public class DatabaseHelper {
                 while (rs.next()) {
                     int itemId = rs.getInt("menu_item_id");
                     String itemName = rs.getString("name");
-                    // Generate image filename from item name
+
                     String imageFileName = sanitizeImageName(itemName) + ".png";
-                    
+
                     MenuItem currentItem = new MenuItem(
                             itemId,
                             itemName,
@@ -105,7 +107,10 @@ public class DatabaseHelper {
                             rs.getDouble("price"),
                             imageFileName
                     );
-                    List<RemovableIngredient> currentRemovable = getRemovableIngredientsByItem(itemId);
+
+                    List<RemovableIngredient> currentRemovable =
+                            getRemovableIngredientsByItem(itemId);
+
                     currentItem.setRemovableIngredients(currentRemovable);
                     items.add(currentItem);
                 }
@@ -126,11 +131,27 @@ public class DatabaseHelper {
                 FROM ComboChoiceGroup
                 WHERE combo_item_id = ?
             )
-        """;
-        String deleteComboGroupsSql = "DELETE FROM ComboChoiceGroup WHERE combo_item_id = ?";
-        String deleteExtrasSql = "DELETE FROM MenuItemExtraOption WHERE menu_item_id = ?";
-        String deleteRemovablesSql = "DELETE FROM MenuItemRemovableIngredient WHERE menu_item_id = ?";
-        String deleteMenuItemSql = "DELETE FROM MenuItem WHERE menu_item_id = ?";
+            """;
+
+        String deleteComboGroupsSql = """
+            DELETE FROM ComboChoiceGroup
+            WHERE combo_item_id = ?
+            """;
+
+        String deleteExtrasSql = """
+            DELETE FROM MenuItemExtraOption
+            WHERE menu_item_id = ?
+            """;
+
+        String deleteRemovablesSql = """
+            DELETE FROM MenuItemRemovableIngredient
+            WHERE menu_item_id = ?
+            """;
+
+        String deleteMenuItemSql = """
+            DELETE FROM MenuItem
+            WHERE menu_item_id = ?
+            """;
 
         try (Connection conn = DatabaseConnection.getConnection()) {
             conn.setAutoCommit(false);
@@ -142,6 +163,7 @@ public class DatabaseHelper {
                 executeDelete(conn, deleteRemovablesSql, menuItemId);
 
                 int deletedRows = executeDelete(conn, deleteMenuItemSql, menuItemId);
+
                 conn.commit();
                 return deletedRows > 0;
 
@@ -156,17 +178,15 @@ public class DatabaseHelper {
         }
     }
 
-    private static int executeDelete(Connection conn, String sql, int menuItemId) throws SQLException {
+    private static int executeDelete(Connection conn, String sql, int menuItemId)
+            throws SQLException {
+
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, menuItemId);
             return pstmt.executeUpdate();
         }
     }
 
-    /**
-     * Converts item name to image filename format
-     * e.g., "BBQ Smash Burger" -> "bbq_smash_burger.png"
-     */
     private static String sanitizeImageName(String name) {
         return name.toLowerCase()
                 .replaceAll("\\s+", "_")
@@ -178,10 +198,11 @@ public class DatabaseHelper {
 
         String sql = """
             SELECT r.ingredient_id, r.name
-            FROM RemovableIngredient r JOIN MenuItemRemovableIngredient m
+            FROM RemovableIngredient r
+            JOIN MenuItemRemovableIngredient m
             ON r.ingredient_id = m.ingredient_id
             WHERE m.menu_item_id = ?
-        """;
+            """;
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -196,22 +217,24 @@ public class DatabaseHelper {
                     ));
                 }
             }
+
         } catch (SQLException e) {
-            System.out.println("DB error (getRemovableIngredientsByItem) " + e.getMessage());
+            System.out.println("DB error (getRemovableIngredientsByItem): " + e.getMessage());
         }
 
         return removableIngredients;
     }
+
     public static List<ExtraOption> getExtrasByItem(int itemId) {
         List<ExtraOption> extras = new ArrayList<>();
 
         String sql = """
-        SELECT e.extra_id, e.name, e.price
-        FROM ExtraOption e
-        JOIN MenuItemExtraOption m
-        ON e.extra_id = m.extra_id
-        WHERE m.menu_item_id = ?
-        """;
+            SELECT e.extra_id, e.name, e.price
+            FROM ExtraOption e
+            JOIN MenuItemExtraOption m
+            ON e.extra_id = m.extra_id
+            WHERE m.menu_item_id = ?
+            """;
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -234,22 +257,23 @@ public class DatabaseHelper {
 
         return extras;
     }
+
     public static List<ComboChoiceGroup> getComboChoiceGroupsByItem(int comboItemId) {
         List<ComboChoiceGroup> groups = new ArrayList<>();
 
         String groupSql = """
-        SELECT group_id, group_name
-        FROM ComboChoiceGroup
-        WHERE combo_item_id = ?
-        ORDER BY display_order
-        """;
+            SELECT group_id, group_name
+            FROM ComboChoiceGroup
+            WHERE combo_item_id = ?
+            ORDER BY display_order
+            """;
 
         String optionSql = """
-        SELECT option_id, option_name
-        FROM ComboChoiceOption
-        WHERE group_id = ?
-        ORDER BY display_order
-        """;
+            SELECT option_id, option_name
+            FROM ComboChoiceOption
+            WHERE group_id = ?
+            ORDER BY display_order
+            """;
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement groupStmt = conn.prepareStatement(groupSql)) {
@@ -286,14 +310,19 @@ public class DatabaseHelper {
 
         return groups;
     }
+
+    // =========================
+    // ADMIN ADD MENU ITEM
+    // =========================
+
     public static List<ExtraOption> getAllExtraOptions() {
         List<ExtraOption> extras = new ArrayList<>();
 
         String sql = """
-        SELECT extra_id, name, price
-        FROM ExtraOption
-        ORDER BY name
-        """;
+            SELECT extra_id, name, price
+            FROM ExtraOption
+            ORDER BY name
+            """;
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -318,10 +347,10 @@ public class DatabaseHelper {
         List<RemovableIngredient> ingredients = new ArrayList<>();
 
         String sql = """
-        SELECT ingredient_id, name
-        FROM RemovableIngredient
-        ORDER BY name
-        """;
+            SELECT ingredient_id, name
+            FROM RemovableIngredient
+            ORDER BY name
+            """;
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -341,11 +370,16 @@ public class DatabaseHelper {
         return ingredients;
     }
 
-    public static boolean addMenuItem(String name, String description, double price, int categoryId) {
+    public static boolean addMenuItem(
+            String name,
+            String description,
+            double price,
+            int categoryId
+    ) {
         String sql = """
-        INSERT INTO MenuItem (name, description, price, category_id)
-        VALUES (?, ?, ?, ?)
-        """;
+            INSERT INTO MenuItem (name, description, price, category_id, available)
+            VALUES (?, ?, ?, ?, 1)
+            """;
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -361,6 +395,146 @@ public class DatabaseHelper {
             System.out.println("DB error in addMenuItem: " + e.getMessage());
             e.printStackTrace();
             return false;
+        }
+    }
+
+    // =========================
+    // ADMIN UPDATE / EDIT METHODS
+    // =========================
+
+    public static void updateItemAvailability(int menuItemId, boolean available) {
+        String sql = """
+            UPDATE MenuItem
+            SET available = ?
+            WHERE menu_item_id = ?
+            """;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, available ? 1 : 0);
+            pstmt.setInt(2, menuItemId);
+            pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            System.out.println("DB error (updateItemAvailability): " + e.getMessage());
+        }
+    }
+
+    public static List<MenuItem> getAllMenuItems() {
+        List<MenuItem> items = new ArrayList<>();
+
+        String sql = """
+            SELECT menu_item_id, name, description, price
+            FROM MenuItem
+            ORDER BY name
+            """;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                String itemName = rs.getString("name");
+                String imageFileName = sanitizeImageName(itemName) + ".png";
+
+                MenuItem item = new MenuItem(
+                        rs.getInt("menu_item_id"),
+                        itemName,
+                        rs.getString("description"),
+                        rs.getDouble("price"),
+                        imageFileName
+                );
+
+                items.add(item);
+            }
+
+        } catch (SQLException e) {
+            System.out.println("DB error (getAllMenuItems): " + e.getMessage());
+        }
+
+        return items;
+    }
+
+    public static boolean isItemAvailable(int itemId) {
+        String sql = """
+            SELECT available
+            FROM MenuItem
+            WHERE menu_item_id = ?
+            """;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, itemId);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("available") == 1;
+                }
+            }
+
+        } catch (SQLException e) {
+            System.out.println("DB error (isItemAvailable): " + e.getMessage());
+        }
+
+        return false;
+    }
+
+    public static void updateItemPrice(int itemId, double newPrice) {
+        String sql = """
+            UPDATE MenuItem
+            SET price = ?
+            WHERE menu_item_id = ?
+            """;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setDouble(1, newPrice);
+            pstmt.setInt(2, itemId);
+            pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            System.out.println("DB error (updateItemPrice): " + e.getMessage());
+        }
+    }
+
+    public static void updateItemName(int itemId, String newName) {
+        String sql = """
+            UPDATE MenuItem
+            SET name = ?
+            WHERE menu_item_id = ?
+            """;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, newName);
+            pstmt.setInt(2, itemId);
+            pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            System.out.println("DB error (updateItemName): " + e.getMessage());
+        }
+    }
+
+    public static void updateItemDescription(int itemId, String newDescription) {
+        String sql = """
+            UPDATE MenuItem
+            SET description = ?
+            WHERE menu_item_id = ?
+            """;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, newDescription);
+            pstmt.setInt(2, itemId);
+            pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            System.out.println("DB error (updateItemDescription): " + e.getMessage());
         }
     }
 }
