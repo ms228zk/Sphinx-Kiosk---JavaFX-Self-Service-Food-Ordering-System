@@ -131,14 +131,15 @@ public class CategoryAdminScreen {
 
 
             String finalName = name;
+            String normalizedNewName = normalizeCategoryName(finalName);
 
-            // Prevent duplicates
+// Prevent exact or very similar duplicates, for example "Burger" and "Burgers"
             boolean exists = DatabaseHelper.getCategories()
                     .stream()
-                    .anyMatch(c -> c.getName().equalsIgnoreCase(finalName));
+                    .anyMatch(c -> normalizeCategoryName(c.getName()).equals(normalizedNewName));
 
             if (exists) {
-                statusLabel.setText("Category already exists!");
+                statusLabel.setText("A similar category already exists!");
                 clearMessage.run();
                 return;
             }
@@ -219,5 +220,15 @@ public class CategoryAdminScreen {
     private static void refreshDeleteDropdown(ComboBox<Category> dropdown) {
         dropdown.getItems().clear();
         dropdown.getItems().addAll(DatabaseHelper.getCategories());
+    }
+
+    private static String normalizeCategoryName(String name) {
+        String normalized = name.trim().toLowerCase();
+
+        if (normalized.endsWith("s") && normalized.length() > 1) {
+            normalized = normalized.substring(0, normalized.length() - 1);
+        }
+
+        return normalized;
     }
 }

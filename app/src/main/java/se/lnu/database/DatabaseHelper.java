@@ -13,6 +13,7 @@ import se.lnu.RemovableIngredient;
 import se.lnu.ExtraOption;
 import se.lnu.ComboChoiceGroup;
 import se.lnu.ComboChoiceOption;
+import java.sql.Statement;
 
 public class DatabaseHelper {
 
@@ -284,5 +285,82 @@ public class DatabaseHelper {
         }
 
         return groups;
+    }
+    public static List<ExtraOption> getAllExtraOptions() {
+        List<ExtraOption> extras = new ArrayList<>();
+
+        String sql = """
+        SELECT extra_id, name, price
+        FROM ExtraOption
+        ORDER BY name
+        """;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                extras.add(new ExtraOption(
+                        rs.getInt("extra_id"),
+                        rs.getString("name"),
+                        rs.getDouble("price")
+                ));
+            }
+
+        } catch (SQLException e) {
+            System.out.println("DB error (getAllExtraOptions): " + e.getMessage());
+        }
+
+        return extras;
+    }
+
+    public static List<RemovableIngredient> getAllRemovableIngredients() {
+        List<RemovableIngredient> ingredients = new ArrayList<>();
+
+        String sql = """
+        SELECT ingredient_id, name
+        FROM RemovableIngredient
+        ORDER BY name
+        """;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                ingredients.add(new RemovableIngredient(
+                        rs.getInt("ingredient_id"),
+                        rs.getString("name")
+                ));
+            }
+
+        } catch (SQLException e) {
+            System.out.println("DB error (getAllRemovableIngredients): " + e.getMessage());
+        }
+
+        return ingredients;
+    }
+
+    public static boolean addMenuItem(String name, String description, double price, int categoryId) {
+        String sql = """
+        INSERT INTO MenuItem (name, description, price, category_id)
+        VALUES (?, ?, ?, ?)
+        """;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, name);
+            pstmt.setString(2, description);
+            pstmt.setDouble(3, price);
+            pstmt.setInt(4, categoryId);
+
+            return pstmt.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            System.out.println("DB error in addMenuItem: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
     }
 }

@@ -1,6 +1,7 @@
 package se.lnu.database;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -84,15 +85,16 @@ public class DatabaseInitializer {
               )
               """);
 
-      // Reset database
-      stmt.execute("DELETE FROM ComboChoiceOption");
-      stmt.execute("DELETE FROM ComboChoiceGroup");
-      stmt.execute("DELETE FROM MenuItemExtraOption");
-      stmt.execute("DELETE FROM ExtraOption");
-      stmt.execute("DELETE FROM MenuItemRemovableIngredient");
-      stmt.execute("DELETE FROM RemovableIngredient");
-      stmt.execute("DELETE FROM MenuItem");
-      stmt.execute("DELETE FROM Category");
+      /*
+       * Important:
+       * Do NOT delete/reset the tables here.
+       * If we delete MenuItem/Category every time the app starts,
+       * admin-added menu items disappear after restarting the app.
+       */
+      if (hasData(conn, "Category") || hasData(conn, "MenuItem")) {
+        System.out.println("Database already contains data. Skipping default seed.");
+        return;
+      }
 
       // Insert Categories
       stmt.execute("""
@@ -264,7 +266,6 @@ public class DatabaseInitializer {
       insertComboOption(stmt, "Snack Box", "Choose Extra Snack", "Loaded Fries", 3);
       insertComboOption(stmt, "Snack Box", "Choose Extra Snack", "No Side", 4);
 
-      // Same drink choices for all combos
       insertComboDrinkOptions(stmt, "Family Feast");
       insertComboDrinkOptions(stmt, "Kids Combo");
       insertComboDrinkOptions(stmt, "Burger Combo");
@@ -323,6 +324,14 @@ public class DatabaseInitializer {
 
     } catch (SQLException e) {
       System.out.println("Database initialization error: " + e.getMessage());
+    }
+  }
+
+  private static boolean hasData(Connection conn, String tableName) throws SQLException {
+    try (Statement stmt = conn.createStatement();
+         ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM " + tableName)) {
+
+      return rs.next() && rs.getInt(1) > 0;
     }
   }
 
