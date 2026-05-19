@@ -129,7 +129,8 @@ public class OrderConfirmationScreen {
                         "-fx-font-size: 16px; " +
                         "-fx-font-weight: bold; " +
                         "-fx-padding: 15px 40px; " +
-                        "-fx-background-radius: 8px;"
+                        "-fx-background-radius: 8px;" +
+                        "-fx-cursor: hand;"
         );
 
         finishBtn.setOnAction(e -> {

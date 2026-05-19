@@ -47,7 +47,7 @@ public class MealSelectionScreen {
     backButton.setOnAction(e -> CategoryScreen.show(stage));
 
     Button homeButton = ScreenStyle.createHomeButton(stage);
-    Button cartButton = createCartButton(stage);
+    Button cartButton = ScreenStyle.createCartButton(stage);
 
     Region spacer = new Region();
     HBox.setHgrow(spacer, Priority.ALWAYS);
@@ -191,8 +191,8 @@ public class MealSelectionScreen {
     HBox quantityBox = new HBox(16, minusButton, quantityLabel, plusButton);
     quantityBox.setAlignment(Pos.CENTER);
 
-    VBox extrasBox = createExtrasBox(extrasCheckBoxes);
-    VBox removablesBox = createRemovablesBox(removablesCheckBoxes);
+    VBox extrasBox = createBox(extrasCheckBoxes, "Optional Extras", "Optional add-ons increase the item price");
+    VBox removablesBox = createBox(removablesCheckBoxes, "Remove Ingredients", "Remove unwanted parts");
 
     HBox ingredientChanges;
 
@@ -554,58 +554,31 @@ public class MealSelectionScreen {
     return section;
   }
 
-  private static VBox createExtrasBox(List<CheckBox> extrasCheckBoxes) {
-    Label extrasTitle = new Label("Optional Extras");
-    extrasTitle.setStyle(
-      "-fx-font-size: 24px;" +
-        "-fx-font-weight: bold;" +
-        "-fx-text-fill: #1f1f1f;"
+  private static VBox createBox(List<CheckBox> checkBoxes, String title, String subtitle) {
+    Label titleLabel = new Label(title);
+    titleLabel.setStyle(
+            "-fx-font-size: 24px;" +
+                    "-fx-font-weight: bold;" +
+                    "-fx-text-fill: #1f1f1f;"
     );
 
-    Label extrasSubtitle = new Label("Optional add-ons increase the item price");
-    extrasSubtitle.setWrapText(true);
-    extrasSubtitle.setStyle(
-      "-fx-font-size: 15px;" +
-        "-fx-text-fill: #6f6f6f;" +
-        "-fx-padding: 2 0 8 0;"
+    Label subtitleLabel = new Label(subtitle);
+    subtitleLabel.setWrapText(true);
+    subtitleLabel.setStyle(
+            "-fx-font-size: 15px;" +
+                    "-fx-text-fill: #6f6f6f;" +
+                    "-fx-padding: 2 0 8 0;"
     );
 
-    VBox extrasBox = new VBox(8);
-    extrasBox.getChildren().addAll(extrasTitle, extrasSubtitle);
-    extrasBox.getChildren().addAll(extrasCheckBoxes);
-    extrasBox.setAlignment(Pos.CENTER_LEFT);
-    extrasBox.setMaxWidth(560);
-    extrasBox.setPadding(new Insets(24, 30, 24, 30));
-    extrasBox.setStyle(createWhiteCardStyle());
+    VBox box = new VBox(8);
+    box.getChildren().addAll(titleLabel, subtitleLabel);
+    box.getChildren().addAll(checkBoxes);
+    box.setAlignment(Pos.CENTER_LEFT);
+    box.setMaxWidth(560);
+    box.setPadding(new Insets(24, 30, 24, 30));
+    box.setStyle(createWhiteCardStyle());
 
-    return extrasBox;
-  }
-
-  private static VBox createRemovablesBox(List<CheckBox> removablesCheckBoxes) {
-    Label removablesTitle = new Label("Remove Ingredients");
-    removablesTitle.setStyle(
-      "-fx-font-size: 24px;" +
-        "-fx-font-weight: bold;" +
-        "-fx-text-fill: #1f1f1f;"
-    );
-
-    Label removablesSubtitle = new Label("Remove unwanted parts");
-    removablesSubtitle.setWrapText(true);
-    removablesSubtitle.setStyle(
-      "-fx-font-size: 15px;" +
-        "-fx-text-fill: #6f6f6f;" +
-        "-fx-padding: 2 0 8 0;"
-    );
-
-    VBox removablesBox = new VBox(8);
-    removablesBox.getChildren().addAll(removablesTitle, removablesSubtitle);
-    removablesBox.getChildren().addAll(removablesCheckBoxes);
-    removablesBox.setAlignment(Pos.CENTER_LEFT);
-    removablesBox.setMaxWidth(560);
-    removablesBox.setPadding(new Insets(24, 30, 24, 30));
-    removablesBox.setStyle(createWhiteCardStyle());
-
-    return removablesBox;
+    return box;
   }
 
   private static @NonNull Button getViewCartButton(Stage stage) {
@@ -780,20 +753,6 @@ public class MealSelectionScreen {
     }
 
     return total;
-  }
-
-  private static Button createCartButton(Stage stage) {
-    Button cartButton = new Button("Cart (" + Cart.getInstance().getItemCount() + ")");
-    cartButton.setStyle(
-      "-fx-font-size: 16px;" +
-        "-fx-background-color: #4CAF50;" +
-        "-fx-text-fill: white;" +
-        "-fx-padding: 10 20;" +
-        "-fx-background-radius: 10;" +
-        "-fx-cursor: hand;"
-    );
-    cartButton.setOnAction(e -> CartScreen.show(stage));
-    return cartButton;
   }
 
   private static String createWhiteCardStyle() {
