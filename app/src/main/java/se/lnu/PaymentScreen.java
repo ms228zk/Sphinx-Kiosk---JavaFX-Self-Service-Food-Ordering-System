@@ -34,8 +34,8 @@ public class PaymentScreen {
         RadioButton cardButton = new RadioButton("Card");
         RadioButton cashButton = new RadioButton("Cash");
 
-        cardButton.setStyle("-fx-font-size: 18px;");
-        cashButton.setStyle("-fx-font-size: 18px;");
+        cardButton.setStyle("-fx-font-size: 18px;" + "-fx-cursor: hand;");
+        cashButton.setStyle("-fx-font-size: 18px;" + "-fx-cursor: hand;");
 
         ToggleGroup paymentGroup = new ToggleGroup();
 
@@ -57,7 +57,8 @@ public class PaymentScreen {
                         "-fx-background-color: #4CAF50;" +
                         "-fx-text-fill: white;" +
                         "-fx-padding: 12 25;" +
-                        "-fx-background-radius: 10;"
+                        "-fx-background-radius: 10;" +
+                        "-fx-cursor: hand;"
         );
 
         completeButton.setOnAction(e -> {

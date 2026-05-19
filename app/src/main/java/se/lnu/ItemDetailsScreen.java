@@ -27,7 +27,7 @@ public class ItemDetailsScreen {
         backButton.setOnAction(e -> CategoryScreen.show(stage));
 
         Button homeButton = ScreenStyle.createHomeButton(stage);
-        Button cartButton = createCartButton(stage);
+        Button cartButton = ScreenStyle.createCartButton(stage);
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
@@ -156,21 +156,5 @@ public class ItemDetailsScreen {
      */
     private static ImageView createItemImage(MenuItem item) {
         return ImageLoader.createImageView(item.getImageFileName(), 320, 320);
-    }
-
-    /**
-     * Creates the cart button with current item count
-     */
-    private static Button createCartButton(Stage stage) {
-        Button cartButton = new Button("Cart (" + Cart.getInstance().getItemCount() + ")");
-        cartButton.setStyle(
-                "-fx-font-size: 16px;" +
-                        "-fx-background-color: #4CAF50;" +
-                        "-fx-text-fill: white;" +
-                        "-fx-padding: 10 20;" +
-                        "-fx-background-radius: 10;"
-        );
-        cartButton.setOnAction(e -> CartScreen.show(stage));
-        return cartButton;
     }
 }

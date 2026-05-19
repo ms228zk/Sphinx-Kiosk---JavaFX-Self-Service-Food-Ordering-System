@@ -32,7 +32,7 @@ public class CategoryScreen {
     backBtn.setOnAction(e -> OrderTypeScreen.show(stage));
 
     Button homeButton = ScreenStyle.createHomeButton(stage);
-    Button cartButton = createCartButton(stage);
+    Button cartButton = ScreenStyle.createCartButton(stage);
 
     Region spacer = new Region();
     HBox.setHgrow(spacer, Priority.ALWAYS);
@@ -240,18 +240,5 @@ public class CategoryScreen {
       scale.setToY(1.0);
       scale.play();
     });
-  }
-
-  private static Button createCartButton(Stage stage) {
-    Button cartButton = new Button("Cart (" + Cart.getInstance().getItemCount() + ")");
-    cartButton.setStyle(
-            "-fx-font-size: 16px;" +
-                    "-fx-background-color: #4CAF50;" +
-                    "-fx-text-fill: white;" +
-                    "-fx-padding: 10 20;" +
-                    "-fx-background-radius: 10;"
-    );
-    cartButton.setOnAction(e -> CartScreen.show(stage));
-    return cartButton;
   }
 }

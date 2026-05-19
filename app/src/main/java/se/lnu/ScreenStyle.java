@@ -128,7 +128,7 @@ public class ScreenStyle {
   }
 
   public static Button createBackButton() {
-    Button backButton = new Button("\u2190"); // ← safe back arrow
+    Button backButton = new Button("\u21a9"); // ← safe back arrow
 
     String normalStyle = createCircleIconButtonStyle(
             "linear-gradient(to bottom, #ffb300, #ff6d00)",
@@ -149,6 +149,20 @@ public class ScreenStyle {
     backButton.setOnMouseExited(e -> backButton.setStyle(normalStyle));
 
     return backButton;
+  }
+
+  public static Button createCartButton(Stage stage) {
+    Button cartButton = new Button("\uD83D\uDED2 (" + Cart.getInstance().getItemCount() + ")");
+    cartButton.setStyle(
+            "-fx-font-size: 16px;" +
+                    "-fx-background-color: #4CAF50;" +
+                    "-fx-text-fill: white;" +
+                    "-fx-padding: 10 20;" +
+                    "-fx-background-radius: 10;" +
+                    "-fx-cursor: hand;"
+    );
+    cartButton.setOnAction(e -> CartScreen.show(stage));
+    return cartButton;
   }
 
   private static String createCircleIconButtonStyle(
