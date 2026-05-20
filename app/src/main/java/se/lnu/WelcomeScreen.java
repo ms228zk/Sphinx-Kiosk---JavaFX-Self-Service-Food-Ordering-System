@@ -5,6 +5,8 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
@@ -119,7 +121,7 @@ public class WelcomeScreen {
                     "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.22), 28, 0, 0, 9);"
     );
 
-    VBox burgerIcon = createColorBurgerIcon();
+    VBox burgerIcon = createBurgerIcon();
 
     Label foodTitle = new Label("Today’s Favorites");
     foodTitle.setStyle(
@@ -153,6 +155,20 @@ public class WelcomeScreen {
     return visual;
   }
 
+  private static VBox createBurgerIcon() {
+    ImageView imageView = new ImageView(
+            new Image(WelcomeScreen.class.getResource("/icons/burger.png").toExternalForm())
+    );
+
+    imageView.setFitWidth(200);
+    imageView.setFitHeight(200);
+    imageView.setPreserveRatio(true);
+
+    VBox box = new VBox(imageView);
+    box.setAlignment(Pos.CENTER);
+    box.setPadding(new Insets(3));
+    return box;
+  }
   private static VBox createColorBurgerIcon() {
     Region topBun = new Region();
     topBun.setPrefSize(120, 30);
