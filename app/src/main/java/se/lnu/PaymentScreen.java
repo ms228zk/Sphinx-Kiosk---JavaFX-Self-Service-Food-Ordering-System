@@ -55,6 +55,7 @@ public class PaymentScreen {
         completeButton.setStyle(
                 "-fx-font-size: 18px;" +
                         "-fx-background-color: #4CAF50;" +
+                        "-fx-font-weight: bold;" +
                         "-fx-text-fill: white;" +
                         "-fx-padding: 12 25;" +
                         "-fx-background-radius: 10;" +

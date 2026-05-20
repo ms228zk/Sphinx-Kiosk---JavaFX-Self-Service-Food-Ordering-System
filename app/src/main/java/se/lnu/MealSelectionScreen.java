@@ -35,15 +35,7 @@ public class MealSelectionScreen {
     String[] comboSize = {"Regular"};
     double[] comboPrice = {0};
 
-    Button backButton = new Button("Back");
-    backButton.setStyle(
-      "-fx-font-size: 16px;" +
-        "-fx-background-color: #eeeeee;" +
-        "-fx-text-fill: #333333;" +
-        "-fx-padding: 10 20;" +
-        "-fx-background-radius: 10;" +
-        "-fx-cursor: hand;"
-    );
+    Button backButton = ScreenStyle.createBackButton();
     backButton.setOnAction(e -> CategoryScreen.show(stage));
 
     Button homeButton = ScreenStyle.createHomeButton(stage);
@@ -381,20 +373,23 @@ public class MealSelectionScreen {
       sections.add(section);
     }
 
-    if (sections.size() >= 2) {
-      HBox rowOne = new HBox(22, sections.get(0), sections.get(1));
-      rowOne.setAlignment(Pos.TOP_CENTER);
-      comboBox.getChildren().add(rowOne);
-    } else if (sections.size() == 1) {
-      comboBox.getChildren().add(sections.get(0));
-    }
-    if (sections.size() >= 3) {
+    HBox row = new HBox(22, sections.get(0), sections.get(1), sections.get(2));
+    row.setAlignment(Pos.TOP_CENTER);
+    comboBox.getChildren().add(row);
+    //if (sections.size() >= 2) {
+    //  HBox rowOne = new HBox(22, sections.get(0), sections.get(1));
+    //  rowOne.setAlignment(Pos.TOP_CENTER);
+    //  comboBox.getChildren().add(rowOne);
+    ///} else if (sections.size() == 1) {
+    //  comboBox.getChildren().add(sections.get(0));
+    //}
+    //if (sections.size() >= 3) {
 
-      VBox drinkColumn = new VBox(12, sections.get(2));
-      drinkColumn.setAlignment(Pos.TOP_CENTER);
+    //  VBox drinkColumn = new VBox(12, sections.get(2));
+    //  drinkColumn.setAlignment(Pos.TOP_CENTER);
 
-      comboBox.getChildren().add(drinkColumn);
-    }
+    //  comboBox.getChildren().add(drinkColumn);
+    //}
 
     for (int i = 3; i < sections.size(); i++) {
       comboBox.getChildren().add(sections.get(i));
@@ -538,6 +533,10 @@ public class MealSelectionScreen {
       RadioButton radioButton = new RadioButton(option.getOptionName());
       radioButton.setToggleGroup(toggleGroup);
       radioButton.setUserData(option.getOptionName());
+
+      radioButton.setWrapText(true);
+      radioButton.setMaxWidth(320);
+
       radioButton.setStyle(
         "-fx-font-size: 14px;" +
           "-fx-text-fill: #202020;" +

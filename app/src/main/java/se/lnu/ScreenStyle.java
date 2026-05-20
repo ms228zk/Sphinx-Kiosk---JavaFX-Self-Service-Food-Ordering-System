@@ -4,14 +4,21 @@ import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ContentDisplay;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.CycleMethod;
 import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.RadialGradient;
 import javafx.scene.paint.Stop;
+import javafx.scene.shape.SVGPath;
 import javafx.stage.Stage;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 public class ScreenStyle {
@@ -85,7 +92,26 @@ public class ScreenStyle {
   }
 
   public static Button createHomeButton(Stage stage) {
-    Button homeButton = new Button("\u2302"); // ⌂ safe home symbol
+    String svgContent;
+    try (InputStream is = ScreenStyle.class.getResourceAsStream("/icons/home.svg")) {
+      svgContent = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to load SVG icon", e);
+    }
+
+    String pathData = extractPathData(svgContent);
+
+    SVGPath homeIcon = new SVGPath();
+    homeIcon.setContent(pathData);
+
+    homeIcon.setFill(Color.TRANSPARENT);
+    homeIcon.setStroke(Color.web("#222222"));
+    homeIcon.setStrokeWidth(2);
+    homeIcon.setScaleX(1.2);
+    homeIcon.setScaleY(1.2);
+
+    Button homeButton = new Button();
+    homeButton.setGraphic(homeIcon);
 
     String normalStyle = createCircleIconButtonStyle(
             "rgba(255,255,255,0.94)",
@@ -102,8 +128,14 @@ public class ScreenStyle {
     );
 
     homeButton.setStyle(normalStyle);
-    homeButton.setOnMouseEntered(e -> homeButton.setStyle(hoverStyle));
-    homeButton.setOnMouseExited(e -> homeButton.setStyle(normalStyle));
+    homeButton.setOnMouseEntered(e -> {
+      homeButton.setStyle(hoverStyle);
+      homeIcon.setStroke(Color.WHITE);
+      });
+    homeButton.setOnMouseExited(e -> {
+      homeButton.setStyle(normalStyle);
+      homeIcon.setStroke(Color.web("#222222"));
+    });
 
     homeButton.setOnAction(e -> {
       Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -128,7 +160,26 @@ public class ScreenStyle {
   }
 
   public static Button createBackButton() {
-    Button backButton = new Button("\u21a9"); // ← safe back arrow
+    String svgContent;
+    try (InputStream is = ScreenStyle.class.getResourceAsStream("/icons/back.svg")) {
+      svgContent = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to load SVG icon", e);
+    }
+
+    String pathData = extractPathData(svgContent);
+
+    SVGPath backIcon = new SVGPath();
+    backIcon.setContent(pathData);
+
+    backIcon.setFill(Color.TRANSPARENT);
+    backIcon.setStroke(Color.WHITE);
+    backIcon.setStrokeWidth(1);
+    backIcon.setScaleX(1.5);
+    backIcon.setScaleY(1.5);
+
+    Button backButton = new Button();
+    backButton.setGraphic(backIcon);
 
     String normalStyle = createCircleIconButtonStyle(
             "linear-gradient(to bottom, #ffb300, #ff6d00)",
@@ -152,15 +203,41 @@ public class ScreenStyle {
   }
 
   public static Button createCartButton(Stage stage) {
-    Button cartButton = new Button("\uD83D\uDED2 (" + Cart.getInstance().getItemCount() + ")");
+    String svgContent;
+    try (InputStream is = ScreenStyle.class.getResourceAsStream("/icons/cart.svg")) {
+      svgContent = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to load SVG icon", e);
+    }
+
+    String pathData = extractPathData(svgContent);
+
+    SVGPath cartIcon = new SVGPath();
+    cartIcon.setContent(pathData);
+
+    cartIcon.setFill(Color.TRANSPARENT);
+    cartIcon.setStroke(Color.WHITE);
+    cartIcon.setStrokeWidth(2);
+    cartIcon.setScaleX(0.9);
+    cartIcon.setScaleY(0.9);
+
+    Button cartButton = new Button(
+            " (" + Cart.getInstance().getItemCount() + ")",
+            cartIcon);
+
     cartButton.setStyle(
             "-fx-font-size: 16px;" +
+                    "-fx-font-weight: bold;" +
                     "-fx-background-color: #4CAF50;" +
                     "-fx-text-fill: white;" +
                     "-fx-padding: 10 20;" +
                     "-fx-background-radius: 10;" +
                     "-fx-cursor: hand;"
     );
+
+    cartButton.setContentDisplay(ContentDisplay.LEFT);
+    cartButton.setGraphicTextGap(8);
+
     cartButton.setOnAction(e -> CartScreen.show(stage));
     return cartButton;
   }
@@ -215,5 +292,15 @@ public class ScreenStyle {
             "-fx-border-width: 1.3;" +
             "-fx-border-radius: 28;" +
             "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.14), 20, 0, 0, 5);";
+  }
+
+  public static String extractPathData(String svg) {
+    int start = svg.indexOf("d=\"");
+    if (start == -1) throw new IllegalArgumentException("No SVG path found");
+
+    start += 3;
+    int end = svg.indexOf("\"", start);
+
+    return svg.substring(start, end);
   }
 }
