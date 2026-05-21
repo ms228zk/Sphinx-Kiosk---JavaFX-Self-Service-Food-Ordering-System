@@ -97,6 +97,17 @@ public class DatabaseInitializer {
               )
               """);
 
+      stmt.execute("""
+              CREATE TABLE IF NOT EXISTS Orders (
+                  id INTEGER PRIMARY KEY AUTOINCREMENT,
+                  order_number INTEGER NOT NULL,
+                  item_name TEXT NOT NULL,
+                  quantity INTEGER NOT NULL,
+                  date TEXT NOT NULL
+              )
+          """);
+
+
       /*
        * Important:
        * Only skip default seeding if MenuItem already has data.
@@ -347,6 +358,9 @@ public class DatabaseInitializer {
       linkRemovables(stmt, "Chocolate Brownie", "'Nuts','Chocolate syrup','Ice cream'");
       linkRemovables(stmt, "Mini Donuts", "'Sugar coating','Chocolate sauce','Caramel sauce'");
       linkRemovables(stmt, "Ice Cream Sundae", "'Nuts','Whipped cream','Chocolate syrup','Cherry'");
+
+
+
 
       System.out.println("Database initialized successfully.");
 

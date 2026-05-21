@@ -13,6 +13,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import se.lnu.database.DatabaseHelper;
 
 public class OrderConfirmationScreen {
 
@@ -134,9 +135,26 @@ public class OrderConfirmationScreen {
         );
 
         finishBtn.setOnAction(e -> {
+
+            // Generate next order number from database
+            int orderNumber = DatabaseHelper.getNextOrderNumber();
+            String today = java.time.LocalDate.now().toString();
+
+            // Save each item in the order to the database
+            for (Cart.CartItem item : order.getItems()) {
+                DatabaseHelper.saveOrder(
+                        orderNumber,
+                        item.getMenuItem().getName(),
+                        item.getQuantity(),
+                        today
+                );
+            }
+
+            // Show the order number screen
             OrderNumberScreen ons = new OrderNumberScreen();
-            ons.start(stage, order.getOrderNumber());
+            ons.start(stage, String.format("%04d", orderNumber));
         });
+
 
         Button homeButton = ScreenStyle.createHomeButton(stage);
 

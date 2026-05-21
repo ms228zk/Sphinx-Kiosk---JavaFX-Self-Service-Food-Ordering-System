@@ -75,9 +75,11 @@ public class PaymentScreen {
 
             // Create order
             Order order = new Order(
+                    "TEMP",
                     Cart.getInstance().getItems(),
                     paymentMethod
             );
+
 
             // Go to confirmation screen
             new OrderConfirmationScreen().start(stage, order);

@@ -519,6 +519,51 @@ public class DatabaseHelper {
         }
     }
 
+    public static boolean saveOrder(int orderNumber, String itemName, int quantity, String date) {
+        String sql = "INSERT INTO Orders (order_number, item_name, quantity, date) VALUES (?, ?, ?, ?)";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, orderNumber);
+            pstmt.setString(2, itemName);
+            pstmt.setInt(3, quantity);
+            pstmt.setString(4, date);
+
+            pstmt.executeUpdate();
+            return true;
+
+        } catch (SQLException e) {
+            System.out.println("DB error (saveOrder): " + e.getMessage());
+            return false;
+        }
+    }
+
+    public static int getNextOrderNumber() {
+        String today = java.time.LocalDate.now().toString();
+
+        String sql = "SELECT order_number FROM Orders WHERE date = ? ORDER BY order_number DESC LIMIT 1";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, today);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt("order_number") + 1;
+            } else {
+                return 1; // reset for new day
+            }
+
+        } catch (SQLException e) {
+            System.out.println("DB error (getNextOrderNumber): " + e.getMessage());
+            return 1;
+        }
+    }
+
+
+
     public static void updateItemDescription(int itemId, String newDescription) {
         String sql = """
             UPDATE MenuItem
