@@ -98,14 +98,41 @@ public class DatabaseInitializer {
               """);
 
       stmt.execute("""
-              CREATE TABLE IF NOT EXISTS Orders (
-                  id INTEGER PRIMARY KEY AUTOINCREMENT,
-                  order_number INTEGER NOT NULL,
-                  item_name TEXT NOT NULL,
-                  quantity INTEGER NOT NULL,
-                  date TEXT NOT NULL
-              )
-          """);
+        CREATE TABLE IF NOT EXISTS Orders (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            order_number INTEGER NOT NULL,
+            item_name TEXT NOT NULL,
+            quantity INTEGER NOT NULL,
+            date TEXT NOT NULL,
+            status TEXT NOT NULL DEFAULT 'Pending'
+        )
+        """);
+
+      /*
+       * If the database was created before the status column existed,
+       * this safely adds it. If it already exists, SQLite throws an error,
+       * which we ignore because that means the column is already there.
+       */
+      try {
+        stmt.execute("ALTER TABLE Orders ADD COLUMN status TEXT NOT NULL DEFAULT 'Pending'");
+      } catch (SQLException e) {
+        // Column already exists, so nothing needs to be done.
+      }
+
+      /*
+       * Important:
+       * Only skip default seeding if MenuItem already has data.
+       *
+       * This prevents two problems:
+       * 1. Admin-added items disappearing every time the app restarts.
+       * 2. Categories existing but MenuItem being empty, which causes
+       *    the customer side to show "No items available".
+       */
+      if (hasData(conn, "MenuItem")) {
+        System.out.println("Database already contains menu items. Skipping default seed.");
+        return;
+      }
+
 
 
       /*

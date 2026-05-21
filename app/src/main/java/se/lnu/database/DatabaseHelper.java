@@ -13,6 +13,7 @@ import se.lnu.RemovableIngredient;
 import se.lnu.ExtraOption;
 import se.lnu.ComboChoiceGroup;
 import se.lnu.ComboChoiceOption;
+import se.lnu.admin.AdminOrder;
 
 public class DatabaseHelper {
 
@@ -519,8 +520,15 @@ public class DatabaseHelper {
         }
     }
 
+    // =========================
+    // ORDER MANAGEMENT METHODS
+    // =========================
+
     public static boolean saveOrder(int orderNumber, String itemName, int quantity, String date) {
-        String sql = "INSERT INTO Orders (order_number, item_name, quantity, date) VALUES (?, ?, ?, ?)";
+        String sql = """
+            INSERT INTO Orders (order_number, item_name, quantity, date, status)
+            VALUES (?, ?, ?, ?, 'Pending')
+            """;
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -548,21 +556,72 @@ public class DatabaseHelper {
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, today);
-            ResultSet rs = pstmt.executeQuery();
 
-            if (rs.next()) {
-                return rs.getInt("order_number") + 1;
-            } else {
-                return 1; // reset for new day
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("order_number") + 1;
+                }
             }
 
         } catch (SQLException e) {
             System.out.println("DB error (getNextOrderNumber): " + e.getMessage());
-            return 1;
         }
+
+        return 1;
     }
 
+    public static List<AdminOrder> getPendingOrders() {
+        List<AdminOrder> orders = new ArrayList<>();
 
+        String sql = """
+            SELECT order_number,
+                   date,
+                   status,
+                   GROUP_CONCAT(quantity || ' x ' || item_name, char(10)) AS items
+            FROM Orders
+            WHERE status = 'Pending'
+            GROUP BY order_number, date, status
+            ORDER BY order_number ASC
+            """;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                orders.add(new AdminOrder(
+                        rs.getInt("order_number"),
+                        rs.getString("date"),
+                        rs.getString("items"),
+                        rs.getString("status")
+                ));
+            }
+
+        } catch (SQLException e) {
+            System.out.println("DB error (getPendingOrders): " + e.getMessage());
+        }
+
+        return orders;
+    }
+
+    public static boolean markOrderCompleted(int orderNumber) {
+        String sql = """
+            UPDATE Orders
+            SET status = 'Completed'
+            WHERE order_number = ?
+            """;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, orderNumber);
+            return pstmt.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            System.out.println("DB error (markOrderCompleted): " + e.getMessage());
+            return false;
+        }
+    }
 
     public static void updateItemDescription(int itemId, String newDescription) {
         String sql = """
