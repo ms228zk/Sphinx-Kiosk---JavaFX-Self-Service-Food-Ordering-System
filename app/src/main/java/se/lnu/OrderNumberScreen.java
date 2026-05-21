@@ -10,8 +10,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -19,51 +17,33 @@ public class OrderNumberScreen {
 
     public void start(Stage stage, String orderNumber) {
 
-        Label title = new Label("THANK YOU FOR YOUR ORDER");
+        Label title = new Label("Thank you for your order!");
         title.setStyle(
-                "-fx-font-size: 55px;" +
+                "-fx-font-size: 46px;" +
                         "-fx-font-weight: bold;" +
-                        "-fx-text-fill: #222;" +
-                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.35), 10, 0.3, 2, 2);"
+                        "-fx-text-fill: #1f1f1f;" +
+                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.20), 8, 0.2, 1, 2);"
         );
 
-        VBox ticket = new VBox();
-        ticket.setAlignment(Pos.CENTER);
-        ticket.setSpacing(0);
-        ticket.setStyle(
-                "-fx-background-color: #FFEB3B;" +
-                        "-fx-border-color: black;" +
-                        "-fx-border-width: 3px;"
+        Label subtitle = new Label("Please collect your order when your number is called.");
+        subtitle.setStyle(
+                "-fx-font-size: 20px;" +
+                        "-fx-text-fill: #555555;"
         );
-        ticket.setMaxWidth(600);
 
-        Label topBar = new Label("****** ORDER NUMBER ******");
-        topBar.setStyle("-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: black;");
-        topBar.setPadding(new Insets(20, 0, 20, 0));
-        topBar.setMaxWidth(Double.MAX_VALUE);
-        topBar.setAlignment(Pos.CENTER);
+        VBox ticket = createOrderTicket(orderNumber);
 
-        Rectangle line1 = new Rectangle(600, 3, Color.BLACK);
+        Label returnMessage = new Label("This screen will return to the welcome page shortly.");
+        returnMessage.setStyle(
+                "-fx-font-size: 16px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-text-fill: #6d4c41;"
+        );
 
-        Label numberLabel = new Label(orderNumber);
-        numberLabel.setStyle("-fx-font-size: 100px; -fx-font-weight: bold; -fx-text-fill: black;");
-        numberLabel.setPadding(new Insets(40, 0, 40, 0));
-        numberLabel.setMaxWidth(Double.MAX_VALUE);
-        numberLabel.setAlignment(Pos.CENTER);
-
-        Rectangle line2 = new Rectangle(600, 3, Color.BLACK);
-
-        Label ticketMsg = new Label("Your order is being prepared");
-        ticketMsg.setStyle("-fx-font-size: 30px; -fx-text-fill: black;");
-        ticketMsg.setPadding(new Insets(20, 0, 20, 0));
-        ticketMsg.setMaxWidth(Double.MAX_VALUE);
-        ticketMsg.setAlignment(Pos.CENTER);
-
-        ticket.getChildren().addAll(topBar, line1, numberLabel, line2, ticketMsg);
-
-        VBox centerContent = getVBox(title, ticket);
+        VBox centerContent = getVBox(title, subtitle, ticket, returnMessage);
 
         BorderPane root = new BorderPane();
+        root.setPadding(new Insets(30));
         root.setBackground(ScreenStyle.createBackground());
         root.setCenter(centerContent);
 
@@ -89,8 +69,72 @@ public class OrderNumberScreen {
         wait.play();
     }
 
-    private static @NonNull VBox getVBox(Label title, VBox ticket) {
-        VBox centerContent = new VBox(30, title, ticket);
+    private static VBox createOrderTicket(String orderNumber) {
+        Label ticketLabel = new Label("ORDER NUMBER");
+        ticketLabel.setStyle(
+                "-fx-font-size: 24px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-text-fill: #6d4c41;" +
+                        "-fx-letter-spacing: 1px;"
+        );
+
+        Label numberLabel = new Label(orderNumber);
+        numberLabel.setStyle(
+                "-fx-font-size: 104px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-text-fill: #1f1f1f;" +
+                        "-fx-effect: dropshadow(gaussian, rgba(255,109,0,0.30), 12, 0, 0, 3);"
+        );
+
+        Label ticketMsg = new Label("Your order is being prepared");
+        ticketMsg.setStyle(
+                "-fx-font-size: 24px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-text-fill: #333333;"
+        );
+
+        Label orderTypeLabel = new Label(getOrderTypeText());
+        orderTypeLabel.setStyle(
+                "-fx-font-size: 17px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-text-fill: white;" +
+                        "-fx-background-color: linear-gradient(to bottom, #ffb300, #ff6d00);" +
+                        "-fx-background-radius: 18;" +
+                        "-fx-padding: 8 22;" +
+                        "-fx-effect: dropshadow(gaussian, rgba(255,109,0,0.25), 8, 0, 0, 2);"
+        );
+
+        VBox ticket = new VBox(18, ticketLabel, numberLabel, ticketMsg, orderTypeLabel);
+        ticket.setAlignment(Pos.CENTER);
+        ticket.setPadding(new Insets(36, 70, 36, 70));
+        ticket.setMaxWidth(620);
+        ticket.setStyle(
+                "-fx-background-color: rgba(255,255,255,0.96);" +
+                        "-fx-background-radius: 30;" +
+                        "-fx-border-color: rgba(255,152,0,0.55);" +
+                        "-fx-border-width: 2;" +
+                        "-fx-border-radius: 30;" +
+                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 22, 0, 0, 6);"
+        );
+
+        return ticket;
+    }
+
+    private static String getOrderTypeText() {
+        if (App.orderType == null || App.orderType.isBlank()) {
+            return "Order confirmed";
+        }
+
+        return App.orderType + " order confirmed";
+    }
+
+    private static @NonNull VBox getVBox(
+            Label title,
+            Label subtitle,
+            VBox ticket,
+            Label returnMessage
+    ) {
+        VBox centerContent = new VBox(20, title, subtitle, ticket, returnMessage);
         centerContent.setAlignment(Pos.CENTER);
         return centerContent;
     }
