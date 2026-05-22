@@ -164,7 +164,7 @@ public class AdminOrdersScreen {
     HBox header = new HBox(10, orderNumberLabel, spacer, status);
     header.setAlignment(Pos.CENTER_LEFT);
 
-    Label itemsTitle = new Label("Items:");
+    Label itemsTitle = new Label("Items and customizations:");
     itemsTitle.setStyle(
             "-fx-font-size: 16px;" +
                     "-fx-font-weight: bold;" +
@@ -172,10 +172,15 @@ public class AdminOrdersScreen {
     );
 
     Label itemsLabel = new Label(order.getItems());
+    itemsLabel.setWrapText(true);
+    itemsLabel.setMaxWidth(590);
     itemsLabel.setStyle(
             "-fx-font-size: 16px;" +
                     "-fx-text-fill: #444444;" +
-                    "-fx-line-spacing: 4px;"
+                    "-fx-line-spacing: 5px;" +
+                    "-fx-background-color: rgba(255, 248, 225, 0.65);" +
+                    "-fx-background-radius: 14;" +
+                    "-fx-padding: 12;"
     );
 
     Button completeButton = createPrimaryButton("Mark as Completed");

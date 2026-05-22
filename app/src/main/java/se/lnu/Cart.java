@@ -1,6 +1,7 @@
 package se.lnu;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Cart {
@@ -26,13 +27,16 @@ public class Cart {
         addItem(menuItem, quantity, new ArrayList<>(), 0.0, removed, new ArrayList<>());
     }
 
-    public void addItem(MenuItem menuItem, int quantity, List<String> extras, double extrasPrice, List<String> removed, List<String> comboChoices) {
+    public void addItem(
+            MenuItem menuItem,
+            int quantity,
+            List<String> extras,
+            double extrasPrice,
+            List<String> removed,
+            List<String> comboChoices
+    ) {
         for (CartItem item : items) {
-            if (item.getMenuItem().getId() == menuItem.getId()
-                    && item.getExtras().equals(extras)
-                    && item.getExtrasPrice() == extrasPrice
-                    && item.getRemoved().equals(removed)
-                    && item.getComboChoices().equals(comboChoices)) {
+            if (item.isSameOrderItem(menuItem, extras, extrasPrice, removed, comboChoices)) {
                 item.increaseQuantity(quantity);
                 return;
             }
@@ -93,13 +97,47 @@ public class Cart {
         private final List<String> removed;
         private final List<String> comboChoices;
 
-        public CartItem(MenuItem menuItem, int quantity, List<String> extras, double extrasPrice, List<String> removed, List<String> comboChoices) {
+        public CartItem(
+                MenuItem menuItem,
+                int quantity,
+                List<String> extras,
+                double extrasPrice,
+                List<String> removed,
+                List<String> comboChoices
+        ) {
             this.menuItem = menuItem;
             this.quantity = quantity;
             this.extras = new ArrayList<>(extras);
             this.extrasPrice = extrasPrice;
             this.removed = new ArrayList<>(removed);
             this.comboChoices = new ArrayList<>(comboChoices);
+        }
+
+        public boolean isSameOrderItem(
+                MenuItem otherMenuItem,
+                List<String> otherExtras,
+                double otherExtrasPrice,
+                List<String> otherRemoved,
+                List<String> otherComboChoices
+        ) {
+            return menuItem.getId() == otherMenuItem.getId()
+                    && Double.compare(extrasPrice, otherExtrasPrice) == 0
+                    && normalizeList(extras).equals(normalizeList(otherExtras))
+                    && normalizeList(removed).equals(normalizeList(otherRemoved))
+                    && normalizeList(comboChoices).equals(normalizeList(otherComboChoices));
+        }
+
+        private static List<String> normalizeList(List<String> list) {
+            List<String> normalized = new ArrayList<>();
+
+            for (String value : list) {
+                if (value != null && !value.isBlank()) {
+                    normalized.add(value.trim());
+                }
+            }
+
+            Collections.sort(normalized);
+            return normalized;
         }
 
         public MenuItem getMenuItem() {
@@ -118,7 +156,9 @@ public class Cart {
             return extrasPrice;
         }
 
-        public List<String> getRemoved() { return removed; }
+        public List<String> getRemoved() {
+            return removed;
+        }
 
         public List<String> getComboChoices() {
             return comboChoices;
@@ -157,6 +197,10 @@ public class Cart {
         }
 
         public String getRemovedText() {
+            if (removed.isEmpty()) {
+                return "";
+            }
+
             return String.join(", ", removed);
         }
 

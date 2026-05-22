@@ -40,7 +40,7 @@ public class OrderConfirmationScreen {
         VBox titleBox = new VBox(8, title, subtitle);
         titleBox.setAlignment(Pos.CENTER);
 
-        // Date ,Time are in same row
+        // Date, time and payment in same row
         Label dateLabel = new Label("Date : " + date);
         Label timeLabel = new Label("Time : " + time);
         Label paymentMethodLabel = new Label("Payment : " + order.getPaymentMethod());
@@ -75,7 +75,6 @@ public class OrderConfirmationScreen {
 
         for (Cart.CartItem item : order.getItems()) {
 
-            // name, price
             HBox itemRow = new HBox();
             itemRow.setAlignment(Pos.CENTER_LEFT);
             itemRow.setSpacing(10);
@@ -91,13 +90,11 @@ public class OrderConfirmationScreen {
 
             itemRow.getChildren().addAll(name, price);
 
-            // Qty
             Label qtyLabel = new Label("Qty: " + item.getQuantity());
             qtyLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: #444;");
 
             itemsBox.getChildren().addAll(itemRow, qtyLabel);
 
-            // Extras, removed ingredients, and combo choices if available
             if (!item.getExtrasText().isBlank()) {
                 Label extrasLabel = new Label("Extras: " + item.getExtrasText());
                 extrasLabel.setWrapText(true);
@@ -218,23 +215,23 @@ public class OrderConfirmationScreen {
             alert.showAndWait().ifPresent(result -> {
                 if (result == confirmButton) {
 
-                    // Generate next order number from database
                     int orderNumber = DatabaseHelper.getNextOrderNumber();
                     String today = java.time.LocalDate.now().toString();
 
-                    // Save each item in the order to the database
                     for (Cart.CartItem item : order.getItems()) {
+                        String customizations = buildCustomizationText(item);
+
                         DatabaseHelper.saveOrder(
                                 orderNumber,
                                 item.getMenuItem().getName(),
                                 item.getQuantity(),
-                                today
+                                today,
+                                customizations
                         );
                     }
 
                     Cart.getInstance().clear();
 
-                    // Show the order number screen
                     OrderNumberScreen ons = new OrderNumberScreen();
                     ons.start(stage, String.format("%04d", orderNumber));
                 }
@@ -253,5 +250,28 @@ public class OrderConfirmationScreen {
         stage.setScene(scene);
         stage.setTitle("Review Order");
         WindowManager.enforceStandardSize(stage);
+    }
+
+    private String buildCustomizationText(Cart.CartItem item) {
+        StringBuilder text = new StringBuilder();
+
+        if (!item.getExtrasText().isBlank()) {
+            text.append("Extras: ")
+                    .append(item.getExtrasText())
+                    .append("\n");
+        }
+
+        if (!item.getRemovedText().isBlank()) {
+            text.append("Removed: ")
+                    .append(item.getRemovedText())
+                    .append("\n");
+        }
+
+        if (!item.getComboChoicesText().isBlank()) {
+            text.append(item.getComboChoicesText())
+                    .append("\n");
+        }
+
+        return text.toString().trim();
     }
 }

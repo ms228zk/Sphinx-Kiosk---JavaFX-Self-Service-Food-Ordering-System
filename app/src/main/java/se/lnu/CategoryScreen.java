@@ -119,9 +119,10 @@ public class CategoryScreen {
   private static VBox createOrderPanel(Stage stage) {
     VBox panel = new VBox(18);
     panel.setPadding(new Insets(24));
-    panel.setPrefWidth(330);
-    panel.setMaxWidth(330);
+    panel.setPrefWidth(390);
+    panel.setMaxWidth(390);
     panel.setMinHeight(560);
+
     panel.setStyle(
             "-fx-background-color: rgba(255,255,255,0.96);" +
                     "-fx-background-radius: 28;" +
@@ -235,6 +236,7 @@ public class CategoryScreen {
 
     clearButton.setOnAction(e -> {
       Cart.getInstance().clear();
+      App.selectedPaymentMethod = "";
       CategoryScreen.show(stage);
     });
 
@@ -249,29 +251,98 @@ public class CategoryScreen {
     return panel;
   }
 
-  private static HBox createOrderRow(Stage stage, Cart.CartItem cartItem) {
+  private static VBox createOrderRow(Stage stage, Cart.CartItem cartItem) {
+    VBox row = new VBox(10);
+    row.setMaxWidth(Double.MAX_VALUE);
+    row.setPadding(new Insets(16));
+    row.setStyle(
+            "-fx-background-color: #FFFFFF;" +
+                    "-fx-background-radius: 18;" +
+                    "-fx-border-radius: 18;" +
+                    "-fx-border-color: #EEEEEE;" +
+                    "-fx-border-width: 1.2;"
+    );
+
     Label itemName = new Label(cartItem.getMenuItem().getName());
     itemName.setWrapText(true);
-    itemName.setMaxWidth(160);
+    itemName.setMaxWidth(175);
     itemName.setStyle(
             "-fx-font-size: 15px;" +
                     "-fx-font-weight: bold;" +
                     "-fx-text-fill: #1f1f1f;"
     );
 
+    Label itemPrice = new Label(String.format("%.2f kr", cartItem.getSubtotal()));
+    itemPrice.setMinWidth(80);
+    itemPrice.setAlignment(Pos.CENTER_RIGHT);
+    itemPrice.setStyle(
+            "-fx-font-size: 15px;" +
+                    "-fx-font-weight: bold;" +
+                    "-fx-text-fill: #FF9800;"
+    );
+
+    Button removeButton = new Button("×");
+    removeButton.setStyle(
+            "-fx-background-color: rgba(255,80,80,0.12);" +
+                    "-fx-text-fill: #E53935;" +
+                    "-fx-font-size: 17px;" +
+                    "-fx-font-weight: bold;" +
+                    "-fx-background-radius: 50;" +
+                    "-fx-min-width: 38;" +
+                    "-fx-min-height: 38;" +
+                    "-fx-cursor: hand;"
+    );
+
+    removeButton.setOnAction(e -> {
+      Cart.getInstance().removeItem(cartItem);
+
+      if (Cart.getInstance().getItems().isEmpty()) {
+        App.selectedPaymentMethod = "";
+      }
+
+      CategoryScreen.show(stage);
+    });
+
+    Region topSpacer = new Region();
+    HBox.setHgrow(topSpacer, Priority.ALWAYS);
+
+    HBox topRow = new HBox(10, itemName, topSpacer, itemPrice, removeButton);
+    topRow.setAlignment(Pos.CENTER_LEFT);
+
+    VBox detailBox = new VBox(5);
+    detailBox.setAlignment(Pos.CENTER_LEFT);
+
+    if (!cartItem.getExtrasText().isBlank()) {
+      detailBox.getChildren().add(
+              createDetailLabel("+ " + cartItem.getExtrasText())
+      );
+    }
+
+    if (!cartItem.getRemovedText().isBlank()) {
+      detailBox.getChildren().add(
+              createDetailLabel("- " + cartItem.getRemovedText())
+      );
+    }
+
+    if (!cartItem.getComboChoicesText().isBlank()) {
+      detailBox.getChildren().add(
+              createDetailLabel("Combo customized")
+      );
+    }
+
     Button minusButton = new Button("-");
     minusButton.setStyle(createSmallQuantityButtonStyle());
 
     Label quantity = new Label(String.valueOf(cartItem.getQuantity()));
-    quantity.setMinWidth(28);
+    quantity.setMinWidth(26);
     quantity.setAlignment(Pos.CENTER);
     quantity.setStyle(
-            "-fx-font-size: 14px;" +
+            "-fx-font-size: 13px;" +
                     "-fx-font-weight: bold;" +
                     "-fx-text-fill: #555555;" +
                     "-fx-background-color: #FFF3E0;" +
                     "-fx-background-radius: 12;" +
-                    "-fx-padding: 4 10 4 10;"
+                    "-fx-padding: 4 9 4 9;"
     );
 
     Button plusButton = new Button("+");
@@ -284,6 +355,10 @@ public class CategoryScreen {
         Cart.getInstance().removeItem(cartItem);
       }
 
+      if (Cart.getInstance().getItems().isEmpty()) {
+        App.selectedPaymentMethod = "";
+      }
+
       CategoryScreen.show(stage);
     });
 
@@ -292,64 +367,74 @@ public class CategoryScreen {
       CategoryScreen.show(stage);
     });
 
-    HBox quantityBox = new HBox(8, minusButton, quantity, plusButton);
-    quantityBox.setAlignment(Pos.CENTER_LEFT);
+    HBox quantityRow = new HBox(7, minusButton, quantity, plusButton);
+    quantityRow.setAlignment(Pos.CENTER_LEFT);
 
-    VBox leftBox = new VBox(10, itemName, quantityBox);
-    leftBox.setAlignment(Pos.CENTER_LEFT);
-
-    Label itemPrice = new Label(String.format("%.2f kr", cartItem.getSubtotal()));
-    itemPrice.setStyle(
-            "-fx-font-size: 15px;" +
+    Button editButton = new Button("Edit");
+    editButton.setStyle(
+            "-fx-background-color: white;" +
+                    "-fx-text-fill: #333333;" +
+                    "-fx-border-color: #E0E0E0;" +
+                    "-fx-border-width: 1.2;" +
+                    "-fx-border-radius: 12;" +
+                    "-fx-background-radius: 12;" +
+                    "-fx-font-size: 13px;" +
                     "-fx-font-weight: bold;" +
-                    "-fx-text-fill: #FF9800;"
-    );
-
-    Button removeButton = new Button("×");
-    removeButton.setStyle(
-            "-fx-background-color: rgba(255,80,80,0.12);" +
-                    "-fx-text-fill: #E53935;" +
-                    "-fx-font-size: 18px;" +
-                    "-fx-font-weight: bold;" +
-                    "-fx-background-radius: 50;" +
-                    "-fx-min-width: 42;" +
-                    "-fx-min-height: 42;" +
+                    "-fx-padding: 7 16;" +
                     "-fx-cursor: hand;"
     );
 
-    removeButton.setOnAction(e -> {
+    editButton.setOnAction(e -> {
       Cart.getInstance().removeItem(cartItem);
-      CategoryScreen.show(stage);
+
+      if (Cart.getInstance().getItems().isEmpty()) {
+        App.selectedPaymentMethod = "";
+      }
+
+      MealSelectionScreen.show(stage, cartItem.getMenuItem());
     });
 
-    VBox rightBox = new VBox(12, itemPrice, removeButton);
-    rightBox.setAlignment(Pos.CENTER_RIGHT);
+    Region actionSpacer = new Region();
+    HBox.setHgrow(actionSpacer, Priority.ALWAYS);
 
-    Region spacer = new Region();
-    HBox.setHgrow(spacer, Priority.ALWAYS);
+    HBox bottomRow = new HBox(10, quantityRow, actionSpacer, editButton);
+    bottomRow.setAlignment(Pos.CENTER_LEFT);
 
-    HBox row = new HBox(12, leftBox, spacer, rightBox);
-    row.setAlignment(Pos.CENTER_LEFT);
-    row.setPadding(new Insets(16, 18, 16, 18));
-    row.setStyle(
-            "-fx-background-color: #FFFFFF;" +
-                    "-fx-background-radius: 18;" +
-                    "-fx-border-radius: 18;" +
-                    "-fx-border-color: #EEEEEE;" +
-                    "-fx-border-width: 1.2;"
-    );
+    row.getChildren().add(topRow);
+
+    if (!detailBox.getChildren().isEmpty()) {
+      row.getChildren().add(detailBox);
+    }
+
+    row.getChildren().add(bottomRow);
 
     return row;
+  }
+
+  private static Label createDetailLabel(String text) {
+    Label label = new Label(text);
+    label.setWrapText(true);
+    label.setMaxWidth(255);
+    label.setStyle(
+            "-fx-font-size: 12px;" +
+                    "-fx-font-weight: bold;" +
+                    "-fx-text-fill: #666666;" +
+                    "-fx-background-color: #FFF7EC;" +
+                    "-fx-background-radius: 10;" +
+                    "-fx-padding: 4 8 4 8;"
+    );
+
+    return label;
   }
 
   private static String createSmallQuantityButtonStyle() {
     return "-fx-background-color: #FF9800;" +
             "-fx-text-fill: white;" +
-            "-fx-font-size: 13px;" +
+            "-fx-font-size: 12px;" +
             "-fx-font-weight: bold;" +
             "-fx-background-radius: 50;" +
-            "-fx-min-width: 34;" +
-            "-fx-min-height: 34;" +
+            "-fx-min-width: 32;" +
+            "-fx-min-height: 32;" +
             "-fx-cursor: hand;";
   }
 

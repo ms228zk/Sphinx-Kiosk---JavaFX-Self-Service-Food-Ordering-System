@@ -550,10 +550,18 @@ public class DatabaseHelper {
         }
     }
 
-    public static boolean saveOrder(int orderNumber, String itemName, int quantity, String date) {
+    public static boolean saveOrder(
+            int orderNumber,
+            String itemName,
+            int quantity,
+            String date,
+            String customizations
+    ) {
+        ensureOrdersCustomizationColumn();
+
         String sql = """
-            INSERT INTO Orders (order_number, item_name, quantity, date, status)
-            VALUES (?, ?, ?, ?, 'Pending')
+            INSERT INTO Orders (order_number, item_name, quantity, date, status, customizations)
+            VALUES (?, ?, ?, ?, 'Pending', ?)
             """;
 
         try (Connection conn = DatabaseConnection.getConnection();
@@ -563,6 +571,7 @@ public class DatabaseHelper {
             pstmt.setString(2, itemName);
             pstmt.setInt(3, quantity);
             pstmt.setString(4, date);
+            pstmt.setString(5, customizations == null ? "" : customizations.trim());
 
             pstmt.executeUpdate();
             return true;
@@ -603,13 +612,23 @@ public class DatabaseHelper {
     }
 
     public static List<AdminOrder> getPendingOrders() {
+        ensureOrdersCustomizationColumn();
+
         List<AdminOrder> orders = new ArrayList<>();
 
         String sql = """
             SELECT order_number,
                    date,
                    status,
-                   GROUP_CONCAT(quantity || ' x ' || item_name, char(10)) AS items
+                   GROUP_CONCAT(
+                       quantity || ' x ' || item_name ||
+                       CASE
+                           WHEN customizations IS NOT NULL AND TRIM(customizations) != ''
+                           THEN char(10) || customizations
+                           ELSE ''
+                       END,
+                       char(10) || char(10)
+                   ) AS items
             FROM Orders
             WHERE status = 'Pending'
             GROUP BY order_number, date, status
@@ -645,12 +664,30 @@ public class DatabaseHelper {
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
             pstmt.setInt(1, orderNumber);
             return pstmt.executeUpdate() > 0;
 
         } catch (SQLException e) {
             System.out.println("DB error (markOrderCompleted): " + e.getMessage());
             return false;
+        }
+    }
+
+    private static void ensureOrdersCustomizationColumn() {
+        String sql = "ALTER TABLE Orders ADD COLUMN customizations TEXT";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            String message = e.getMessage();
+
+            if (message == null || !message.toLowerCase().contains("duplicate column")) {
+                System.out.println("DB note (customizations column): " + e.getMessage());
+            }
         }
     }
 }
