@@ -8,11 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import se.lnu.Category;
-import se.lnu.MenuItem;
-import se.lnu.RemovableIngredient;
-import se.lnu.ExtraOption;
 import se.lnu.ComboChoiceGroup;
 import se.lnu.ComboChoiceOption;
+import se.lnu.ExtraOption;
+import se.lnu.MenuItem;
+import se.lnu.RemovableIngredient;
 
 public class DatabaseHelper {
 
@@ -81,7 +81,8 @@ public class DatabaseHelper {
                    name,
                    description,
                    price,
-                   available
+                   available,
+                   category_id
             FROM MenuItem
             WHERE category_id = ?
             AND available = 1
@@ -105,7 +106,8 @@ public class DatabaseHelper {
                             itemName,
                             rs.getString("description"),
                             rs.getDouble("price"),
-                            imageFileName
+                            imageFileName,
+                            rs.getInt("category_id")
                     );
 
                     List<RemovableIngredient> currentRemovable =
@@ -258,39 +260,36 @@ public class DatabaseHelper {
         return extras;
     }
 
-    public static List<ComboChoiceGroup> getComboChoiceGroupsByItem(int comboItemId) {
+    public static List<ComboChoiceGroup> getComboChoiceGroupsByItem(int itemId) {
         List<ComboChoiceGroup> groups = new ArrayList<>();
 
-        String groupSql = """
+        String sql = """
             SELECT group_id, group_name
             FROM ComboChoiceGroup
             WHERE combo_item_id = ?
-            ORDER BY display_order
-            """;
-
-        String optionSql = """
-            SELECT option_id, option_name
-            FROM ComboChoiceOption
-            WHERE group_id = ?
-            ORDER BY display_order
             """;
 
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement groupStmt = conn.prepareStatement(groupSql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            groupStmt.setInt(1, comboItemId);
+            pstmt.setInt(1, itemId);
 
-            try (ResultSet groupRs = groupStmt.executeQuery()) {
-                while (groupRs.next()) {
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
                     ComboChoiceGroup group = new ComboChoiceGroup(
-                            groupRs.getInt("group_id"),
-                            groupRs.getString("group_name")
+                            rs.getInt("group_id"),
+                            rs.getString("group_name")
                     );
 
-                    try (PreparedStatement optionStmt = conn.prepareStatement(optionSql)) {
-                        optionStmt.setInt(1, group.getId());
+                    String optionsSql = """
+                            SELECT option_id, option_name
+                            FROM ComboChoiceOption
+                            WHERE group_id = ?
+                            """;
 
-                        try (ResultSet optionRs = optionStmt.executeQuery()) {
+                    try (PreparedStatement optionsStmt = conn.prepareStatement(optionsSql)) {
+                        optionsStmt.setInt(1, rs.getInt("group_id"));
+                        try (ResultSet optionRs = optionsStmt.executeQuery()) {
                             while (optionRs.next()) {
                                 group.addOption(new ComboChoiceOption(
                                         optionRs.getInt("option_id"),
@@ -425,7 +424,7 @@ public class DatabaseHelper {
         List<MenuItem> items = new ArrayList<>();
 
         String sql = """
-            SELECT menu_item_id, name, description, price
+            SELECT menu_item_id, name, description, price, category_id
             FROM MenuItem
             ORDER BY name
             """;
@@ -443,7 +442,8 @@ public class DatabaseHelper {
                         itemName,
                         rs.getString("description"),
                         rs.getDouble("price"),
-                        imageFileName
+                        imageFileName,
+                        rs.getInt("category_id")
                 );
 
                 items.add(item);
@@ -535,6 +535,25 @@ public class DatabaseHelper {
 
         } catch (SQLException e) {
             System.out.println("DB error (updateItemDescription): " + e.getMessage());
+        }
+    }
+
+    public static void updateItemCategory(int itemId, int newCategoryId) {
+        String sql = """
+            UPDATE MenuItem
+            SET category_id = ?
+            WHERE menu_item_id = ?
+            """;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, newCategoryId);
+            pstmt.setInt(2, itemId);
+            pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            System.out.println("DB error (updateItemCategory): " + e.getMessage());
         }
     }
 }
