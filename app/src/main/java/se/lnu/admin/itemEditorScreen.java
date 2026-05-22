@@ -1,16 +1,25 @@
 package se.lnu.admin;
 
+import java.util.List;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-
+import se.lnu.Category;
 import se.lnu.MenuItem;
 import se.lnu.database.DatabaseHelper;
-
-import java.util.List;
 
 public class itemEditorScreen {
 
@@ -65,6 +74,8 @@ public class itemEditorScreen {
 
     List<MenuItem> items =
       DatabaseHelper.getAllMenuItems();
+
+    List<Category> categories = DatabaseHelper.getCategories();
 
     for (MenuItem item : items) {
 
@@ -229,6 +240,41 @@ public class itemEditorScreen {
                         -fx-background-radius: 10;
                         """);
 
+        // CATEGORY DROPDOWN
+        ComboBox<Category> categoryCombo = new ComboBox<>();
+        categoryCombo.setItems(javafx.collections.FXCollections.observableArrayList(categories));
+        categoryCombo.setPrefWidth(420);
+        categoryCombo.setStyle("""
+                        -fx-font-size: 16px;
+                        -fx-padding: 12;
+                        -fx-background-radius: 10;
+                        """);
+
+        // Set current category
+        for (Category cat : categories) {
+          if (cat.getId() == item.getCategoryId()) {
+            categoryCombo.setValue(cat);
+            break;
+          }
+        }
+
+        // Custom cell factory to display category names
+        categoryCombo.setCellFactory(param -> new ListCell<Category>() {
+          @Override
+          protected void updateItem(Category category, boolean empty) {
+            super.updateItem(category, empty);
+            setText(empty ? "" : category.getName());
+          }
+        });
+
+        categoryCombo.setButtonCell(new ListCell<Category>() {
+          @Override
+          protected void updateItem(Category category, boolean empty) {
+            super.updateItem(category, empty);
+            setText(empty ? "" : category.getName());
+          }
+        });
+
         Button saveButton =
           new Button("Save Changes");
 
@@ -256,6 +302,8 @@ public class itemEditorScreen {
                 priceField.getText()
               );
 
+            Category selectedCategory = categoryCombo.getValue();
+
             DatabaseHelper.updateItemName(
               item.getId(),
               newName
@@ -265,10 +313,18 @@ public class itemEditorScreen {
               item.getId(),
               newPrice
             );
+
             DatabaseHelper.updateItemDescription(
               item.getId(),
               newDescription
             );
+
+            if (selectedCategory != null) {
+              DatabaseHelper.updateItemCategory(
+                item.getId(),
+                selectedCategory.getId()
+              );
+            }
 
             // UPDATE UI
 
@@ -297,11 +353,13 @@ public class itemEditorScreen {
           nameField,
           descriptionField,
           priceField,
+          new Label("Category:"),
+          categoryCombo,
           saveButton
         );
 
         Scene popupScene =
-          new Scene(popupLayout, 520, 520);
+          new Scene(popupLayout, 520, 600);
 
         popupStage.setScene(popupScene);
 
@@ -412,4 +470,3 @@ public class itemEditorScreen {
     stage.setMaximized(true);
   }
 }
-

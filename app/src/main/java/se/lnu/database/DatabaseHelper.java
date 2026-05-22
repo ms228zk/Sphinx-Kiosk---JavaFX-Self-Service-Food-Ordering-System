@@ -8,11 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import se.lnu.Category;
-import se.lnu.MenuItem;
-import se.lnu.RemovableIngredient;
-import se.lnu.ExtraOption;
 import se.lnu.ComboChoiceGroup;
 import se.lnu.ComboChoiceOption;
+import se.lnu.ExtraOption;
+import se.lnu.MenuItem;
+import se.lnu.RemovableIngredient;
 import se.lnu.admin.AdminOrder;
 
 public class DatabaseHelper {
@@ -40,7 +40,6 @@ public class DatabaseHelper {
         return categories;
     }
 
-    // ADD CATEGORY
     public static boolean addCategory(String name) {
         String sql = "INSERT INTO Category (name) VALUES (?)";
 
@@ -57,7 +56,6 @@ public class DatabaseHelper {
         }
     }
 
-    // DELETE CATEGORY
     public static boolean deleteCategory(int id) {
         String sql = "DELETE FROM Category WHERE category_id = ?";
 
@@ -82,7 +80,8 @@ public class DatabaseHelper {
                    name,
                    description,
                    price,
-                   available
+                   available,
+                   category_id
             FROM MenuItem
             WHERE category_id = ?
             AND available = 1
@@ -98,7 +97,6 @@ public class DatabaseHelper {
                 while (rs.next()) {
                     int itemId = rs.getInt("menu_item_id");
                     String itemName = rs.getString("name");
-
                     String imageFileName = sanitizeImageName(itemName) + ".png";
 
                     MenuItem currentItem = new MenuItem(
@@ -106,7 +104,8 @@ public class DatabaseHelper {
                             itemName,
                             rs.getString("description"),
                             rs.getDouble("price"),
-                            imageFileName
+                            imageFileName,
+                            rs.getInt("category_id")
                     );
 
                     List<RemovableIngredient> currentRemovable =
@@ -312,10 +311,6 @@ public class DatabaseHelper {
         return groups;
     }
 
-    // =========================
-    // ADMIN ADD MENU ITEM
-    // =========================
-
     public static List<ExtraOption> getAllExtraOptions() {
         List<ExtraOption> extras = new ArrayList<>();
 
@@ -399,10 +394,6 @@ public class DatabaseHelper {
         }
     }
 
-    // =========================
-    // ADMIN UPDATE / EDIT METHODS
-    // =========================
-
     public static void updateItemAvailability(int menuItemId, boolean available) {
         String sql = """
             UPDATE MenuItem
@@ -426,7 +417,7 @@ public class DatabaseHelper {
         List<MenuItem> items = new ArrayList<>();
 
         String sql = """
-            SELECT menu_item_id, name, description, price
+            SELECT menu_item_id, name, description, price, category_id
             FROM MenuItem
             ORDER BY name
             """;
@@ -444,7 +435,8 @@ public class DatabaseHelper {
                         itemName,
                         rs.getString("description"),
                         rs.getDouble("price"),
-                        imageFileName
+                        imageFileName,
+                        rs.getInt("category_id")
                 );
 
                 items.add(item);
@@ -520,9 +512,43 @@ public class DatabaseHelper {
         }
     }
 
-    // =========================
-    // ORDER MANAGEMENT METHODS
-    // =========================
+    public static void updateItemDescription(int itemId, String newDescription) {
+        String sql = """
+            UPDATE MenuItem
+            SET description = ?
+            WHERE menu_item_id = ?
+            """;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, newDescription);
+            pstmt.setInt(2, itemId);
+            pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            System.out.println("DB error (updateItemDescription): " + e.getMessage());
+        }
+    }
+
+    public static void updateItemCategory(int itemId, int newCategoryId) {
+        String sql = """
+            UPDATE MenuItem
+            SET category_id = ?
+            WHERE menu_item_id = ?
+            """;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, newCategoryId);
+            pstmt.setInt(2, itemId);
+            pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            System.out.println("DB error (updateItemCategory): " + e.getMessage());
+        }
+    }
 
     public static boolean saveOrder(int orderNumber, String itemName, int quantity, String date) {
         String sql = """
@@ -550,7 +576,13 @@ public class DatabaseHelper {
     public static int getNextOrderNumber() {
         String today = java.time.LocalDate.now().toString();
 
-        String sql = "SELECT order_number FROM Orders WHERE date = ? ORDER BY order_number DESC LIMIT 1";
+        String sql = """
+            SELECT order_number
+            FROM Orders
+            WHERE date = ?
+            ORDER BY order_number DESC
+            LIMIT 1
+            """;
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -613,32 +645,12 @@ public class DatabaseHelper {
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
             pstmt.setInt(1, orderNumber);
             return pstmt.executeUpdate() > 0;
 
         } catch (SQLException e) {
             System.out.println("DB error (markOrderCompleted): " + e.getMessage());
             return false;
-        }
-    }
-
-    public static void updateItemDescription(int itemId, String newDescription) {
-        String sql = """
-            UPDATE MenuItem
-            SET description = ?
-            WHERE menu_item_id = ?
-            """;
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setString(1, newDescription);
-            pstmt.setInt(2, itemId);
-            pstmt.executeUpdate();
-
-        } catch (SQLException e) {
-            System.out.println("DB error (updateItemDescription): " + e.getMessage());
         }
     }
 }
