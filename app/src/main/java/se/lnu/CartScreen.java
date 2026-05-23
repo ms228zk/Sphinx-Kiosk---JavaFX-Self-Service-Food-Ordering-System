@@ -1,12 +1,14 @@
 package se.lnu;
 
+import java.util.List;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Control;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -28,300 +30,43 @@ public class CartScreen {
         HBox topBar = new HBox(12, backButton, spacer, homeButton);
         topBar.setAlignment(Pos.CENTER_LEFT);
 
-        Label title = new Label("Your Cart");
+        Label title = new Label("Current Order");
         title.setStyle(
-                "-fx-font-size: 46px;" +
+                "-fx-font-size: 42px;" +
                         "-fx-font-weight: bold;" +
                         "-fx-text-fill: #1f1f1f;"
         );
 
-        VBox itemsBox = new VBox(20);
-        itemsBox.setAlignment(Pos.CENTER);
+        VBox itemsBox = new VBox(18);
+        itemsBox.setAlignment(Pos.TOP_CENTER);
+        itemsBox.setFillWidth(true);
 
-        Label warningLabel = new Label("Add items before confirming your order.");
-        warningLabel.setStyle(
-                "-fx-font-size: 18px;" +
-                        "-fx-font-weight: bold;" +
-                        "-fx-text-fill: #b00020;" +
-                        "-fx-background-color: rgba(255, 220, 220, 0.90);" +
-                        "-fx-background-radius: 18;" +
-                        "-fx-padding: 14 28 14 28;"
-        );
-
-        java.util.List<Cart.CartItem> items = Cart.getInstance().getItems();
+        List<Cart.CartItem> items = Cart.getInstance().getItems();
 
         if (items.isEmpty()) {
-            Label cartIcon = new Label("Cart");
-            cartIcon.setStyle("-fx-font-size: 48px;");
-
-            Label emptyHeading = new Label("Your cart is empty");
-            emptyHeading.setStyle(
-                    "-fx-font-size: 28px;" +
-                            "-fx-font-weight: bold;" +
-                            "-fx-text-fill: #2d2d2d;"
-            );
-
-            Label emptySubtext = new Label("Browse the menu and add something delicious!");
-            emptySubtext.setStyle(
-                    "-fx-font-size: 16px;" +
-                            "-fx-text-fill: #888888;"
-            );
-
-            VBox textGroup = new VBox(8, emptyHeading, emptySubtext);
-            textGroup.setAlignment(Pos.CENTER);
-
-            VBox emptyCard = new VBox(16, cartIcon, textGroup, warningLabel);
-            emptyCard.setAlignment(Pos.CENTER);
-            emptyCard.setPadding(new Insets(20, 52, 20, 52));
-            emptyCard.setMaxWidth(520);
-            emptyCard.setStyle(
-                    "-fx-background-color: rgba(255,255,255,0.92);" +
-                            "-fx-background-radius: 24;" +
-                            "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.10), 16, 0, 0, 3);"
-            );
-
-            Button browseButton = new Button("Browse Menu");
-            browseButton.setStyle(
-                    "-fx-font-size: 15px;" +
-                            "-fx-font-weight: bold;" +
-                            "-fx-background-color: linear-gradient(to bottom, #ffae00, #ff8c00);" +
-                            "-fx-text-fill: white;" +
-                            "-fx-padding: 11 32;" +
-                            "-fx-background-radius: 16;" +
-                            "-fx-cursor: hand;" +
-                            "-fx-effect: dropshadow(gaussian, rgba(255,140,0,0.35), 8, 0, 0, 2);"
-            );
-            browseButton.setOnAction(e -> CategoryScreen.show(stage));
-
-            VBox emptyStateGroup = new VBox(16, emptyCard, browseButton);
-            emptyStateGroup.setAlignment(Pos.CENTER);
-
-            itemsBox.getChildren().add(emptyStateGroup);
-
+            itemsBox.getChildren().add(createEmptyCart(stage));
         } else {
             for (Cart.CartItem cartItem : items) {
-                Button minusButton = new Button("-");
-                Button plusButton = new Button("+");
-                Button removeButton = new Button("\uD83D\uDDD1");
-
-                removeButton.setStyle(
-                        "-fx-background-color: rgba(255, 80, 80, 0.15);" +
-                                "-fx-text-fill: #ff4d4d;" +
-                                "-fx-font-size: 18px;" +
-                                "-fx-font-weight: bold;" +
-                                "-fx-background-radius: 50;" +
-                                "-fx-min-width: 40;" +
-                                "-fx-min-height: 40;" +
-                                "-fx-cursor: hand;"
-                );
-
-                removeButton.setOnAction(e -> {
-                    Cart.getInstance().removeItem(cartItem);
-                    CartScreen.show(stage);
-                });
-
-                String quantityButtonStyle =
-                        "-fx-background-color: linear-gradient(to bottom, #ffae00, #ff8c00);" +
-                                "-fx-text-fill: white;" +
-                                "-fx-font-size: 23px;" +
-                                "-fx-font-weight: bold;" +
-                                "-fx-background-radius: 16;" +
-                                "-fx-min-width: 54;" +
-                                "-fx-min-height: 54;" +
-                                "-fx-cursor: hand;" +
-                                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.16), 7, 0, 0, 2);";
-
-                minusButton.setStyle(quantityButtonStyle);
-                plusButton.setStyle(quantityButtonStyle);
-
-                minusButton.setDisable(cartItem.getQuantity() <= 1);
-
-                minusButton.setOnAction(e -> {
-                    if (cartItem.getQuantity() > 1) {
-                        Cart.getInstance().decreaseQuantity(cartItem);
-                        CartScreen.show(stage);
-                    }
-                });
-
-                plusButton.setOnAction(e -> {
-                    Cart.getInstance().increaseQuantity(cartItem);
-                    CartScreen.show(stage);
-                });
-
-                Label itemNameLabel = new Label(cartItem.getMenuItem().getName());
-                itemNameLabel.setWrapText(true);
-                itemNameLabel.setStyle(
-                        "-fx-font-size: 24px;" +
-                                "-fx-font-weight: bold;" +
-                                "-fx-text-fill: #1f1f1f;"
-                );
-
-                // Item image
-                ImageView itemImage = ImageLoader.createImageView(
-                        cartItem.getMenuItem().getImageFileName(), 
-                        100, 
-                        80
-                );
-                VBox imageBox = new VBox();
-                imageBox.setStyle(
-                        "-fx-background-color: #f0f0f0;" +
-                                "-fx-background-radius: 12;" +
-                                "-fx-padding: 6;"
-                );
-                imageBox.setAlignment(Pos.CENTER);
-                imageBox.setPrefWidth(110);
-                imageBox.setPrefHeight(90);
-                imageBox.getChildren().add(itemImage);
-
-                Label comboChoicesLabel = new Label();
-                if (cartItem.getComboChoices().isEmpty()) {
-                    comboChoicesLabel.setText("");
-                    comboChoicesLabel.setVisible(false);
-                    comboChoicesLabel.setManaged(false);
-                } else {
-                    comboChoicesLabel.setText(cartItem.getComboChoicesText());
-                    comboChoicesLabel.setVisible(true);
-                    comboChoicesLabel.setManaged(true);
-                }
-
-                comboChoicesLabel.setWrapText(true);
-                comboChoicesLabel.setStyle(
-                        "-fx-font-size: 14px;" +
-                                "-fx-font-weight: bold;" +
-                                "-fx-text-fill: #444444;" +
-                                "-fx-background-color: rgba(255,152,0,0.12);" +
-                                "-fx-background-radius: 14;" +
-                                "-fx-padding: 9 13 9 13;"
-                );
-
-                Label extrasLabel = new Label();
-                if (cartItem.getExtras().isEmpty()) {
-                    extrasLabel.setText("Extras: None");
-                } else {
-                    extrasLabel.setText("Extras: " + cartItem.getExtrasText());
-                }
-
-                extrasLabel.setWrapText(true);
-                extrasLabel.setStyle(
-                        "-fx-font-size: 14px;" +
-                                "-fx-text-fill: #666666;"
-                );
-
-                Label removedLabel = new Label();
-                if (cartItem.getRemoved().isEmpty()) {
-                    removedLabel.setText("Original variant");
-                } else {
-                    removedLabel.setText("Removed: " + cartItem.getRemovedText());
-                }
-
-                removedLabel.setWrapText(true);
-                removedLabel.setStyle(
-                        "-fx-font-size: 14px;" +
-                                "-fx-text-fill: #666666;"
-                );
-
-                Label unitPriceLabel = new Label(
-                        "Unit: " + String.format("%.2f kr", cartItem.getUnitPriceWithExtras())
-                );
-                unitPriceLabel.setStyle(
-                        "-fx-font-size: 16px;" +
-                                "-fx-font-weight: bold;" +
-                                "-fx-text-fill: #555555;"
-                );
-
-                VBox itemDetails = new VBox(
-                        7,
-                        itemNameLabel,
-                        imageBox,
-                        comboChoicesLabel,
-                        extrasLabel,
-                        removedLabel,
-                        unitPriceLabel
-                );
-                itemDetails.setAlignment(Pos.CENTER_LEFT);
-                itemDetails.setMinWidth(330);
-                itemDetails.setMaxWidth(390);
-
-                Label quantityLabel = new Label("Qty: " + cartItem.getQuantity());
-                quantityLabel.setStyle(
-                        "-fx-font-size: 28px;" +
-                                "-fx-font-weight: bold;" +
-                                "-fx-text-fill: #1f1f1f;" +
-                                "-fx-min-width: 95;" +
-                                "-fx-alignment: center;"
-                );
-                quantityLabel.setAlignment(Pos.CENTER);
-
-                HBox quantityControls = new HBox(16, minusButton, quantityLabel, plusButton);
-                quantityControls.setAlignment(Pos.CENTER);
-
-                Label subtotalLabel = new Label(
-                        "Line total: " + String.format("%.2f kr", cartItem.getSubtotal())
-                );
-                subtotalLabel.setStyle(
-                        "-fx-font-size: 20px;" +
-                                "-fx-font-weight: bold;" +
-                                "-fx-text-fill: #1f1f1f;"
-                );
-                subtotalLabel.setMinWidth(200);
-
-                HBox row = new HBox(22, itemDetails, quantityControls, subtotalLabel, removeButton);
-                row.setAlignment(Pos.CENTER);
-                row.setPadding(new Insets(20, 30, 20, 30));
-                row.setMinWidth(900);
-                row.setMaxWidth(980);
-                row.setStyle(
-                        "-fx-background-color: rgba(255,255,255,0.95);" +
-                                "-fx-background-radius: 28;" +
-                                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 12, 0, 0, 4);"
-                );
-
-                itemsBox.getChildren().add(row);
+                itemsBox.getChildren().add(createCartItemCard(stage, cartItem));
             }
 
-            Label totalLabel = new Label(
-                    "Total: " + String.format("%.2f", Cart.getInstance().getTotalPrice()) + " kr"
-            );
-            totalLabel.setStyle(
-                    "-fx-font-size: 30px;" +
-                            "-fx-font-weight: bold;" +
-                            "-fx-text-fill: #1f1f1f;" +
-                            "-fx-background-color: rgba(255,149,0,0.18);" +
-                            "-fx-background-radius: 28;" +
-                            "-fx-padding: 18 65 18 65;"
-            );
-
-            Button confirmButton = new Button("Confirm Order");
-            confirmButton.setStyle(
-                    "-fx-font-size: 18px;" +
-                            "-fx-background-color: #4CAF50;" +
-                            "-fx-font-weight: bold;" +
-                            "-fx-text-fill: white;" +
-                            "-fx-padding: 12 25;" +
-                            "-fx-background-radius: 10;" +
-                            "-fx-cursor: hand;"
-            );
-
-            confirmButton.setDisable(Cart.getInstance().getItems().isEmpty());
-
-            confirmButton.setOnAction(e -> {
-                PaymentScreen.show(stage);
-            });
-
-            itemsBox.getChildren().addAll(totalLabel, confirmButton);
+            itemsBox.getChildren().add(createTotalSection(stage));
         }
 
-        VBox centerContent = new VBox(24, title, itemsBox);
-        centerContent.setAlignment(Pos.CENTER);
+        VBox centerContent = new VBox(26, title, itemsBox);
+        centerContent.setAlignment(Pos.TOP_CENTER);
         centerContent.setFillWidth(true);
-        VBox.setVgrow(itemsBox, javafx.scene.layout.Priority.ALWAYS);
+        centerContent.setPadding(new Insets(10, 0, 30, 0));
 
         ScrollPane scrollPane = new ScrollPane(centerContent);
         scrollPane.setFitToWidth(true);
         scrollPane.setPannable(true);
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        scrollPane.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
+        scrollPane.setStyle(
+                "-fx-background: transparent;" +
+                        "-fx-background-color: transparent;"
+        );
 
         BorderPane root = new BorderPane();
         root.setPadding(new Insets(26));
@@ -333,5 +78,290 @@ public class CartScreen {
         stage.setScene(scene);
         stage.setTitle("Cart");
         WindowManager.enforceStandardSize(stage);
+    }
+
+    private static VBox createCartItemCard(Stage stage, Cart.CartItem cartItem) {
+        Label nameLabel = new Label(cartItem.getMenuItem().getName());
+        nameLabel.setWrapText(true);
+        nameLabel.setMinHeight(Control.USE_PREF_SIZE);
+        nameLabel.setStyle(
+                "-fx-font-size: 23px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-text-fill: #222222;"
+        );
+
+        Label priceLabel = new Label(String.format("%.2f kr", cartItem.getSubtotal()));
+        priceLabel.setStyle(
+                "-fx-font-size: 22px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-text-fill: #ff9800;"
+        );
+
+        Button removeButton = new Button("×");
+        removeButton.setStyle(
+                "-fx-background-color: rgba(255, 80, 80, 0.15);" +
+                        "-fx-text-fill: #d32f2f;" +
+                        "-fx-font-size: 22px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-background-radius: 50;" +
+                        "-fx-min-width: 52;" +
+                        "-fx-min-height: 52;" +
+                        "-fx-cursor: hand;"
+        );
+
+        removeButton.setOnAction(e -> {
+            Cart.getInstance().removeItem(cartItem);
+            CartScreen.show(stage);
+        });
+
+        Region headerSpacer = new Region();
+        HBox.setHgrow(headerSpacer, Priority.ALWAYS);
+
+        HBox headerRow = new HBox(14, nameLabel, headerSpacer, priceLabel, removeButton);
+        headerRow.setAlignment(Pos.CENTER_LEFT);
+
+        VBox customizationList = new VBox(7);
+        customizationList.setAlignment(Pos.CENTER_LEFT);
+        customizationList.setFillWidth(true);
+
+        addComboChoices(customizationList, cartItem.getComboChoices());
+        addExtras(customizationList, cartItem.getExtras());
+        addRemoved(customizationList, cartItem.getRemoved());
+
+        if (customizationList.getChildren().isEmpty()) {
+            customizationList.getChildren().add(createBulletLine("• Original item"));
+        }
+
+        Label unitPriceLabel = new Label(
+                "Unit price: " + String.format("%.2f kr", cartItem.getUnitPriceWithExtras())
+        );
+        unitPriceLabel.setStyle(
+                "-fx-font-size: 14px;" +
+                        "-fx-text-fill: #777777;"
+        );
+
+        Button minusButton = createQuantityButton("-");
+        Button plusButton = createQuantityButton("+");
+
+        minusButton.setDisable(cartItem.getQuantity() <= 1);
+
+        minusButton.setOnAction(e -> {
+            if (cartItem.getQuantity() > 1) {
+                Cart.getInstance().decreaseQuantity(cartItem);
+                CartScreen.show(stage);
+            }
+        });
+
+        plusButton.setOnAction(e -> {
+            Cart.getInstance().increaseQuantity(cartItem);
+            CartScreen.show(stage);
+        });
+
+        Label quantityLabel = new Label(String.valueOf(cartItem.getQuantity()));
+        quantityLabel.setAlignment(Pos.CENTER);
+        quantityLabel.setStyle(
+                "-fx-font-size: 20px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-text-fill: #1f1f1f;" +
+                        "-fx-background-color: rgba(255, 248, 225, 0.95);" +
+                        "-fx-background-radius: 16;" +
+                        "-fx-min-width: 54;" +
+                        "-fx-min-height: 50;" +
+                        "-fx-alignment: center;"
+        );
+
+        Button editButton = createEditButton();
+        editButton.setOnAction(e -> {
+            Cart.getInstance().removeItem(cartItem);
+            MealSelectionScreen.show(stage, cartItem.getMenuItem());
+        });
+
+        HBox quantityRow = new HBox(12, minusButton, quantityLabel, plusButton, editButton);
+        quantityRow.setAlignment(Pos.CENTER_LEFT);
+
+        VBox card = new VBox(13, headerRow, customizationList, unitPriceLabel, quantityRow);
+        card.setAlignment(Pos.CENTER_LEFT);
+        card.setFillWidth(true);
+        card.setPadding(new Insets(24, 28, 24, 28));
+        card.setPrefWidth(820);
+        card.setMaxWidth(820);
+        card.setMinHeight(Control.USE_PREF_SIZE);
+        card.setStyle(
+                "-fx-background-color: rgba(255,255,255,0.96);" +
+                        "-fx-background-radius: 28;" +
+                        "-fx-border-color: rgba(0,0,0,0.06);" +
+                        "-fx-border-radius: 28;" +
+                        "-fx-border-width: 1;" +
+                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.10), 12, 0, 0, 4);"
+        );
+
+        return card;
+    }
+
+    private static void addExtras(VBox list, List<String> extras) {
+        for (String extra : extras) {
+            if (extra == null || extra.isBlank()) {
+                continue;
+            }
+
+            list.getChildren().add(createBulletLine("• " + extra.trim()));
+        }
+    }
+
+    private static void addRemoved(VBox list, List<String> removed) {
+        for (String removedItem : removed) {
+            if (removedItem == null || removedItem.isBlank()) {
+                continue;
+            }
+
+            list.getChildren().add(createBulletLine("• No " + removedItem.trim()));
+        }
+    }
+
+    private static void addComboChoices(VBox list, List<String> comboChoices) {
+        for (String choice : comboChoices) {
+            if (choice == null || choice.isBlank()) {
+                continue;
+            }
+
+            list.getChildren().add(createBulletLine("• " + choice.trim()));
+        }
+    }
+
+    private static Label createBulletLine(String text) {
+        Label label = new Label(text);
+        label.setWrapText(true);
+        label.setMaxWidth(760);
+        label.setMinHeight(Control.USE_PREF_SIZE);
+        label.setStyle(
+                "-fx-font-size: 15px;" +
+                        "-fx-text-fill: #444444;" +
+                        "-fx-line-spacing: 3px;"
+        );
+
+        return label;
+    }
+
+    private static Button createQuantityButton(String text) {
+        Button button = new Button(text);
+        button.setStyle(
+                "-fx-background-color: linear-gradient(to bottom, #ffae00, #ff8c00);" +
+                        "-fx-text-fill: white;" +
+                        "-fx-font-size: 20px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-background-radius: 16;" +
+                        "-fx-min-width: 54;" +
+                        "-fx-min-height: 50;" +
+                        "-fx-cursor: hand;"
+        );
+
+        return button;
+    }
+
+    private static Button createEditButton() {
+        Button button = new Button("Edit");
+        button.setStyle(
+                "-fx-font-size: 15px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-background-color: rgba(255,255,255,0.92);" +
+                        "-fx-text-fill: #ff8c00;" +
+                        "-fx-border-color: rgba(255,140,0,0.55);" +
+                        "-fx-border-width: 1.2;" +
+                        "-fx-border-radius: 14;" +
+                        "-fx-background-radius: 14;" +
+                        "-fx-padding: 10 22;" +
+                        "-fx-cursor: hand;"
+        );
+
+        return button;
+    }
+
+    private static VBox createTotalSection(Stage stage) {
+        Label totalText = new Label("Total amount");
+        totalText.setStyle(
+                "-fx-font-size: 24px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-text-fill: #222222;"
+        );
+
+        Label totalAmount = new Label(
+                String.format("%.2f kr", Cart.getInstance().getTotalPrice())
+        );
+        totalAmount.setStyle(
+                "-fx-font-size: 28px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-text-fill: #ff9800;"
+        );
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        HBox totalRow = new HBox(20, totalText, spacer, totalAmount);
+        totalRow.setAlignment(Pos.CENTER);
+        totalRow.setMaxWidth(820);
+        totalRow.setPadding(new Insets(12, 4, 12, 4));
+
+        Button confirmButton = new Button("Confirm Order");
+        confirmButton.setStyle(
+                "-fx-font-size: 18px;" +
+                        "-fx-background-color: #4CAF50;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-text-fill: white;" +
+                        "-fx-padding: 14 38;" +
+                        "-fx-background-radius: 16;" +
+                        "-fx-cursor: hand;"
+        );
+
+        confirmButton.setOnAction(e -> PaymentScreen.show(stage));
+
+        VBox totalSection = new VBox(18, totalRow, confirmButton);
+        totalSection.setAlignment(Pos.CENTER);
+        totalSection.setMaxWidth(820);
+        totalSection.setPadding(new Insets(10, 0, 30, 0));
+
+        return totalSection;
+    }
+
+    private static VBox createEmptyCart(Stage stage) {
+        Label cartIcon = new Label("Cart");
+        cartIcon.setStyle("-fx-font-size: 48px;");
+
+        Label emptyHeading = new Label("Your cart is empty");
+        emptyHeading.setStyle(
+                "-fx-font-size: 28px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-text-fill: #2d2d2d;"
+        );
+
+        Label emptySubtext = new Label("Browse the menu and add something delicious!");
+        emptySubtext.setStyle(
+                "-fx-font-size: 16px;" +
+                        "-fx-text-fill: #888888;"
+        );
+
+        Button browseButton = new Button("Browse Menu");
+        browseButton.setStyle(
+                "-fx-font-size: 15px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-background-color: linear-gradient(to bottom, #ffae00, #ff8c00);" +
+                        "-fx-text-fill: white;" +
+                        "-fx-padding: 11 32;" +
+                        "-fx-background-radius: 16;" +
+                        "-fx-cursor: hand;"
+        );
+
+        browseButton.setOnAction(e -> CategoryScreen.show(stage));
+
+        VBox emptyCard = new VBox(16, cartIcon, emptyHeading, emptySubtext, browseButton);
+        emptyCard.setAlignment(Pos.CENTER);
+        emptyCard.setPadding(new Insets(30, 52, 30, 52));
+        emptyCard.setMaxWidth(520);
+        emptyCard.setStyle(
+                "-fx-background-color: rgba(255,255,255,0.92);" +
+                        "-fx-background-radius: 24;" +
+                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.10), 16, 0, 0, 3);"
+        );
+
+        return emptyCard;
     }
 }

@@ -35,6 +35,7 @@ public class AdminDashboardScreen {
     Button manageItemsButton = new Button("Manage Menu Items");
     Button editItemsButton = new Button("Edit Menu Items");
     Button manageCategoriesButton = new Button("Manage Categories");
+    Button viewOrdersButton = new Button("View Orders");
     Button logoutButton = new Button("Logout");
 
     String mainButtonStyle =
@@ -89,6 +90,7 @@ public class AdminDashboardScreen {
     styleButton(manageItemsButton, mainButtonStyle, mainButtonHoverStyle);
     styleButton(editItemsButton, mainButtonStyle, mainButtonHoverStyle);
     styleButton(manageCategoriesButton, mainButtonStyle, mainButtonHoverStyle);
+    styleButton(viewOrdersButton, mainButtonStyle, mainButtonHoverStyle);
     styleButton(logoutButton, logoutButtonStyle, logoutButtonHoverStyle);
 
     // Button actions
@@ -100,21 +102,24 @@ public class AdminDashboardScreen {
 
     manageCategoriesButton.setOnAction(e -> CategoryAdminScreen.show(stage));
 
+    viewOrdersButton.setOnAction(e -> AdminOrdersScreen.show(stage));
+
     logoutButton.setOnAction(e -> WelcomeScreen.show(stage));
 
     VBox card = new VBox(
-            18,
+            16,
             title,
             subtitle,
             addMenuItemButton,
             manageItemsButton,
             editItemsButton,
             manageCategoriesButton,
+            viewOrdersButton,
             logoutButton
     );
 
     card.setAlignment(Pos.CENTER);
-    card.setPadding(new Insets(42, 60, 42, 60));
+    card.setPadding(new Insets(36, 60, 36, 60));
     card.setMaxWidth(620);
     card.setStyle(ScreenStyle.createCardStyle());
 

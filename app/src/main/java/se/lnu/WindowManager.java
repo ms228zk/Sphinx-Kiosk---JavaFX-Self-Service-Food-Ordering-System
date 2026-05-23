@@ -8,31 +8,32 @@ import javafx.stage.Stage;
  */
 public class WindowManager {
 
-    // Fixed window dimensions
-    public static final double WINDOW_WIDTH = 1024;
-    public static final double WINDOW_HEIGHT = 768;
+    // Default window dimensions used when creating scenes
+    public static final double WINDOW_WIDTH = 1200;
+    public static final double WINDOW_HEIGHT = 800;
 
     // Private constructor - utility class only
     private WindowManager() {}
 
     /**
-     * Initialize the primary stage with fixed dimensions and prevent resizing
+     * Initialize the primary stage.
+     * The app opens maximized so the kiosk layout has enough space.
      * Call this once from App.start()
      */
     public static void initializeStage(Stage stage) {
         stage.setWidth(WINDOW_WIDTH);
         stage.setHeight(WINDOW_HEIGHT);
-        stage.setResizable(false);
+        stage.setResizable(true);
+        stage.setMaximized(true);
         stage.setOnCloseRequest(e -> System.exit(0));
     }
 
     /**
-     * Restore window to standard dimensions if it gets resized or moved
-     * This ensures consistency when navigating between screens
+     * Keep the app maximized when navigating between screens.
+     * This prevents screens from returning to a smaller fixed size.
      */
     public static void enforceStandardSize(Stage stage) {
-        stage.setWidth(WINDOW_WIDTH);
-        stage.setHeight(WINDOW_HEIGHT);
-        stage.setResizable(false);
+        stage.setResizable(true);
+        stage.setMaximized(true);
     }
 }

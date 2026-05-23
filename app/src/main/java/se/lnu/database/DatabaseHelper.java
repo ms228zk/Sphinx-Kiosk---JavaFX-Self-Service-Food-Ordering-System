@@ -13,6 +13,7 @@ import se.lnu.ComboChoiceOption;
 import se.lnu.ExtraOption;
 import se.lnu.MenuItem;
 import se.lnu.RemovableIngredient;
+import se.lnu.admin.AdminOrder;
 
 public class DatabaseHelper {
 
@@ -39,7 +40,6 @@ public class DatabaseHelper {
         return categories;
     }
 
-    // ADD CATEGORY
     public static boolean addCategory(String name) {
         String sql = "INSERT INTO Category (name) VALUES (?)";
 
@@ -56,7 +56,6 @@ public class DatabaseHelper {
         }
     }
 
-    // DELETE CATEGORY
     public static boolean deleteCategory(int id) {
         String sql = "DELETE FROM Category WHERE category_id = ?";
 
@@ -98,7 +97,6 @@ public class DatabaseHelper {
                 while (rs.next()) {
                     int itemId = rs.getInt("menu_item_id");
                     String itemName = rs.getString("name");
-
                     String imageFileName = sanitizeImageName(itemName) + ".png";
 
                     MenuItem currentItem = new MenuItem(
@@ -260,36 +258,39 @@ public class DatabaseHelper {
         return extras;
     }
 
-    public static List<ComboChoiceGroup> getComboChoiceGroupsByItem(int itemId) {
+    public static List<ComboChoiceGroup> getComboChoiceGroupsByItem(int comboItemId) {
         List<ComboChoiceGroup> groups = new ArrayList<>();
 
-        String sql = """
+        String groupSql = """
             SELECT group_id, group_name
             FROM ComboChoiceGroup
             WHERE combo_item_id = ?
+            ORDER BY display_order
+            """;
+
+        String optionSql = """
+            SELECT option_id, option_name
+            FROM ComboChoiceOption
+            WHERE group_id = ?
+            ORDER BY display_order
             """;
 
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement groupStmt = conn.prepareStatement(groupSql)) {
 
-            pstmt.setInt(1, itemId);
+            groupStmt.setInt(1, comboItemId);
 
-            try (ResultSet rs = pstmt.executeQuery()) {
-                while (rs.next()) {
+            try (ResultSet groupRs = groupStmt.executeQuery()) {
+                while (groupRs.next()) {
                     ComboChoiceGroup group = new ComboChoiceGroup(
-                            rs.getInt("group_id"),
-                            rs.getString("group_name")
+                            groupRs.getInt("group_id"),
+                            groupRs.getString("group_name")
                     );
 
-                    String optionsSql = """
-                            SELECT option_id, option_name
-                            FROM ComboChoiceOption
-                            WHERE group_id = ?
-                            """;
+                    try (PreparedStatement optionStmt = conn.prepareStatement(optionSql)) {
+                        optionStmt.setInt(1, group.getId());
 
-                    try (PreparedStatement optionsStmt = conn.prepareStatement(optionsSql)) {
-                        optionsStmt.setInt(1, rs.getInt("group_id"));
-                        try (ResultSet optionRs = optionsStmt.executeQuery()) {
+                        try (ResultSet optionRs = optionStmt.executeQuery()) {
                             while (optionRs.next()) {
                                 group.addOption(new ComboChoiceOption(
                                         optionRs.getInt("option_id"),
@@ -309,10 +310,6 @@ public class DatabaseHelper {
 
         return groups;
     }
-
-    // =========================
-    // ADMIN ADD MENU ITEM
-    // =========================
 
     public static List<ExtraOption> getAllExtraOptions() {
         List<ExtraOption> extras = new ArrayList<>();
@@ -396,10 +393,6 @@ public class DatabaseHelper {
             return false;
         }
     }
-
-    // =========================
-    // ADMIN UPDATE / EDIT METHODS
-    // =========================
 
     public static void updateItemAvailability(int menuItemId, boolean available) {
         String sql = """
@@ -554,6 +547,147 @@ public class DatabaseHelper {
 
         } catch (SQLException e) {
             System.out.println("DB error (updateItemCategory): " + e.getMessage());
+        }
+    }
+
+    public static boolean saveOrder(
+            int orderNumber,
+            String itemName,
+            int quantity,
+            String date,
+            String customizations
+    ) {
+        ensureOrdersCustomizationColumn();
+
+        String sql = """
+            INSERT INTO Orders (order_number, item_name, quantity, date, status, customizations)
+            VALUES (?, ?, ?, ?, 'Pending', ?)
+            """;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, orderNumber);
+            pstmt.setString(2, itemName);
+            pstmt.setInt(3, quantity);
+            pstmt.setString(4, date);
+            pstmt.setString(5, customizations == null ? "" : customizations.trim());
+
+            pstmt.executeUpdate();
+            return true;
+
+        } catch (SQLException e) {
+            System.out.println("DB error (saveOrder): " + e.getMessage());
+            return false;
+        }
+    }
+
+    public static int getNextOrderNumber() {
+        String today = java.time.LocalDate.now().toString();
+
+        String sql = """
+            SELECT order_number
+            FROM Orders
+            WHERE date = ?
+            ORDER BY order_number DESC
+            LIMIT 1
+            """;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, today);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("order_number") + 1;
+                }
+            }
+
+        } catch (SQLException e) {
+            System.out.println("DB error (getNextOrderNumber): " + e.getMessage());
+        }
+
+        return 1;
+    }
+
+    public static List<AdminOrder> getPendingOrders() {
+        ensureOrdersCustomizationColumn();
+
+        List<AdminOrder> orders = new ArrayList<>();
+
+        String sql = """
+            SELECT order_number,
+                   date,
+                   status,
+                   GROUP_CONCAT(
+                       quantity || ' x ' || item_name ||
+                       CASE
+                           WHEN customizations IS NOT NULL AND TRIM(customizations) != ''
+                           THEN char(10) || customizations
+                           ELSE ''
+                       END,
+                       char(10) || char(10)
+                   ) AS items
+            FROM Orders
+            WHERE status = 'Pending'
+            GROUP BY order_number, date, status
+            ORDER BY order_number ASC
+            """;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                orders.add(new AdminOrder(
+                        rs.getInt("order_number"),
+                        rs.getString("date"),
+                        rs.getString("items"),
+                        rs.getString("status")
+                ));
+            }
+
+        } catch (SQLException e) {
+            System.out.println("DB error (getPendingOrders): " + e.getMessage());
+        }
+
+        return orders;
+    }
+
+    public static boolean markOrderCompleted(int orderNumber) {
+        String sql = """
+            UPDATE Orders
+            SET status = 'Completed'
+            WHERE order_number = ?
+            """;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, orderNumber);
+            return pstmt.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            System.out.println("DB error (markOrderCompleted): " + e.getMessage());
+            return false;
+        }
+    }
+
+    private static void ensureOrdersCustomizationColumn() {
+        String sql = "ALTER TABLE Orders ADD COLUMN customizations TEXT";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            String message = e.getMessage();
+
+            if (message == null || !message.toLowerCase().contains("duplicate column")) {
+                System.out.println("DB note (customizations column): " + e.getMessage());
+            }
         }
     }
 }

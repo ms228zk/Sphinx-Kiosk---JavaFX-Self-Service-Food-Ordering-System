@@ -13,6 +13,10 @@ public class App extends Application {
     public static MenuItem selectedMenuItem;
     public static int selectedQuantity = 1;
 
+    // Stores the payment method selected by the user.
+    // This helps keep the selected payment option if the user goes back to edit the order.
+    public static String selectedPaymentMethod = "";
+
     public static void setCategory(int id, String name) {
         selectedCategoryId = id;
         selectedCategoryName = name;
@@ -26,6 +30,7 @@ public class App extends Application {
         selectedCategory = null;
         selectedMenuItem = null;
         selectedQuantity = 1;
+        selectedPaymentMethod = "";
         Cart.getInstance().reset();
     }
 
