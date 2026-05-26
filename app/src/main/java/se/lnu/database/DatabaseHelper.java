@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -392,6 +393,300 @@ public class DatabaseHelper {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public static boolean addMenuItemWithOptions(
+            String name,
+            String description,
+            double price,
+            int categoryId,
+            List<Integer> extraIds,
+            List<Integer> removableIngredientIds
+    ) {
+        String insertMenuItemSql = """
+            INSERT INTO MenuItem (name, description, price, category_id, available)
+            VALUES (?, ?, ?, ?, 1)
+            """;
+
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            conn.setAutoCommit(false);
+
+            try (PreparedStatement menuItemStmt = conn.prepareStatement(
+                    insertMenuItemSql,
+                    Statement.RETURN_GENERATED_KEYS
+            )) {
+                menuItemStmt.setString(1, name);
+                menuItemStmt.setString(2, description);
+                menuItemStmt.setDouble(3, price);
+                menuItemStmt.setInt(4, categoryId);
+
+                int affectedRows = menuItemStmt.executeUpdate();
+
+                if (affectedRows == 0) {
+                    conn.rollback();
+                    return false;
+                }
+
+                int newMenuItemId;
+
+                try (ResultSet generatedKeys = menuItemStmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        newMenuItemId = generatedKeys.getInt(1);
+                    } else {
+                        conn.rollback();
+                        return false;
+                    }
+                }
+
+                if (extraIds != null) {
+                    for (Integer extraId : extraIds) {
+                        linkExtraToItem(conn, newMenuItemId, extraId);
+                    }
+                }
+
+                if (removableIngredientIds != null) {
+                    for (Integer ingredientId : removableIngredientIds) {
+                        linkRemovableIngredientToItem(conn, newMenuItemId, ingredientId);
+                    }
+                }
+
+                conn.commit();
+                return true;
+
+            } catch (SQLException e) {
+                conn.rollback();
+                System.out.println("DB error in addMenuItemWithOptions: " + e.getMessage());
+                e.printStackTrace();
+                return false;
+            }
+
+        } catch (SQLException e) {
+            System.out.println("DB connection error in addMenuItemWithOptions: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean addMenuItemWithExistingAndCustomOptions(
+            String name,
+            String description,
+            double price,
+            int categoryId,
+            List<Integer> existingExtraIds,
+            List<Integer> existingRemovableIngredientIds,
+            List<CustomExtraInput> customExtras,
+            List<String> customRemovableIngredients
+    ) {
+        String insertMenuItemSql = """
+            INSERT INTO MenuItem (name, description, price, category_id, available)
+            VALUES (?, ?, ?, ?, 1)
+            """;
+
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            conn.setAutoCommit(false);
+
+            try (PreparedStatement menuItemStmt = conn.prepareStatement(
+                    insertMenuItemSql,
+                    Statement.RETURN_GENERATED_KEYS
+            )) {
+                menuItemStmt.setString(1, name);
+                menuItemStmt.setString(2, description);
+                menuItemStmt.setDouble(3, price);
+                menuItemStmt.setInt(4, categoryId);
+
+                int affectedRows = menuItemStmt.executeUpdate();
+
+                if (affectedRows == 0) {
+                    conn.rollback();
+                    return false;
+                }
+
+                int newMenuItemId;
+
+                try (ResultSet generatedKeys = menuItemStmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        newMenuItemId = generatedKeys.getInt(1);
+                    } else {
+                        conn.rollback();
+                        return false;
+                    }
+                }
+
+                if (existingExtraIds != null) {
+                    for (Integer extraId : existingExtraIds) {
+                        linkExtraToItem(conn, newMenuItemId, extraId);
+                    }
+                }
+
+                if (existingRemovableIngredientIds != null) {
+                    for (Integer ingredientId : existingRemovableIngredientIds) {
+                        linkRemovableIngredientToItem(conn, newMenuItemId, ingredientId);
+                    }
+                }
+
+                if (customExtras != null) {
+                    for (CustomExtraInput customExtra : customExtras) {
+                        int extraId = getOrCreateExtraOption(
+                                conn,
+                                customExtra.name(),
+                                customExtra.price()
+                        );
+
+                        linkExtraToItem(conn, newMenuItemId, extraId);
+                    }
+                }
+
+                if (customRemovableIngredients != null) {
+                    for (String ingredientName : customRemovableIngredients) {
+                        if (ingredientName == null || ingredientName.trim().isEmpty()) {
+                            continue;
+                        }
+
+                        int ingredientId = getOrCreateRemovableIngredient(conn, ingredientName);
+                        linkRemovableIngredientToItem(conn, newMenuItemId, ingredientId);
+                    }
+                }
+
+                conn.commit();
+                return true;
+
+            } catch (SQLException e) {
+                conn.rollback();
+                System.out.println("DB error in addMenuItemWithExistingAndCustomOptions: " + e.getMessage());
+                e.printStackTrace();
+                return false;
+            }
+
+        } catch (SQLException e) {
+            System.out.println("DB connection error in addMenuItemWithExistingAndCustomOptions: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private static int getOrCreateExtraOption(
+            Connection conn,
+            String name,
+            double price
+    ) throws SQLException {
+        String findSql = """
+            SELECT extra_id
+            FROM ExtraOption
+            WHERE LOWER(name) = LOWER(?)
+            AND price = ?
+            """;
+
+        try (PreparedStatement findStmt = conn.prepareStatement(findSql)) {
+            findStmt.setString(1, name.trim());
+            findStmt.setDouble(2, price);
+
+            try (ResultSet rs = findStmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("extra_id");
+                }
+            }
+        }
+
+        String insertSql = """
+            INSERT INTO ExtraOption (name, price)
+            VALUES (?, ?)
+            """;
+
+        try (PreparedStatement insertStmt = conn.prepareStatement(
+                insertSql,
+                Statement.RETURN_GENERATED_KEYS
+        )) {
+            insertStmt.setString(1, name.trim());
+            insertStmt.setDouble(2, price);
+            insertStmt.executeUpdate();
+
+            try (ResultSet keys = insertStmt.getGeneratedKeys()) {
+                if (keys.next()) {
+                    return keys.getInt(1);
+                }
+            }
+        }
+
+        throw new SQLException("Could not create extra option: " + name);
+    }
+
+    private static int getOrCreateRemovableIngredient(
+            Connection conn,
+            String name
+    ) throws SQLException {
+        String findSql = """
+            SELECT ingredient_id
+            FROM RemovableIngredient
+            WHERE LOWER(name) = LOWER(?)
+            """;
+
+        try (PreparedStatement findStmt = conn.prepareStatement(findSql)) {
+            findStmt.setString(1, name.trim());
+
+            try (ResultSet rs = findStmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("ingredient_id");
+                }
+            }
+        }
+
+        String insertSql = """
+            INSERT INTO RemovableIngredient (name)
+            VALUES (?)
+            """;
+
+        try (PreparedStatement insertStmt = conn.prepareStatement(
+                insertSql,
+                Statement.RETURN_GENERATED_KEYS
+        )) {
+            insertStmt.setString(1, name.trim());
+            insertStmt.executeUpdate();
+
+            try (ResultSet keys = insertStmt.getGeneratedKeys()) {
+                if (keys.next()) {
+                    return keys.getInt(1);
+                }
+            }
+        }
+
+        throw new SQLException("Could not create removable ingredient: " + name);
+    }
+
+    private static void linkExtraToItem(
+            Connection conn,
+            int menuItemId,
+            int extraId
+    ) throws SQLException {
+        String sql = """
+            INSERT OR IGNORE INTO MenuItemExtraOption (menu_item_id, extra_id)
+            VALUES (?, ?)
+            """;
+
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, menuItemId);
+            stmt.setInt(2, extraId);
+            stmt.executeUpdate();
+        }
+    }
+
+    private static void linkRemovableIngredientToItem(
+            Connection conn,
+            int menuItemId,
+            int ingredientId
+    ) throws SQLException {
+        String sql = """
+            INSERT OR IGNORE INTO MenuItemRemovableIngredient (menu_item_id, ingredient_id)
+            VALUES (?, ?)
+            """;
+
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, menuItemId);
+            stmt.setInt(2, ingredientId);
+            stmt.executeUpdate();
+        }
+    }
+
+    public record CustomExtraInput(String name, double price) {
     }
 
     public static void updateItemAvailability(int menuItemId, boolean available) {
