@@ -1,7 +1,16 @@
 package se.lnu.admin;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.stream.Stream;
 
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -11,16 +20,17 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.VBox;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.*;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import se.lnu.Category;
 import se.lnu.ScreenStyle;
 import se.lnu.WindowManager;
 import se.lnu.database.DatabaseHelper;
+
+import javax.imageio.ImageIO;
 
 public class AdminAddMenuItemScreen {
 
@@ -29,6 +39,9 @@ public class AdminAddMenuItemScreen {
   private static TextField priceField;
   private static ComboBox<Category> categoryComboBox;
   private static Label statusLabel;
+  private static File selectedImageFile;
+  private static Label imageLabel;
+  private static FlowPane itemsContainer; // this must be your UI container
 
   public static void show(Stage stage) {
     Button backButton = ScreenStyle.createBackButton();
@@ -87,6 +100,12 @@ public class AdminAddMenuItemScreen {
     categoryComboBox.setStyle(createComboBoxStyle());
 
     loadCategories();
+    Button imageButton = createSecondaryButton("Choose PNG Image");
+
+    imageLabel = new Label("No image selected");
+    imageLabel.setStyle("-fx-text-fill: #666666;");
+
+    imageButton.setOnAction(e -> chooseImage());
 
     Button saveButton = createPrimaryButton("Save Menu Item");
     saveButton.setOnAction(e -> saveMenuItem());
@@ -110,6 +129,8 @@ public class AdminAddMenuItemScreen {
             descriptionField,
             priceField,
             categoryComboBox,
+            imageButton,
+            imageLabel,
             saveButton,
             clearButton,
             statusLabel
@@ -185,6 +206,31 @@ public class AdminAddMenuItemScreen {
       showWarning("Missing category", "Please select a category.");
       return;
     }
+    String imageFileName = null;
+
+    if (selectedImageFile != null) {
+
+      String snakeCaseName = toSnakeCase(name);
+      imageFileName = snakeCaseName + ".png";
+
+      Path destination = Paths.get(
+              "app/src/main/resources/images/items",
+              imageFileName
+      ).toAbsolutePath();
+
+      try {
+        Files.createDirectories(destination.getParent());
+
+        BufferedImage image = ImageIO.read(selectedImageFile);
+
+        ImageIO.write(image, "png", destination.toFile());
+
+      } catch (IOException e) {
+        e.printStackTrace();
+        showWarning("Image Error", "Could not save image file.");
+        return;
+      }
+    }
 
     boolean saved = DatabaseHelper.addMenuItem(
             name,
@@ -224,6 +270,9 @@ public class AdminAddMenuItemScreen {
     if (clearStatus) {
       statusLabel.setText("");
     }
+
+    selectedImageFile = null;
+    imageLabel.setText("No image selected");
   }
 
   private static void showWarning(String title, String message) {
@@ -318,6 +367,30 @@ public class AdminAddMenuItemScreen {
     button.setOnMouseExited(e -> button.setStyle(normalStyle));
 
     return button;
+  }
+  private static void chooseImage() {
+    FileChooser fileChooser = new FileChooser();
+
+    fileChooser.setTitle("Select PNG Image");
+
+    fileChooser.getExtensionFilters().add(
+            new FileChooser.ExtensionFilter("PNG Images", "*.png")
+    );
+
+    File file = fileChooser.showOpenDialog(null);
+
+    if (file != null) {
+      selectedImageFile = file;
+      imageLabel.setText(file.getName());
+    }
+  }
+
+  private static String toSnakeCase(String text) {
+    return text
+            .trim()
+            .toLowerCase()
+            .replaceAll("[^a-z0-9\\s]", "")
+            .replaceAll("\\s+", "_");
   }
 }
 
