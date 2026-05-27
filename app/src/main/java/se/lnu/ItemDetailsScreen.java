@@ -70,11 +70,11 @@ public class ItemDetailsScreen {
         // Ingredients section
         VBox ingredientsSection = createIngredientsSection(item);
 
-        // Add to cart / Customize button
-        Button addButton = new Button("Customize & Add to Cart");
-        addButton.setPrefWidth(300);
-        addButton.setPrefHeight(56);
-        addButton.setStyle(
+        // Select button
+        Button selectButton = new Button("Select");
+        selectButton.setPrefWidth(140);
+        selectButton.setPrefHeight(56);
+        selectButton.setStyle(
                 "-fx-font-size: 18px;" +
                         "-fx-font-weight: bold;" +
                         "-fx-background-color: linear-gradient(to bottom, #ffae00, #ff8c00);" +
@@ -83,24 +83,7 @@ public class ItemDetailsScreen {
                         "-fx-cursor: hand;" +
                         "-fx-effect: dropshadow(gaussian, rgba(255,140,0,0.25), 7, 0, 0, 2);"
         );
-        addButton.setOnAction(e -> MealSelectionScreen.show(stage, item));
-
-        // Add to cart without customization (optional)
-        Button quickAddButton = new Button("Quick Add to Cart");
-        quickAddButton.setPrefWidth(300);
-        quickAddButton.setPrefHeight(48);
-        quickAddButton.setStyle(
-                "-fx-font-size: 16px;" +
-                        "-fx-background-color: #E8E8E8;" +
-                        "-fx-text-fill: #333333;" +
-                        "-fx-background-radius: 24;" +
-                        "-fx-cursor: hand;"
-        );
-        quickAddButton.setOnAction(e -> {
-            Cart.getInstance().addItem(item, 1);
-            // Show confirmation message by returning to category
-            CategoryScreen.show(stage);
-        });
+        selectButton.setOnAction(e -> MealSelectionScreen.show(stage, item));
 
         // Content area with image and details side by side
         HBox contentBox = new HBox(40);
@@ -125,11 +108,11 @@ public class ItemDetailsScreen {
 
         contentBox.getChildren().addAll(imageBox, detailsBox);
 
-        // Bottom action buttons
-        VBox buttonBox = new VBox(12);
+        // Bottom action button
+        HBox buttonBox = new HBox(16);
         buttonBox.setAlignment(Pos.CENTER);
         buttonBox.setPadding(new Insets(20, 30, 40, 30));
-        buttonBox.getChildren().addAll(addButton, quickAddButton);
+        buttonBox.getChildren().add(selectButton);
 
         // Main layout
         BorderPane root = new BorderPane();
@@ -172,7 +155,7 @@ public class ItemDetailsScreen {
         divider.setStyle("-fx-background-color: #E0E0E0;");
 
         // Section header
-        Label headerLabel = new Label("🧾 Ingredients");
+        Label headerLabel = new Label("Ingredients");
         headerLabel.setStyle(
                 "-fx-font-size: 22px;" +
                         "-fx-font-weight: bold;" +
