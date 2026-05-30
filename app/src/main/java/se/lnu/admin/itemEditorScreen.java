@@ -5,14 +5,24 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import se.lnu.MenuItem;
 import se.lnu.database.DatabaseHelper;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 public class itemEditorScreen {
+  private static File selectedImageFile;
+  private static Label imageLabel;
 
   public static void show(Stage stage) {
 
@@ -229,6 +239,13 @@ public class itemEditorScreen {
                         -fx-background-radius: 10;
                         """);
 
+        Button editImage = createSecondaryButton("Edit image");
+
+        imageLabel = new Label("No image selected");
+        imageLabel.setStyle("-fx-text-fill: #666666;");
+
+        editImage.setOnAction(event -> chooseImage());
+
         Button saveButton =
           new Button("Save Changes");
 
@@ -245,50 +262,87 @@ public class itemEditorScreen {
 
           try {
 
-            String newName =
-              nameField.getText();
+            String newName = nameField.getText().trim();
+            String newDescription = descriptionField.getText().trim();
+            double newPrice = Double.parseDouble(priceField.getText());
 
-            String newDescription =
-              descriptionField.getText();
+            // Handle image replacement
+            if (selectedImageFile != null) {
 
-            double newPrice =
-              Double.parseDouble(
-                priceField.getText()
-              );
+              String oldImageName =
+                      toSnakeCase(item.getName()) + ".png";
+
+              Path imageDirectory = Paths.get(
+                      "app/src/main/resources/images/items"
+              ).toAbsolutePath();
+
+              Path oldImagePath =
+                      imageDirectory.resolve(oldImageName);
+
+              try {
+
+                // Delete previous image if it exists
+                Files.deleteIfExists(oldImagePath);
+
+                // Save new image with updated item name
+                String newImageName =
+                        toSnakeCase(newName) + ".png";
+
+                Path newImagePath =
+                        imageDirectory.resolve(newImageName);
+
+                Files.createDirectories(
+                        newImagePath.getParent()
+                );
+
+                BufferedImage image =
+                        ImageIO.read(selectedImageFile);
+
+                if (image == null) {
+                  System.out.println("Invalid image file");
+                  return;
+                }
+
+                ImageIO.write(
+                        image,
+                        "png",
+                        newImagePath.toFile()
+                );
+
+              } catch (IOException ex) {
+                ex.printStackTrace();
+                System.out.println(
+                        "Could not replace image."
+                );
+                return;
+              }
+            }
 
             DatabaseHelper.updateItemName(
-              item.getId(),
-              newName
+                    item.getId(),
+                    newName
             );
 
             DatabaseHelper.updateItemPrice(
-              item.getId(),
-              newPrice
+                    item.getId(),
+                    newPrice
             );
+
             DatabaseHelper.updateItemDescription(
-              item.getId(),
-              newDescription
+                    item.getId(),
+                    newDescription
             );
 
-            // UPDATE UI
-
+            // Update UI
             itemName.setText(newName);
-
-            descriptionLabel.setText(
-              newDescription
-            );
-
-            priceLabel.setText(
-              newPrice + " kr"
-            );
+            descriptionLabel.setText(newDescription);
+            priceLabel.setText(newPrice + " kr");
 
             popupStage.close();
 
           } catch (NumberFormatException ex) {
 
-            System.out.println(
-              "Invalid price"
-            );
+            System.out.println("Invalid price");
           }
         });
 
@@ -297,6 +351,8 @@ public class itemEditorScreen {
           nameField,
           descriptionField,
           priceField,
+          editImage,
+          imageLabel,
           saveButton
         );
 
@@ -410,6 +466,66 @@ public class itemEditorScreen {
     stage.setScene(scene);
 
     stage.setMaximized(true);
+  }
+
+  private static Button createSecondaryButton(String text) {
+    Button button = new Button(text);
+
+    button.setPrefWidth(260);
+    button.setPrefHeight(46);
+
+    String normalStyle =
+            "-fx-font-size: 15px;" +
+                    "-fx-font-weight: bold;" +
+                    "-fx-background-color: rgba(255,255,255,0.92);" +
+                    "-fx-text-fill: #333333;" +
+                    "-fx-background-radius: 16;" +
+                    "-fx-border-color: rgba(255,152,0,0.40);" +
+                    "-fx-border-width: 1.2;" +
+                    "-fx-border-radius: 16;" +
+                    "-fx-cursor: hand;";
+
+    String hoverStyle =
+            "-fx-font-size: 15px;" +
+                    "-fx-font-weight: bold;" +
+                    "-fx-background-color: rgba(255,152,0,0.92);" +
+                    "-fx-text-fill: white;" +
+                    "-fx-background-radius: 16;" +
+                    "-fx-border-color: white;" +
+                    "-fx-border-width: 1.2;" +
+                    "-fx-border-radius: 16;" +
+                    "-fx-cursor: hand;";
+
+    button.setStyle(normalStyle);
+    button.setOnMouseEntered(e -> button.setStyle(hoverStyle));
+    button.setOnMouseExited(e -> button.setStyle(normalStyle));
+
+    return button;
+  }
+
+  private static void chooseImage() {
+    FileChooser fileChooser = new FileChooser();
+
+    fileChooser.setTitle("Select PNG Image");
+
+    fileChooser.getExtensionFilters().add(
+            new FileChooser.ExtensionFilter("PNG Images", "*.png")
+    );
+
+    File file = fileChooser.showOpenDialog(null);
+
+    if (file != null) {
+      selectedImageFile = file;
+      imageLabel.setText(file.getName());
+    }
+  }
+
+  private static String toSnakeCase(String text) {
+    return text
+            .trim()
+            .toLowerCase()
+            .replaceAll("[^a-z0-9\\s]", "")
+            .replaceAll("\\s+", "_");
   }
 }
 
