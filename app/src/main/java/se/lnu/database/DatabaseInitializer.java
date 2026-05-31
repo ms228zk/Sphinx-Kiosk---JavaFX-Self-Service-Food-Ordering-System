@@ -130,7 +130,7 @@ public class DatabaseInitializer {
        */
       if (hasData(conn, "MenuItem")) {
         System.out.println("Database already contains menu items. Skipping default seed.");
-        return;
+        //return;
       }
 
       /*

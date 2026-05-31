@@ -1,5 +1,8 @@
 package se.lnu;
 
+import javafx.animation.FadeTransition;
+import javafx.animation.ScaleTransition;
+import javafx.animation.TranslateTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -11,6 +14,7 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.SVGPath;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 public class OrderTypeScreen {
 
@@ -26,14 +30,14 @@ public class OrderTypeScreen {
     HBox topBar = new HBox(12, backButton, spacer, homeButton);
     topBar.setAlignment(Pos.CENTER_LEFT);
 
-    Label badge = new Label("CHOOSE YOUR ORDER TYPE");
+    Label badge = new Label("ORDER TYPE");
     badge.setStyle(
-            "-fx-font-size: 13px;" +
+            "-fx-font-size: 14px;" +
                     "-fx-font-weight: bold;" +
                     "-fx-text-fill: #c62828;" +
-                    "-fx-background-color: rgba(255, 193, 7, 0.28);" +
-                    "-fx-padding: 7 17;" +
-                    "-fx-background-radius: 20;"
+                    "-fx-background-color: rgba(255, 193, 7, 0.30);" +
+                    "-fx-padding: 8 22;" +
+                    "-fx-background-radius: 22;"
     );
 
     Label title = new Label("How would you like to order?");
@@ -46,13 +50,13 @@ public class OrderTypeScreen {
     Button eatInCard = createOrderTypeCard(
             "IN",
             "Eat-in",
-            "Enjoy here"
+            "Enjoy your meal here"
     );
 
     Button takeawayCard = createOrderTypeCard(
             "GO",
             "Takeaway",
-            "Take it to go"
+            "Packed to go"
     );
 
     eatInCard.setOnAction(e -> {
@@ -65,19 +69,13 @@ public class OrderTypeScreen {
       CategoryScreen.show(stage);
     });
 
-    HBox optionCards = new HBox(34, eatInCard, takeawayCard);
+    HBox optionCards = new HBox(38, eatInCard, takeawayCard);
     optionCards.setAlignment(Pos.CENTER);
 
-    VBox card = new VBox(
-            34,
-            badge,
-            title,
-            optionCards
-    );
-
+    VBox card = new VBox(34, badge, title, optionCards);
     card.setAlignment(Pos.CENTER);
-    card.setPadding(new Insets(42, 60, 42, 60));
-    card.setMaxWidth(860);
+    card.setPadding(new Insets(42, 64, 42, 64));
+    card.setMaxWidth(880);
     card.setStyle(ScreenStyle.createCardStyle());
 
     BorderPane root = new BorderPane();
@@ -91,6 +89,8 @@ public class OrderTypeScreen {
     stage.setTitle("Choose Order Type");
     stage.setScene(scene);
     WindowManager.enforceStandardSize(stage);
+
+    playIntroAnimation(card, optionCards);
   }
 
   private static Button createOrderTypeCard(
@@ -99,11 +99,11 @@ public class OrderTypeScreen {
           String descriptionText
   ) {
     Label accentBar = new Label("");
-    accentBar.setMinHeight(10);
+    accentBar.setMinHeight(12);
     accentBar.setMaxWidth(Double.MAX_VALUE);
     accentBar.setStyle(
             "-fx-background-color: linear-gradient(to right, #ffb300, #ff6d00);" +
-                    "-fx-background-radius: 28 28 0 0;"
+                    "-fx-background-radius: 30 30 0 0;"
     );
 
     Node icon = createIcon(iconText);
@@ -118,6 +118,7 @@ public class OrderTypeScreen {
     Label description = new Label(descriptionText);
     description.setStyle(
             "-fx-font-size: 17px;" +
+                    "-fx-font-weight: bold;" +
                     "-fx-text-fill: #666666;"
     );
 
@@ -128,14 +129,14 @@ public class OrderTypeScreen {
     Button cardButton = new Button();
     cardButton.setGraphic(content);
     cardButton.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-    cardButton.setPrefWidth(285);
-    cardButton.setPrefHeight(270);
+    cardButton.setPrefWidth(305);
+    cardButton.setPrefHeight(282);
 
     String normalStyle =
             "-fx-background-color: linear-gradient(to bottom right, #ffffff, #fff5df);" +
                     "-fx-background-radius: 30;" +
-                    "-fx-border-color: rgba(255,152,0,0.36);" +
-                    "-fx-border-width: 1.5;" +
+                    "-fx-border-color: rgba(255,152,0,0.38);" +
+                    "-fx-border-width: 1.6;" +
                     "-fx-border-radius: 30;" +
                     "-fx-cursor: hand;" +
                     "-fx-padding: 0;" +
@@ -144,16 +145,32 @@ public class OrderTypeScreen {
     String hoverStyle =
             "-fx-background-color: linear-gradient(to bottom right, #fff1cf, #ffffff);" +
                     "-fx-background-radius: 30;" +
-                    "-fx-border-color: rgba(255,109,0,0.78);" +
-                    "-fx-border-width: 2;" +
+                    "-fx-border-color: rgba(255,109,0,0.82);" +
+                    "-fx-border-width: 2.2;" +
                     "-fx-border-radius: 30;" +
                     "-fx-cursor: hand;" +
                     "-fx-padding: 0;" +
-                    "-fx-effect: dropshadow(gaussian, rgba(255,109,0,0.34), 24, 0, 0, 8);";
+                    "-fx-effect: dropshadow(gaussian, rgba(255,109,0,0.34), 26, 0, 0, 8);";
 
     cardButton.setStyle(normalStyle);
-    cardButton.setOnMouseEntered(e -> cardButton.setStyle(hoverStyle));
-    cardButton.setOnMouseExited(e -> cardButton.setStyle(normalStyle));
+
+    cardButton.setOnMouseEntered(e -> {
+      cardButton.setStyle(hoverStyle);
+
+      ScaleTransition scale = new ScaleTransition(Duration.millis(140), cardButton);
+      scale.setToX(1.035);
+      scale.setToY(1.035);
+      scale.play();
+    });
+
+    cardButton.setOnMouseExited(e -> {
+      cardButton.setStyle(normalStyle);
+
+      ScaleTransition scale = new ScaleTransition(Duration.millis(140), cardButton);
+      scale.setToX(1.0);
+      scale.setToY(1.0);
+      scale.play();
+    });
 
     return cardButton;
   }
@@ -190,19 +207,50 @@ public class OrderTypeScreen {
 
     StackPane circle = new StackPane(icon);
 
-    circle.setPrefSize(82, 82);
-    circle.setMinSize(82, 82);
-    circle.setMaxSize(82, 82);
+    circle.setPrefSize(86, 86);
+    circle.setMinSize(86, 86);
+    circle.setMaxSize(86, 86);
 
     circle.setStyle(
             "-fx-background-color: white;" +
-                    "-fx-background-radius: 41;" +
-                    "-fx-border-color: rgba(255,152,0,0.58);" +
-                    "-fx-border-width: 1.7;" +
-                    "-fx-border-radius: 41;" +
+                    "-fx-background-radius: 43;" +
+                    "-fx-border-color: rgba(255,152,0,0.62);" +
+                    "-fx-border-width: 1.8;" +
+                    "-fx-border-radius: 43;" +
                     "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.14), 13, 0, 0, 3);"
     );
 
     return circle;
+  }
+
+  private static void playIntroAnimation(VBox card, HBox optionCards) {
+    card.setOpacity(0);
+    card.setTranslateY(18);
+
+    FadeTransition fade = new FadeTransition(Duration.millis(550), card);
+    fade.setFromValue(0);
+    fade.setToValue(1);
+
+    TranslateTransition slide = new TranslateTransition(Duration.millis(550), card);
+    slide.setFromY(18);
+    slide.setToY(0);
+
+    optionCards.setOpacity(0);
+    optionCards.setTranslateY(20);
+
+    FadeTransition cardsFade = new FadeTransition(Duration.millis(750), optionCards);
+    cardsFade.setFromValue(0);
+    cardsFade.setToValue(1);
+    cardsFade.setDelay(Duration.millis(120));
+
+    TranslateTransition cardsSlide = new TranslateTransition(Duration.millis(750), optionCards);
+    cardsSlide.setFromY(20);
+    cardsSlide.setToY(0);
+    cardsSlide.setDelay(Duration.millis(120));
+
+    fade.play();
+    slide.play();
+    cardsFade.play();
+    cardsSlide.play();
   }
 }
