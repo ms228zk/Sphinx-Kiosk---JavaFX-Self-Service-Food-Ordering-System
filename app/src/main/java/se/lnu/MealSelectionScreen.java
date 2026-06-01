@@ -664,7 +664,7 @@ public class MealSelectionScreen {
     box.setMaxWidth(560);
     box.setPadding(new Insets(20, 24, 20, 24));
     box.setStyle(createWhiteCardStyle());
-
+    
     return box;
   }
 
