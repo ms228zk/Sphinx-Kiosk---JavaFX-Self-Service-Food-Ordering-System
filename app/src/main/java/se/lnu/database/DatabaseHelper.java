@@ -188,10 +188,22 @@ public class DatabaseHelper {
         }
     }
 
-    private static String sanitizeImageName(String name) {
-        return name.toLowerCase()
-                .replaceAll("\\s+", "_")
-                .replaceAll("[^a-z0-9_]", "");
+    public static String sanitizeImageName(String name) {
+        if (name == null) {
+            return "item";
+        }
+
+        String cleanedName = name
+                .trim()
+                .toLowerCase()
+                .replaceAll("[^a-z0-9\\s]", "")
+                .replaceAll("\\s+", "_");
+
+        if (cleanedName.isBlank()) {
+            return "item";
+        }
+
+        return cleanedName;
     }
 
     public static List<RemovableIngredient> getRemovableIngredientsByItem(int itemId) {

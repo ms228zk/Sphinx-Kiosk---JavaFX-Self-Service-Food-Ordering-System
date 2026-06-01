@@ -135,7 +135,7 @@ public class AdminAddMenuItemScreen {
     imageLabel = new Label("No image selected");
     imageLabel.setStyle("-fx-text-fill: #666666;");
 
-    imageButton.setOnAction(e -> chooseImage());
+    imageButton.setOnAction(e -> chooseImage(stage));
 
     VBox extrasSection = createExtrasSection();
     VBox removableSection = createRemovableIngredientsSection();
@@ -623,29 +623,12 @@ public class AdminAddMenuItemScreen {
       return;
     }
 
+    String imageFileName = toSnakeCase(name) + ".png";
+
     if (selectedImageFile != null) {
-      String snakeCaseName = toSnakeCase(name);
-      String imageFileName = snakeCaseName + ".png";
+      boolean imageSaved = saveSelectedImageToItemsFolder(selectedImageFile, imageFileName);
 
-      Path destination = Paths.get(
-              "app/src/main/resources/images/items",
-              imageFileName
-      ).toAbsolutePath();
-
-      try {
-        Files.createDirectories(destination.getParent());
-
-        BufferedImage image = ImageIO.read(selectedImageFile);
-
-        if (image == null) {
-          showWarning("Image Error", "The selected file could not be read as an image.");
-          return;
-        }
-
-        ImageIO.write(image, "png", destination.toFile());
-
-      } catch (IOException e) {
-        e.printStackTrace();
+      if (!imageSaved) {
         showWarning("Image Error", "Could not save image file.");
         return;
       }
@@ -682,6 +665,46 @@ public class AdminAddMenuItemScreen {
                       "-fx-text-fill: #c62828;"
       );
     }
+  }
+
+  private static boolean saveSelectedImageToItemsFolder(File selectedFile, String imageFileName) {
+    try {
+      if (selectedFile == null || imageFileName == null || imageFileName.isBlank()) {
+        return false;
+      }
+
+      Path destinationFolder = getItemsImageFolderPath();
+
+      Files.createDirectories(destinationFolder);
+
+      Path destinationFile = destinationFolder.resolve(imageFileName);
+
+      BufferedImage image = ImageIO.read(selectedFile);
+
+      if (image == null) {
+        return false;
+      }
+
+      ImageIO.write(image, "png", destinationFile.toFile());
+
+      System.out.println("Saved image to: " + destinationFile.toAbsolutePath());
+
+      return true;
+
+    } catch (IOException e) {
+      e.printStackTrace();
+      return false;
+    }
+  }
+
+  private static Path getItemsImageFolderPath() {
+    Path appModulePath = Paths.get("app", "src", "main", "resources", "images", "items");
+
+    if (Files.exists(appModulePath)) {
+      return appModulePath;
+    }
+
+    return Paths.get("src", "main", "resources", "images", "items");
   }
 
   private static List<Integer> getSelectedIds(List<CheckBox> checkBoxes) {
@@ -942,7 +965,7 @@ public class AdminAddMenuItemScreen {
     return button;
   }
 
-  private static void chooseImage() {
+  private static void chooseImage(Stage stage) {
     FileChooser fileChooser = new FileChooser();
 
     fileChooser.setTitle("Select PNG Image");
@@ -951,7 +974,7 @@ public class AdminAddMenuItemScreen {
             new FileChooser.ExtensionFilter("PNG Images", "*.png")
     );
 
-    File file = fileChooser.showOpenDialog(null);
+    File file = fileChooser.showOpenDialog(stage);
 
     if (file != null) {
       selectedImageFile = file;

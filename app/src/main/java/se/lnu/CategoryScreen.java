@@ -1,5 +1,7 @@
 package se.lnu;
 
+import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,6 +13,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
@@ -321,15 +324,11 @@ public class CategoryScreen {
     detailBox.setAlignment(Pos.CENTER_LEFT);
 
     if (!cartItem.getExtrasText().isBlank()) {
-      detailBox.getChildren().add(
-              createDetailLabel("+ " + cartItem.getExtrasText())
-      );
+      detailBox.getChildren().add(createDetailLabel("+ " + cartItem.getExtrasText()));
     }
 
     if (!cartItem.getRemovedText().isBlank()) {
-      detailBox.getChildren().add(
-              createDetailLabel("- " + cartItem.getRemovedText())
-      );
+      detailBox.getChildren().add(createDetailLabel("- " + cartItem.getRemovedText()));
     }
 
     if (!cartItem.getComboChoicesText().isBlank()) {
@@ -548,7 +547,7 @@ public class CategoryScreen {
   }
 
   private static VBox createItemCard(Stage stage, MenuItem item) {
-    ImageView itemImage = ImageLoader.createImageView(item.getImageFileName(), 170, 130);
+    ImageView itemImage = createSafeImageView(item.getImageFileName(), 170, 130);
 
     VBox imageBox = new VBox();
     imageBox.setStyle(
@@ -626,6 +625,126 @@ public class CategoryScreen {
     addHoverAnimation(card);
 
     return card;
+  }
+
+  private static ImageView createSafeImageView(String imageFileName, double width, double height) {
+    ImageView imageView = new ImageView();
+
+    imageView.setFitWidth(width);
+    imageView.setFitHeight(height);
+    imageView.setPreserveRatio(true);
+    imageView.setSmooth(true);
+
+    if (imageFileName == null || imageFileName.isBlank()) {
+      System.out.println("No image filename found.");
+      return imageView;
+    }
+
+    String cleanedFileName = imageFileName.trim();
+
+    Image image = loadImage(cleanedFileName);
+
+    if (image != null && !image.isError()) {
+      imageView.setImage(image);
+      System.out.println("Image loaded successfully: " + cleanedFileName);
+    } else {
+      System.out.println("Image could not be loaded: " + cleanedFileName);
+    }
+
+    return imageView;
+  }
+
+  private static Image loadImage(String imagePath) {
+    try {
+      if (imagePath == null || imagePath.isBlank()) {
+        System.out.println("Image path is empty.");
+        return null;
+      }
+
+      String cleanedPath = imagePath.trim();
+
+      /*
+       * Case 1:
+       * Load from compiled resources.
+       * This works for images that were already inside resources before running.
+       */
+      URL resourceUrl = CategoryScreen.class.getResource("/images/items/" + cleanedPath);
+
+      if (resourceUrl != null) {
+        System.out.println("Loaded image from compiled resources: " + resourceUrl);
+        return new Image(resourceUrl.toExternalForm());
+      }
+
+      /*
+       * Case 2:
+       * If the image path already includes images/items/...
+       */
+      resourceUrl = CategoryScreen.class.getResource("/" + cleanedPath);
+
+      if (resourceUrl != null) {
+        System.out.println("Loaded image from given resource path: " + resourceUrl);
+        return new Image(resourceUrl.toExternalForm());
+      }
+
+      /*
+       * Case 3:
+       * IMPORTANT:
+       * Your admin screen may save into:
+       * app/src/main/resources/images/items/
+       */
+      File appModuleFile = new File("app/src/main/resources/images/items/" + cleanedPath);
+
+      if (appModuleFile.exists()) {
+        System.out.println("Loaded image from app module folder: " + appModuleFile.getAbsolutePath());
+        return new Image(appModuleFile.toURI().toString());
+      }
+
+      /*
+       * Case 4:
+       * If IntelliJ runs inside the app folder, this path will work.
+       */
+      File normalFile = new File("src/main/resources/images/items/" + cleanedPath);
+
+      if (normalFile.exists()) {
+        System.out.println("Loaded image from normal resources folder: " + normalFile.getAbsolutePath());
+        return new Image(normalFile.toURI().toString());
+      }
+
+      /*
+       * Case 5:
+       * In some Gradle/Maven runs, copied resources may be inside build/resources/main.
+       */
+      File buildResourcesFile = new File("build/resources/main/images/items/" + cleanedPath);
+
+      if (buildResourcesFile.exists()) {
+        System.out.println("Loaded image from build resources folder: " + buildResourcesFile.getAbsolutePath());
+        return new Image(buildResourcesFile.toURI().toString());
+      }
+
+      /*
+       * Case 6:
+       * If the admin somehow saved the full file path.
+       */
+      File fullPathFile = new File(cleanedPath);
+
+      if (fullPathFile.exists()) {
+        System.out.println("Loaded image from full file path: " + fullPathFile.getAbsolutePath());
+        return new Image(fullPathFile.toURI().toString());
+      }
+
+      System.out.println("Image not found anywhere: " + cleanedPath);
+      System.out.println("Checked:");
+      System.out.println("- /images/items/" + cleanedPath);
+      System.out.println("- app/src/main/resources/images/items/" + cleanedPath);
+      System.out.println("- src/main/resources/images/items/" + cleanedPath);
+      System.out.println("- build/resources/main/images/items/" + cleanedPath);
+
+    } catch (Exception e) {
+      System.out.println("Could not load image: " + imagePath);
+      e.printStackTrace();
+    }
+
+    return null;
   }
 
   private static void addHoverAnimation(javafx.scene.Node node) {
