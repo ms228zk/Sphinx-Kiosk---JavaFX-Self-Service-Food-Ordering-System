@@ -48,7 +48,7 @@ public class MealSelectionScreen {
 
     Label title = new Label(item.getName());
     title.setStyle(
-            "-fx-font-size: 42px;" +
+            "-fx-font-size: 36px;" +
                     "-fx-font-weight: bold;" +
                     "-fx-text-fill: #1f1f1f;"
     );
@@ -58,35 +58,33 @@ public class MealSelectionScreen {
     description.setMaxWidth(520);
     description.setAlignment(Pos.CENTER);
     description.setStyle(
-            "-fx-font-size: 17px;" +
+            "-fx-font-size: 15px;" +
                     "-fx-text-fill: #555555;"
     );
 
     Label priceLabel = new Label("Unit price: " + String.format("%.2f kr", item.getPrice()));
     priceLabel.setStyle(
-            "-fx-font-size: 19px;" +
+            "-fx-font-size: 17px;" +
                     "-fx-text-fill: #1f1f1f;"
     );
 
-    Label itemTotalLabel = new Label();
-    itemTotalLabel.setStyle(
-            "-fx-font-size: 22px;" +
+    Label currentTotalLabel = new Label();
+    currentTotalLabel.setStyle(
+            "-fx-font-size: 19px;" +
                     "-fx-font-weight: bold;" +
-                    "-fx-text-fill: #1f1f1f;" +
-                    "-fx-background-color: rgba(255,152,0,0.12);" +
-                    "-fx-background-radius: 18;" +
-                    "-fx-padding: 10 24 10 24;"
+                    "-fx-text-fill: #FF8C00;"
     );
 
     Button minusButton = new Button("-");
     Button plusButton = new Button("+");
 
     String quantityButtonStyle =
-            "-fx-font-size: 20px;" +
+            "-fx-font-size: 18px;" +
                     "-fx-font-weight: bold;" +
                     "-fx-background-color: linear-gradient(to bottom, #ffae00, #ff8c00);" +
                     "-fx-text-fill: white;" +
-                    "-fx-padding: 10 20;" +
+                    "-fx-min-width: 48;" +
+                    "-fx-min-height: 44;" +
                     "-fx-background-radius: 14;" +
                     "-fx-cursor: hand;" +
                     "-fx-effect: dropshadow(gaussian, rgba(255,140,0,0.25), 7, 0, 0, 2);";
@@ -96,10 +94,10 @@ public class MealSelectionScreen {
 
     Label quantityLabel = new Label(String.valueOf(App.selectedQuantity));
     quantityLabel.setStyle(
-            "-fx-font-size: 22px;" +
+            "-fx-font-size: 20px;" +
                     "-fx-font-weight: bold;" +
                     "-fx-text-fill: #1f1f1f;" +
-                    "-fx-min-width: 42;" +
+                    "-fx-min-width: 38;" +
                     "-fx-alignment: center;"
     );
     quantityLabel.setAlignment(Pos.CENTER);
@@ -127,7 +125,7 @@ public class MealSelectionScreen {
               (item.getPrice() + extrasPrice + comboPrice[0])
                       * App.selectedQuantity;
 
-      itemTotalLabel.setText("Item total: " + String.format("%.2f kr", finalTotal));
+      currentTotalLabel.setText("Current total: " + String.format("%.2f kr", finalTotal));
     };
 
     for (CheckBox checkBox : extrasBoxes) {
@@ -140,22 +138,22 @@ public class MealSelectionScreen {
 
     if (isCombo) {
       VBox comboSizeSelector = createComboSizeSelector(comboSize, comboPrice, updateTotal);
-
       comboSelection = createComboSelection(item, comboSizeSelector);
-
       comboBox = comboSelection.comboBox;
     }
 
-    List<RemovableIngredient> removableIngredients = DatabaseHelper.getRemovableIngredientsByItem(item.getId());
+    List<RemovableIngredient> removableIngredients =
+            DatabaseHelper.getRemovableIngredientsByItem(item.getId());
+
     List<CheckBox> removablesCheckBoxes = new ArrayList<>();
 
     for (RemovableIngredient r : removableIngredients) {
       CheckBox box = new CheckBox(r.name());
       box.setStyle(
-              "-fx-font-size: 16px;" +
+              "-fx-font-size: 15px;" +
                       "-fx-font-weight: 600;" +
                       "-fx-text-fill: #202020;" +
-                      "-fx-padding: 4 0 4 0;" +
+                      "-fx-padding: 3 0;" +
                       "-fx-cursor: hand;"
       );
       removablesCheckBoxes.add(box);
@@ -177,28 +175,40 @@ public class MealSelectionScreen {
       updateTotal.run();
     });
 
-    HBox quantityBox = new HBox(16, minusButton, quantityLabel, plusButton);
+    HBox quantityBox = new HBox(14, minusButton, quantityLabel, plusButton);
     quantityBox.setAlignment(Pos.CENTER);
 
-    VBox extrasBox = createBox(extrasCheckBoxes, "Optional Extras", "Optional add-ons increase the item price");
-    VBox removablesBox = createBox(removablesCheckBoxes, "Remove Ingredients", "Remove unwanted parts");
+    VBox extrasBox = createBox(
+            extrasCheckBoxes,
+            "Optional Extras",
+            "Optional add-ons increase the item price",
+            false
+    );
 
-    HBox ingredientChanges;
+    VBox removablesBox = createBox(
+            removablesCheckBoxes,
+            "Remove Ingredients",
+            "Remove unwanted parts",
+            isCombo
+    );
 
     extrasBox.setPrefWidth(360);
     extrasBox.setMaxWidth(360);
 
-    ingredientChanges = new HBox(30, extrasBox, removablesBox);
-    ingredientChanges.setAlignment(Pos.CENTER);
+    removablesBox.setPrefWidth(isCombo ? 520 : 360);
+    removablesBox.setMaxWidth(isCombo ? 520 : 360);
+
+    HBox ingredientChanges = new HBox(20, extrasBox, removablesBox);
+    ingredientChanges.setAlignment(Pos.TOP_CENTER);
 
     Label statusLabel = new Label("");
     statusLabel.setOpacity(0);
     statusLabel.setStyle(
-            "-fx-font-size: 16px;" +
+            "-fx-font-size: 15px;" +
                     "-fx-text-fill: white;" +
                     "-fx-background-color: #4CAF50;" +
-                    "-fx-padding: 10 20;" +
-                    "-fx-background-radius: 15;" +
+                    "-fx-padding: 9 18;" +
+                    "-fx-background-radius: 14;" +
                     "-fx-font-weight: bold;"
     );
 
@@ -208,8 +218,8 @@ public class MealSelectionScreen {
                     "-fx-font-weight: bold;" +
                     "-fx-background-color: linear-gradient(to bottom, #ffae00, #ff8c00);" +
                     "-fx-text-fill: white;" +
-                    "-fx-padding: 13 30;" +
-                    "-fx-background-radius: 14;" +
+                    "-fx-padding: 12 30;" +
+                    "-fx-background-radius: 15;" +
                     "-fx-cursor: hand;" +
                     "-fx-effect: dropshadow(gaussian, rgba(255,140,0,0.30), 8, 0, 0, 2);"
     );
@@ -233,7 +243,13 @@ public class MealSelectionScreen {
           comboChoices.add(groupName + ": " + getSelectedRadioText(group));
         }
 
-        comboChoices.add("Combo Size: " + comboSize[0] + " (+" + String.format("%.2f kr", comboPrice[0]) + ")");
+        comboChoices.add(
+                "Combo Size: " +
+                        comboSize[0] +
+                        " (+" +
+                        String.format("%.2f kr", comboPrice[0]) +
+                        ")"
+        );
 
         List<String> comboCustomizations = getSelectedExtras(
                 comboCustomizeBoxes.toArray(new CheckBox[0])
@@ -243,7 +259,13 @@ public class MealSelectionScreen {
           comboChoices.add("Customizations: " + String.join(", ", comboCustomizations));
         }
 
-        if (!finalComboSelection.giftLabel.getText().isBlank()) {
+        if (item.getName().toLowerCase().contains("kids combo")) {
+          if (!finalComboSelection.giftLabel.getText().isBlank()) {
+            comboChoices.add(finalComboSelection.giftLabel.getText());
+          } else {
+            comboChoices.add("Surprise gift included");
+          }
+        } else if (!finalComboSelection.giftLabel.getText().isBlank()) {
           comboChoices.add(finalComboSelection.giftLabel.getText());
         }
       }
@@ -271,23 +293,17 @@ public class MealSelectionScreen {
       pause.play();
     });
 
-    VBox centerContent = new VBox(18);
+    VBox centerContent = new VBox(14);
     centerContent.getChildren().addAll(title, description, priceLabel);
 
     if (comboBox != null) {
       centerContent.getChildren().add(comboBox);
     }
 
-    centerContent.getChildren().addAll(
-            ingredientChanges,
-            quantityBox,
-            itemTotalLabel,
-            confirmButton,
-            statusLabel
-    );
+    centerContent.getChildren().add(ingredientChanges);
 
     centerContent.setAlignment(Pos.CENTER);
-    centerContent.setPadding(new Insets(20));
+    centerContent.setPadding(new Insets(16, 20, 125, 20));
 
     updateTotal.run();
 
@@ -298,11 +314,23 @@ public class MealSelectionScreen {
     scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
     scrollPane.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
 
+    HBox bottomActionBar = createBottomActionBar(
+            item.getName(),
+            currentTotalLabel,
+            quantityBox,
+            confirmButton
+    );
+
+    VBox bottomArea = new VBox(8, bottomActionBar, statusLabel);
+    bottomArea.setAlignment(Pos.CENTER);
+    bottomArea.setPadding(new Insets(6, 0, 0, 0));
+
     BorderPane root = new BorderPane();
     root.setPadding(new Insets(20));
     root.setBackground(ScreenStyle.createBackground());
     root.setTop(topBar);
     root.setCenter(scrollPane);
+    root.setBottom(bottomArea);
 
     Scene scene = new Scene(root, WindowManager.WINDOW_WIDTH, WindowManager.WINDOW_HEIGHT);
     stage.setScene(scene);
@@ -310,36 +338,76 @@ public class MealSelectionScreen {
     WindowManager.enforceStandardSize(stage);
   }
 
+  private static HBox createBottomActionBar(
+          String itemName,
+          Label currentTotalLabel,
+          HBox quantityBox,
+          Button confirmButton
+  ) {
+    Label bottomItemName = new Label(itemName);
+    bottomItemName.setWrapText(true);
+    bottomItemName.setMaxWidth(260);
+    bottomItemName.setStyle(
+            "-fx-font-size: 17px;" +
+                    "-fx-font-weight: bold;" +
+                    "-fx-text-fill: #1f1f1f;"
+    );
+
+    VBox summaryBox = new VBox(3, bottomItemName, currentTotalLabel);
+    summaryBox.setAlignment(Pos.CENTER_LEFT);
+
+    Region spacerOne = new Region();
+    Region spacerTwo = new Region();
+
+    HBox.setHgrow(spacerOne, Priority.ALWAYS);
+    HBox.setHgrow(spacerTwo, Priority.ALWAYS);
+
+    HBox bar = new HBox(24, summaryBox, spacerOne, quantityBox, spacerTwo, confirmButton);
+    bar.setAlignment(Pos.CENTER);
+    bar.setPadding(new Insets(10, 22, 10, 22));
+    bar.setMaxWidth(900);
+    bar.setStyle(
+            "-fx-background-color: rgba(255,255,255,0.97);" +
+                    "-fx-background-radius: 24;" +
+                    "-fx-border-color: rgba(255,152,0,0.28);" +
+                    "-fx-border-width: 1.4;" +
+                    "-fx-border-radius: 24;" +
+                    "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.16), 16, 0, 0, 4);"
+    );
+
+    return bar;
+  }
+
   private static ComboSelection createComboSelection(
           MenuItem item,
           VBox comboSizeSelector
   ) {
-    List<ComboChoiceGroup> comboGroups = DatabaseHelper.getComboChoiceGroupsByItem(item.getId());
+    List<ComboChoiceGroup> comboGroups =
+            DatabaseHelper.getComboChoiceGroupsByItem(item.getId());
 
-    VBox comboBox = new VBox(18);
+    VBox comboBox = new VBox(14);
     comboBox.setAlignment(Pos.CENTER);
-    comboBox.setMaxWidth(850);
-    comboBox.setPadding(new Insets(24, 30, 24, 30));
+    comboBox.setMaxWidth(820);
+    comboBox.setPadding(new Insets(18, 22, 18, 22));
     comboBox.setStyle(createWhiteCardStyle());
 
     Label comboTitle = new Label("Required Combo Choices");
     comboTitle.setStyle(
-            "-fx-font-size: 24px;" +
+            "-fx-font-size: 22px;" +
                     "-fx-font-weight: bold;" +
                     "-fx-text-fill: #1f1f1f;"
     );
 
     Label comboSubtitle = new Label("Choose your main, side, drink, and combo size.");
     comboSubtitle.setWrapText(true);
-    comboSubtitle.setMaxWidth(650);
+    comboSubtitle.setMaxWidth(620);
     comboSubtitle.setAlignment(Pos.CENTER);
     comboSubtitle.setStyle(
-            "-fx-font-size: 15px;" +
+            "-fx-font-size: 14px;" +
                     "-fx-text-fill: #6f6f6f;"
     );
 
-    comboBox.getChildren().addAll(comboTitle, comboSubtitle);
-    comboBox.getChildren().add(comboSizeSelector);
+    comboBox.getChildren().addAll(comboTitle, comboSubtitle, comboSizeSelector);
 
     List<ToggleGroup> toggleGroups = new ArrayList<>();
     List<String> groupNames = new ArrayList<>();
@@ -355,11 +423,11 @@ public class MealSelectionScreen {
     }
 
     if (sections.size() >= 3) {
-      HBox row = new HBox(22, sections.get(0), sections.get(1), sections.get(2));
+      HBox row = new HBox(16, sections.get(0), sections.get(1), sections.get(2));
       row.setAlignment(Pos.TOP_CENTER);
       comboBox.getChildren().add(row);
     } else if (sections.size() == 2) {
-      HBox row = new HBox(22, sections.get(0), sections.get(1));
+      HBox row = new HBox(16, sections.get(0), sections.get(1));
       row.setAlignment(Pos.TOP_CENTER);
       comboBox.getChildren().add(row);
     } else if (sections.size() == 1) {
@@ -437,9 +505,9 @@ public class MealSelectionScreen {
 
     VBox wrapper = new VBox(8, title, buttons);
     wrapper.setAlignment(Pos.CENTER);
-    wrapper.setPadding(new Insets(14));
-    wrapper.setPrefWidth(760);
-    wrapper.setMaxWidth(760);
+    wrapper.setPadding(new Insets(12));
+    wrapper.setPrefWidth(700);
+    wrapper.setMaxWidth(700);
     wrapper.setStyle(createSmallOptionCardStyle());
 
     return wrapper;
@@ -480,19 +548,22 @@ public class MealSelectionScreen {
             "-fx-background-radius: 20;";
   }
 
-  private static VBox createRadioSectionFromDatabase(ComboChoiceGroup group, ToggleGroup toggleGroup) {
+  private static VBox createRadioSectionFromDatabase(
+          ComboChoiceGroup group,
+          ToggleGroup toggleGroup
+  ) {
     Label titleLabel = new Label(group.getGroupName());
     titleLabel.setStyle(
-            "-fx-font-size: 17px;" +
+            "-fx-font-size: 16px;" +
                     "-fx-font-weight: bold;" +
                     "-fx-text-fill: #1f1f1f;"
     );
 
-    VBox section = new VBox(8);
+    VBox section = new VBox(7);
     section.setAlignment(Pos.CENTER_LEFT);
-    section.setPadding(new Insets(16));
-    section.setPrefWidth(360);
-    section.setMinHeight(160);
+    section.setPadding(new Insets(14));
+    section.setPrefWidth(290);
+    section.setMinHeight(140);
     section.setStyle(
             "-fx-background-color: rgba(255,248,238,0.95);" +
                     "-fx-background-radius: 20;"
@@ -510,10 +581,10 @@ public class MealSelectionScreen {
       radioButton.setUserData(option.getOptionName());
 
       radioButton.setWrapText(true);
-      radioButton.setMaxWidth(320);
+      radioButton.setMaxWidth(260);
 
       radioButton.setStyle(
-              "-fx-font-size: 14px;" +
+              "-fx-font-size: 13px;" +
                       "-fx-text-fill: #202020;" +
                       "-fx-cursor: hand;"
       );
@@ -528,10 +599,15 @@ public class MealSelectionScreen {
     return section;
   }
 
-  private static VBox createBox(List<CheckBox> checkBoxes, String title, String subtitle) {
+  private static VBox createBox(
+          List<CheckBox> checkBoxes,
+          String title,
+          String subtitle,
+          boolean compactScrollable
+  ) {
     Label titleLabel = new Label(title);
     titleLabel.setStyle(
-            "-fx-font-size: 24px;" +
+            "-fx-font-size: 22px;" +
                     "-fx-font-weight: bold;" +
                     "-fx-text-fill: #1f1f1f;"
     );
@@ -539,19 +615,22 @@ public class MealSelectionScreen {
     Label subtitleLabel = new Label(subtitle);
     subtitleLabel.setWrapText(true);
     subtitleLabel.setStyle(
-            "-fx-font-size: 15px;" +
+            "-fx-font-size: 14px;" +
                     "-fx-text-fill: #6f6f6f;" +
-                    "-fx-padding: 2 0 8 0;"
+                    "-fx-padding: 2 0 6 0;"
     );
 
-    VBox box = new VBox(8);
+    VBox box = new VBox(7);
     box.getChildren().addAll(titleLabel, subtitleLabel);
-    if (checkBoxes.size() < 10) {
-      box.getChildren().addAll(checkBoxes);
-    } else {
-      HBox hBox = new HBox(20); // spacing between columns
 
-      VBox col1 = new VBox(5); // spacing between checkboxes
+    if (checkBoxes.size() < 10) {
+      VBox list = new VBox(6);
+      list.getChildren().addAll(checkBoxes);
+      box.getChildren().add(list);
+    } else {
+      HBox columns = new HBox(20);
+
+      VBox col1 = new VBox(5);
       VBox col2 = new VBox(5);
 
       int half = (int) Math.ceil(checkBoxes.size() / 2.0);
@@ -564,22 +643,35 @@ public class MealSelectionScreen {
         }
       }
 
-      hBox.getChildren().addAll(col1, col2);
+      columns.getChildren().addAll(col1, col2);
 
-      box.getChildren().add(hBox);
+      if (compactScrollable) {
+        ScrollPane innerScroll = new ScrollPane(columns);
+        innerScroll.setFitToWidth(true);
+        innerScroll.setPannable(true);
+        innerScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        innerScroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        innerScroll.setMaxHeight(230);
+        innerScroll.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
+
+        box.getChildren().add(innerScroll);
+      } else {
+        box.getChildren().add(columns);
+      }
     }
+
     box.setAlignment(Pos.CENTER_LEFT);
     box.setMaxWidth(560);
-    box.setPadding(new Insets(24, 30, 24, 30));
+    box.setPadding(new Insets(20, 24, 20, 24));
     box.setStyle(createWhiteCardStyle());
-
+    
     return box;
   }
 
   private static VBox createKidsGiftBox(Label giftLabel) {
     Label title = new Label("Surprise Gift Game");
     title.setStyle(
-            "-fx-font-size: 20px;" +
+            "-fx-font-size: 19px;" +
                     "-fx-font-weight: bold;" +
                     "-fx-text-fill: #1f1f1f;"
     );
@@ -587,28 +679,28 @@ public class MealSelectionScreen {
     Label subtitle = new Label("Roll the dice to reveal the kids meal surprise gift.");
     subtitle.setWrapText(true);
     subtitle.setStyle(
-            "-fx-font-size: 14px;" +
+            "-fx-font-size: 13px;" +
                     "-fx-text-fill: #666666;"
     );
 
     Button rollButton = new Button("Roll Dice");
     rollButton.setStyle(
-            "-fx-font-size: 16px;" +
+            "-fx-font-size: 15px;" +
                     "-fx-font-weight: bold;" +
                     "-fx-background-color: linear-gradient(to bottom, #ffae00, #ff8c00);" +
                     "-fx-text-fill: white;" +
-                    "-fx-padding: 10 24;" +
+                    "-fx-padding: 9 22;" +
                     "-fx-background-radius: 14;" +
                     "-fx-cursor: hand;"
     );
 
     giftLabel.setStyle(
-            "-fx-font-size: 15px;" +
+            "-fx-font-size: 14px;" +
                     "-fx-font-weight: bold;" +
                     "-fx-text-fill: #1f1f1f;" +
                     "-fx-background-color: rgba(255,152,0,0.14);" +
                     "-fx-background-radius: 14;" +
-                    "-fx-padding: 9 16 9 16;"
+                    "-fx-padding: 8 14;"
     );
 
     rollButton.setOnAction(e -> {
@@ -625,10 +717,10 @@ public class MealSelectionScreen {
       giftLabel.setText("Dice " + diceNumber + " -> " + gifts[diceNumber - 1]);
     });
 
-    VBox box = new VBox(10, title, subtitle, rollButton, giftLabel);
+    VBox box = new VBox(9, title, subtitle, rollButton, giftLabel);
     box.setAlignment(Pos.CENTER);
-    box.setMaxWidth(560);
-    box.setPadding(new Insets(18));
+    box.setMaxWidth(520);
+    box.setPadding(new Insets(16));
     box.setStyle(
             "-fx-background-color: rgba(255,248,238,0.95);" +
                     "-fx-background-radius: 22;"
@@ -651,10 +743,10 @@ public class MealSelectionScreen {
     CheckBox checkBox = new CheckBox(name + " (+" + String.format("%.2f kr", price) + ")");
     checkBox.setUserData(price);
     checkBox.setStyle(
-            "-fx-font-size: 16px;" +
+            "-fx-font-size: 15px;" +
                     "-fx-font-weight: 600;" +
                     "-fx-text-fill: #202020;" +
-                    "-fx-padding: 4 0 4 0;" +
+                    "-fx-padding: 3 0;" +
                     "-fx-cursor: hand;"
     );
     return checkBox;
@@ -686,11 +778,11 @@ public class MealSelectionScreen {
 
   private static String createWhiteCardStyle() {
     return "-fx-background-color: rgba(255,255,255,0.96);" +
-            "-fx-background-radius: 26;" +
+            "-fx-background-radius: 24;" +
             "-fx-border-color: rgba(255,255,255,0.75);" +
             "-fx-border-width: 1.2;" +
-            "-fx-border-radius: 26;" +
-            "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.10), 18, 0, 0, 4);";
+            "-fx-border-radius: 24;" +
+            "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.10), 16, 0, 0, 4);";
   }
 
   private static class ComboSelection {

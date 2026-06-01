@@ -14,15 +14,21 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import se.lnu.database.DatabaseHelper;
 
 public class OrderConfirmationScreen {
 
+    private static final String ORANGE = "#FF9800";
+    private static final String GREEN = "#4CAF50";
+    private static final String TEXT_DARK = "#1f1f1f";
+    private static final String TEXT_MUTED = "#666666";
+    private static final String DIVIDER = "rgba(0,0,0,0.08)";
+
     public void start(Stage stage, Order order) {
 
-        // Date & Time
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
@@ -30,136 +36,86 @@ public class OrderConfirmationScreen {
         String date = now.format(dateFormatter);
         String time = now.format(timeFormatter);
 
-        // Title
         Label title = new Label("Review Your Order");
-        title.setStyle("-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #222;");
+        title.setStyle(
+                "-fx-font-size: 32px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-text-fill: " + TEXT_DARK + ";"
+        );
 
-        Label subtitle = new Label("Please check your order before placing it.");
-        subtitle.setStyle("-fx-font-size: 18px; -fx-text-fill: #555;");
+        Label subtitle = new Label("Check your items before placing the order.");
+        subtitle.setStyle(
+                "-fx-font-size: 16px;" +
+                        "-fx-text-fill: " + TEXT_MUTED + ";"
+        );
 
-        VBox titleBox = new VBox(8, title, subtitle);
+        VBox titleBox = new VBox(6, title, subtitle);
         titleBox.setAlignment(Pos.CENTER);
 
-        // Date, time and payment in same row
-        Label dateLabel = new Label("Date : " + date);
-        Label timeLabel = new Label("Time : " + time);
-        Label paymentMethodLabel = new Label("Payment : " + order.getPaymentMethod());
-
-        dateLabel.setStyle("-fx-font-size: 18px; -fx-text-fill: #222;");
-        timeLabel.setStyle("-fx-font-size: 18px; -fx-text-fill: #222;");
-        paymentMethodLabel.setStyle("-fx-font-size: 18px; -fx-text-fill: #222;");
-
-        HBox infoRow = new HBox(40, dateLabel, timeLabel, paymentMethodLabel);
-        infoRow.setAlignment(Pos.CENTER);
-
-        // Message before final confirmation
-        Label reviewMessage = new Label(
-                "Your order has not been placed yet. Please review everything and press Place Order when you are sure."
+        Label infoLine = new Label(
+                "Date: " + date +
+                        "   •   Time: " + time +
+                        "   •   Payment: " + order.getPaymentMethod()
         );
+        infoLine.setStyle(
+                "-fx-font-size: 15px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-text-fill: " + TEXT_DARK + ";"
+        );
+
+        Label reviewMessage = new Label("Review carefully before placing your order.");
         reviewMessage.setWrapText(true);
         reviewMessage.setStyle(
-                "-fx-font-size: 18px;" +
+                "-fx-font-size: 15px;" +
                         "-fx-font-weight: bold;" +
-                        "-fx-text-fill: #222;" +
-                        "-fx-background-color: rgba(76,175,80,0.12);" +
-                        "-fx-background-radius: 14;" +
-                        "-fx-padding: 14px 20px;"
+                        "-fx-text-fill: #5f4b00;" +
+                        "-fx-background-color: rgba(255,193,7,0.20);" +
+                        "-fx-background-radius: 16;" +
+                        "-fx-padding: 12 18;"
         );
 
-        // Items Ordered
-        Label itemsLabel = new Label("Items Ordered:");
-        itemsLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #222;");
+        Label summaryTitle = new Label("Order Summary");
+        summaryTitle.setStyle(
+                "-fx-font-size: 23px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-text-fill: " + TEXT_DARK + ";"
+        );
 
-        VBox itemsBox = new VBox(10);
-        itemsBox.setAlignment(Pos.CENTER_LEFT);
+        VBox orderSummaryCard = new VBox(0);
+        orderSummaryCard.setMaxWidth(900);
+        orderSummaryCard.setPadding(new Insets(10, 26, 10, 26));
+        orderSummaryCard.setStyle(
+                "-fx-background-color: rgba(255,255,255,0.90);" +
+                        "-fx-background-radius: 24;" +
+                        "-fx-border-color: rgba(255,152,0,0.18);" +
+                        "-fx-border-width: 1.2;" +
+                        "-fx-border-radius: 24;" +
+                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.10), 15, 0, 0, 4);"
+        );
 
-        for (Cart.CartItem item : order.getItems()) {
+        for (int i = 0; i < order.getItems().size(); i++) {
+            Cart.CartItem item = order.getItems().get(i);
+            orderSummaryCard.getChildren().add(createOrderItemRow(item));
 
-            HBox itemRow = new HBox();
-            itemRow.setAlignment(Pos.CENTER_LEFT);
-            itemRow.setSpacing(10);
-
-            Label name = new Label(item.getMenuItem().getName());
-            name.setStyle("-fx-font-size: 18px; -fx-text-fill: #222;");
-
-            Label price = new Label(String.format("%.2f kr", item.getSubtotal()));
-            price.setStyle("-fx-font-size: 18px; -fx-text-fill: #222;");
-
-            HBox.setHgrow(name, Priority.ALWAYS);
-            name.setMaxWidth(Double.MAX_VALUE);
-
-            itemRow.getChildren().addAll(name, price);
-
-            Label qtyLabel = new Label("Qty: " + item.getQuantity());
-            qtyLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: #444;");
-
-            itemsBox.getChildren().addAll(itemRow, qtyLabel);
-
-            if (!item.getExtrasText().isBlank()) {
-                Label extrasLabel = new Label("Extras: " + item.getExtrasText());
-                extrasLabel.setWrapText(true);
-                extrasLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #555;");
-                itemsBox.getChildren().add(extrasLabel);
-            }
-
-            if (!item.getRemovedText().isBlank()) {
-                Label removedLabel = new Label("Removed: " + item.getRemovedText());
-                removedLabel.setWrapText(true);
-                removedLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #555;");
-                itemsBox.getChildren().add(removedLabel);
-            }
-
-            if (!item.getComboChoicesText().isBlank()) {
-                Label comboLabel = new Label(item.getComboChoicesText());
-                comboLabel.setWrapText(true);
-                comboLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #555;");
-                itemsBox.getChildren().add(comboLabel);
+            if (i < order.getItems().size() - 1) {
+                orderSummaryCard.getChildren().add(createDivider());
             }
         }
 
-        // Total
-        HBox totalRow = new HBox();
-        totalRow.setAlignment(Pos.CENTER_LEFT);
-        totalRow.setSpacing(10);
-
-        Label totalText = new Label("Order Total:");
-        totalText.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #222;");
-
-        Label totalAmount = new Label(String.format("%.2f kr", order.getTotalPrice()));
-        totalAmount.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #222;");
-
-        Label paymentLabel = new Label();
-
-        if (order.getPaymentMethod().equalsIgnoreCase("Cash")) {
-            paymentLabel.setText("Payment note: Please pay at the counter after placing your order.");
-        } else {
-            paymentLabel.setText("Payment note: Please follow the card terminal instructions after placing your order.");
-        }
-
-        paymentLabel.setStyle(
-                "-fx-font-size: 18px;" +
-                        "-fx-font-weight: bold;" +
-                        "-fx-text-fill: #1f1f1f;"
-        );
-
-        HBox.setHgrow(totalText, Priority.ALWAYS);
-        totalText.setMaxWidth(Double.MAX_VALUE);
-
-        totalRow.getChildren().addAll(totalText, totalAmount);
+        VBox totalSection = createTotalSection(order);
 
         VBox centerContent = new VBox(
-                20,
+                16,
                 titleBox,
-                infoRow,
+                infoLine,
                 reviewMessage,
-                itemsLabel,
-                itemsBox,
-                paymentLabel,
-                totalRow
+                summaryTitle,
+                orderSummaryCard,
+                totalSection
         );
 
-        centerContent.setPadding(new Insets(20));
-        centerContent.setAlignment(Pos.TOP_LEFT);
+        centerContent.setPadding(new Insets(18, 24, 120, 24));
+        centerContent.setAlignment(Pos.TOP_CENTER);
 
         ScrollPane scrollPane = new ScrollPane(centerContent);
         scrollPane.setFitToWidth(true);
@@ -168,88 +124,275 @@ public class OrderConfirmationScreen {
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         scrollPane.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
 
+        Button homeButton = ScreenStyle.createHomeButton(stage);
+        Button editOrderBtn = createEditButton(stage);
+        Button placeOrderBtn = createPlaceOrderButton(stage, order);
+
+        HBox bottomBar = new HBox(14, homeButton, editOrderBtn, placeOrderBtn);
+        bottomBar.setAlignment(Pos.CENTER);
+        bottomBar.setPadding(new Insets(10, 18, 10, 18));
+        bottomBar.setMaxWidth(680);
+        bottomBar.setStyle(
+                "-fx-background-color: rgba(255,255,255,0.96);" +
+                        "-fx-background-radius: 24;" +
+                        "-fx-border-color: rgba(255,152,0,0.24);" +
+                        "-fx-border-width: 1.3;" +
+                        "-fx-border-radius: 24;" +
+                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 14, 0, 0, 4);"
+        );
+
+        VBox bottomArea = new VBox(bottomBar);
+        bottomArea.setAlignment(Pos.CENTER);
+        bottomArea.setPadding(new Insets(6, 0, 0, 0));
+
         BorderPane root = new BorderPane();
         root.setPadding(new Insets(20));
         root.setBackground(ScreenStyle.createBackground());
         root.setCenter(scrollPane);
+        root.setBottom(bottomArea);
 
+        Scene scene = new Scene(root, WindowManager.WINDOW_WIDTH, WindowManager.WINDOW_HEIGHT);
+
+        stage.setScene(scene);
+        stage.setTitle("Review Order");
+        WindowManager.enforceStandardSize(stage);
+    }
+
+    private VBox createOrderItemRow(Cart.CartItem item) {
+        VBox row = new VBox(8);
+        row.setPadding(new Insets(18, 8, 18, 8));
+        row.setAlignment(Pos.CENTER_LEFT);
+
+        Label itemName = new Label(item.getMenuItem().getName());
+        itemName.setWrapText(true);
+        itemName.setStyle(
+                "-fx-font-size: 20px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-text-fill: " + TEXT_DARK + ";"
+        );
+
+        Label itemPrice = new Label(String.format("%.2f kr", item.getSubtotal()));
+        itemPrice.setStyle(
+                "-fx-font-size: 20px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-text-fill: " + ORANGE + ";"
+        );
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        HBox topRow = new HBox(12, itemName, spacer, itemPrice);
+        topRow.setAlignment(Pos.CENTER_LEFT);
+
+        Label quantityLabel = new Label("Qty: " + item.getQuantity());
+        quantityLabel.setStyle(
+                "-fx-font-size: 14px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-text-fill: " + TEXT_MUTED + ";"
+        );
+
+        VBox detailBox = new VBox(5);
+        detailBox.setAlignment(Pos.CENTER_LEFT);
+
+        if (!item.getExtrasText().isBlank()) {
+            detailBox.getChildren().add(createDetailLine("+ " + item.getExtrasText()));
+        }
+
+        if (!item.getRemovedText().isBlank()) {
+            detailBox.getChildren().add(createDetailLine("- " + item.getRemovedText()));
+        }
+
+        if (!item.getComboChoicesText().isBlank()) {
+            addComboChoiceLines(detailBox, item.getComboChoicesText());
+        }
+
+        row.getChildren().addAll(topRow, quantityLabel);
+
+        if (!detailBox.getChildren().isEmpty()) {
+            row.getChildren().add(detailBox);
+        }
+
+        return row;
+    }
+
+    private void addComboChoiceLines(VBox detailBox, String comboText) {
+        String[] lines = comboText.split("\\n");
+
+        for (String line : lines) {
+            String cleaned = cleanComboLine(line);
+
+            if (!cleaned.isBlank()) {
+                detailBox.getChildren().add(createDetailLine(cleaned));
+            }
+        }
+    }
+
+    private String cleanComboLine(String line) {
+        String cleaned = line == null ? "" : line.trim();
+
+        cleaned = cleaned.replace("Choose Kids Main:", "Main:");
+        cleaned = cleaned.replace("Choose Kids Side:", "Side:");
+        cleaned = cleaned.replace("Choose Family Main:", "Main:");
+        cleaned = cleaned.replace("Choose Sharing Side:", "Side:");
+        cleaned = cleaned.replace("Choose Burger:", "Burger:");
+        cleaned = cleaned.replace("Choose Chicken Main:", "Main:");
+        cleaned = cleaned.replace("Choose Snack Main:", "Snack:");
+        cleaned = cleaned.replace("Choose Extra Snack:", "Extra snack:");
+        cleaned = cleaned.replace("Choose Drink:", "Drink:");
+        cleaned = cleaned.replace("Combo Size:", "Size:");
+
+        if (cleaned.startsWith("Dice") && cleaned.contains("Gift:")) {
+            int giftIndex = cleaned.indexOf("Gift:");
+            cleaned = cleaned.substring(giftIndex).trim();
+        }
+
+        return cleaned;
+    }
+
+    private Label createDetailLine(String text) {
+        Label label = new Label(text);
+        label.setWrapText(true);
+        label.setMaxWidth(800);
+        label.setStyle(
+                "-fx-font-size: 14px;" +
+                        "-fx-text-fill: " + TEXT_MUTED + ";"
+        );
+
+        return label;
+    }
+
+    private Region createDivider() {
+        Region divider = new Region();
+        divider.setMinHeight(1);
+        divider.setMaxHeight(1);
+        divider.setStyle("-fx-background-color: " + DIVIDER + ";");
+        return divider;
+    }
+
+    private VBox createTotalSection(Order order) {
+        Label totalText = new Label("Total");
+        totalText.setStyle(
+                "-fx-font-size: 22px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-text-fill: " + TEXT_DARK + ";"
+        );
+
+        Label totalAmount = new Label(String.format("%.2f kr", order.getTotalPrice()));
+        totalAmount.setStyle(
+                "-fx-font-size: 28px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-text-fill: " + ORANGE + ";"
+        );
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        HBox totalRow = new HBox(12, totalText, spacer, totalAmount);
+        totalRow.setAlignment(Pos.CENTER_LEFT);
+
+        Label paymentNote = new Label();
+
+        if (order.getPaymentMethod().equalsIgnoreCase("Cash")) {
+            paymentNote.setText("Payment note: Please pay at the counter after placing your order.");
+        } else {
+            paymentNote.setText("Payment note: Please follow the card terminal instructions after placing your order.");
+        }
+
+        paymentNote.setWrapText(true);
+        paymentNote.setStyle(
+                "-fx-font-size: 14px;" +
+                        "-fx-text-fill: " + TEXT_MUTED + ";"
+        );
+
+        VBox section = new VBox(8, totalRow, paymentNote);
+        section.setMaxWidth(900);
+        section.setPadding(new Insets(14, 26, 14, 26));
+        section.setStyle(
+                "-fx-background-color: rgba(255,255,255,0.55);" +
+                        "-fx-background-radius: 20;"
+        );
+
+        return section;
+    }
+
+    private Button createEditButton(Stage stage) {
         Button editOrderBtn = new Button("Edit Order");
+        editOrderBtn.setPrefWidth(160);
+        editOrderBtn.setPrefHeight(50);
         editOrderBtn.setStyle(
-                "-fx-background-color: white; " +
-                        "-fx-text-fill: #222; " +
-                        "-fx-font-size: 16px; " +
-                        "-fx-font-weight: bold; " +
-                        "-fx-padding: 15px 40px; " +
-                        "-fx-background-radius: 8px;" +
+                "-fx-background-color: white;" +
+                        "-fx-text-fill: " + TEXT_DARK + ";" +
+                        "-fx-font-size: 15px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-background-radius: 15;" +
                         "-fx-border-color: #dddddd;" +
-                        "-fx-border-width: 1.5px;" +
-                        "-fx-border-radius: 8px;" +
+                        "-fx-border-width: 1.4;" +
+                        "-fx-border-radius: 15;" +
                         "-fx-cursor: hand;"
         );
 
         editOrderBtn.setOnAction(e -> CategoryScreen.show(stage));
 
+        return editOrderBtn;
+    }
+
+    private Button createPlaceOrderButton(Stage stage, Order order) {
         Button placeOrderBtn = new Button("Place Order");
+        placeOrderBtn.setPrefWidth(180);
+        placeOrderBtn.setPrefHeight(50);
         placeOrderBtn.setStyle(
-                "-fx-background-color: #4CAF50; " +
-                        "-fx-text-fill: white; " +
-                        "-fx-font-size: 16px; " +
-                        "-fx-font-weight: bold; " +
-                        "-fx-padding: 15px 40px; " +
-                        "-fx-background-radius: 8px;" +
-                        "-fx-cursor: hand;"
+                "-fx-background-color: " + GREEN + ";" +
+                        "-fx-text-fill: white;" +
+                        "-fx-font-size: 15px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-background-radius: 15;" +
+                        "-fx-cursor: hand;" +
+                        "-fx-effect: dropshadow(gaussian, rgba(76,175,80,0.26), 9, 0, 0, 3);"
         );
 
-        placeOrderBtn.setOnAction(e -> {
+        placeOrderBtn.setOnAction(e -> showPlaceOrderConfirmation(stage, order));
 
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setTitle("Place Order");
-            alert.setHeaderText("Are you sure you want to place this order?");
-            alert.setContentText("After confirming, your order number will be generated.");
+        return placeOrderBtn;
+    }
 
-            ButtonType cancelButton = new ButtonType("Cancel");
-            ButtonType confirmButton = new ButtonType("Yes, Place Order");
+    private void showPlaceOrderConfirmation(Stage stage, Order order) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Place Order");
+        alert.setHeaderText("Are you sure you want to place this order?");
+        alert.setContentText("After confirming, your order number will be generated.");
 
-            alert.getButtonTypes().setAll(cancelButton, confirmButton);
+        ButtonType cancelButton = new ButtonType("Cancel");
+        ButtonType confirmButton = new ButtonType("Yes, Place Order");
 
-            alert.showAndWait().ifPresent(result -> {
-                if (result == confirmButton) {
+        alert.getButtonTypes().setAll(cancelButton, confirmButton);
 
-                    int orderNumber = DatabaseHelper.getNextOrderNumber();
-                    String today = java.time.LocalDate.now().toString();
-
-                    for (Cart.CartItem item : order.getItems()) {
-                        String customizations = buildCustomizationText(item);
-
-                        DatabaseHelper.saveOrder(
-                                orderNumber,
-                                item.getMenuItem().getName(),
-                                item.getQuantity(),
-                                today,
-                                customizations
-                        );
-                    }
-
-                    Cart.getInstance().clear();
-
-                    OrderNumberScreen ons = new OrderNumberScreen();
-                    ons.start(stage, String.format("%04d", orderNumber));
-                }
-            });
+        alert.showAndWait().ifPresent(result -> {
+            if (result == confirmButton) {
+                placeOrder(stage, order);
+            }
         });
+    }
 
-        Button homeButton = ScreenStyle.createHomeButton(stage);
+    private void placeOrder(Stage stage, Order order) {
+        int orderNumber = DatabaseHelper.getNextOrderNumber();
+        String today = java.time.LocalDate.now().toString();
 
-        HBox bottomBox = new HBox(12, homeButton, editOrderBtn, placeOrderBtn);
-        bottomBox.setAlignment(Pos.CENTER_RIGHT);
-        bottomBox.setPadding(new Insets(10, 20, 20, 20));
+        for (Cart.CartItem item : order.getItems()) {
+            String customizations = buildCustomizationText(item);
 
-        root.setBottom(bottomBox);
+            DatabaseHelper.saveOrder(
+                    orderNumber,
+                    item.getMenuItem().getName(),
+                    item.getQuantity(),
+                    today,
+                    customizations
+            );
+        }
 
-        Scene scene = new Scene(root, WindowManager.WINDOW_WIDTH, WindowManager.WINDOW_HEIGHT);
-        stage.setScene(scene);
-        stage.setTitle("Review Order");
-        WindowManager.enforceStandardSize(stage);
+        Cart.getInstance().clear();
+
+        OrderNumberScreen ons = new OrderNumberScreen();
+        ons.start(stage, String.format("%04d", orderNumber));
     }
 
     private String buildCustomizationText(Cart.CartItem item) {

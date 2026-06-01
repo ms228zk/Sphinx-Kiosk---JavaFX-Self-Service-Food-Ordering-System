@@ -1,5 +1,6 @@
 package se.lnu;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javafx.animation.FadeTransition;
@@ -25,6 +26,7 @@ public class CategoryScreen {
 
   private static FlowPane itemsPane;
   private static Label titleLabel;
+  private static final List<Button> categoryButtons = new ArrayList<>();
 
   public static void show(Stage stage) {
 
@@ -58,15 +60,20 @@ public class CategoryScreen {
 
     List<Category> categories = DatabaseHelper.getCategories();
 
+    categoryButtons.clear();
+
     for (Category category : categories) {
       Button categoryButton = createCategoryButton(category.getName());
+      categoryButton.setUserData(category.getId());
 
       categoryButton.setOnAction(e -> {
         App.setCategory(category.getId(), category.getName());
         titleLabel.setText(category.getName());
+        updateCategoryButtonStyles(category.getId());
         showItems(stage, category.getId());
       });
 
+      categoryButtons.add(categoryButton);
       categoryBar.getChildren().add(categoryButton);
     }
 
@@ -84,6 +91,7 @@ public class CategoryScreen {
 
       App.setCategory(categoryToShow.getId(), categoryToShow.getName());
       titleLabel.setText(categoryToShow.getName());
+      updateCategoryButtonStyles(categoryToShow.getId());
       showItems(stage, categoryToShow.getId());
     }
 
@@ -265,7 +273,7 @@ public class CategoryScreen {
 
     Label itemName = new Label(cartItem.getMenuItem().getName());
     itemName.setWrapText(true);
-    itemName.setMaxWidth(175);
+    itemName.setMaxWidth(160);
     itemName.setStyle(
             "-fx-font-size: 15px;" +
                     "-fx-font-weight: bold;" +
@@ -325,9 +333,7 @@ public class CategoryScreen {
     }
 
     if (!cartItem.getComboChoicesText().isBlank()) {
-      detailBox.getChildren().add(
-              createDetailLabel("Combo customized")
-      );
+      addComboChoiceLabels(detailBox, cartItem.getComboChoicesText());
     }
 
     Button minusButton = new Button("-");
@@ -411,6 +417,40 @@ public class CategoryScreen {
     return row;
   }
 
+  private static void addComboChoiceLabels(VBox detailBox, String comboText) {
+    String[] lines = comboText.split("\\n");
+
+    for (String line : lines) {
+      String cleaned = cleanComboLine(line);
+
+      if (!cleaned.isBlank()) {
+        detailBox.getChildren().add(createDetailLabel(cleaned));
+      }
+    }
+  }
+
+  private static String cleanComboLine(String line) {
+    String cleaned = line == null ? "" : line.trim();
+
+    cleaned = cleaned.replace("Choose Kids Main:", "Main:");
+    cleaned = cleaned.replace("Choose Kids Side:", "Side:");
+    cleaned = cleaned.replace("Choose Family Main:", "Main:");
+    cleaned = cleaned.replace("Choose Sharing Side:", "Side:");
+    cleaned = cleaned.replace("Choose Burger:", "Burger:");
+    cleaned = cleaned.replace("Choose Chicken Main:", "Main:");
+    cleaned = cleaned.replace("Choose Snack Main:", "Snack:");
+    cleaned = cleaned.replace("Choose Extra Snack:", "Extra snack:");
+    cleaned = cleaned.replace("Choose Drink:", "Drink:");
+    cleaned = cleaned.replace("Combo Size:", "Size:");
+
+    if (cleaned.startsWith("Dice") && cleaned.contains("Gift:")) {
+      int giftIndex = cleaned.indexOf("Gift:");
+      cleaned = cleaned.substring(giftIndex).trim();
+    }
+
+    return cleaned;
+  }
+
   private static Label createDetailLabel(String text) {
     Label label = new Label(text);
     label.setWrapText(true);
@@ -464,20 +504,47 @@ public class CategoryScreen {
   private static Button createCategoryButton(String name) {
     Button button = new Button(name);
 
-    button.setStyle(
-            "-fx-font-size: 17px;" +
-                    "-fx-font-weight: bold;" +
-                    "-fx-background-color: #FF9800;" +
-                    "-fx-text-fill: white;" +
-                    "-fx-padding: 14 24;" +
-                    "-fx-background-radius: 28;" +
-                    "-fx-cursor: hand;" +
-                    "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.16), 8, 0, 0, 2);"
-    );
-
+    button.setStyle(createNormalCategoryButtonStyle());
     addHoverAnimation(button);
 
     return button;
+  }
+
+  private static void updateCategoryButtonStyles(int selectedCategoryId) {
+    for (Button button : categoryButtons) {
+      Object categoryId = button.getUserData();
+
+      if (categoryId instanceof Integer && ((Integer) categoryId) == selectedCategoryId) {
+        button.setStyle(createActiveCategoryButtonStyle());
+      } else {
+        button.setStyle(createNormalCategoryButtonStyle());
+      }
+    }
+  }
+
+  private static String createNormalCategoryButtonStyle() {
+    return "-fx-font-size: 17px;" +
+            "-fx-font-weight: bold;" +
+            "-fx-background-color: linear-gradient(to bottom, #ffb300, #ff8f00);" +
+            "-fx-text-fill: white;" +
+            "-fx-padding: 14 24;" +
+            "-fx-background-radius: 28;" +
+            "-fx-cursor: hand;" +
+            "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.16), 8, 0, 0, 2);";
+  }
+
+  private static String createActiveCategoryButtonStyle() {
+    return "-fx-font-size: 17px;" +
+            "-fx-font-weight: bold;" +
+            "-fx-background-color: linear-gradient(to bottom, #ff3d00, #c62828);" +
+            "-fx-text-fill: white;" +
+            "-fx-padding: 14 26;" +
+            "-fx-background-radius: 28;" +
+            "-fx-border-color: rgba(255,255,255,0.75);" +
+            "-fx-border-width: 2;" +
+            "-fx-border-radius: 28;" +
+            "-fx-cursor: hand;" +
+            "-fx-effect: dropshadow(gaussian, rgba(198,40,40,0.42), 14, 0, 0, 4);";
   }
 
   private static VBox createItemCard(Stage stage, MenuItem item) {
