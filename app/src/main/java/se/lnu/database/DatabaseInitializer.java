@@ -133,22 +133,6 @@ public class DatabaseInitializer {
         return;
       }
 
-
-
-      /*
-       * Important:
-       * Only skip default seeding if MenuItem already has data.
-       *
-       * This prevents two problems:
-       * 1. Admin-added items disappearing every time the app restarts.
-       * 2. Categories existing but MenuItem being empty, which causes
-       *    the customer side to show "No items available".
-       */
-      if (hasData(conn, "MenuItem")) {
-        System.out.println("Database already contains menu items. Skipping default seed.");
-        return;
-      }
-
       /*
        * If MenuItem is empty, reset the seed-related tables and insert
        * the default menu data again.
@@ -385,8 +369,20 @@ public class DatabaseInitializer {
       linkRemovables(stmt, "Chocolate Brownie", "'Nuts','Chocolate syrup','Ice cream'");
       linkRemovables(stmt, "Mini Donuts", "'Sugar coating','Chocolate sauce','Caramel sauce'");
       linkRemovables(stmt, "Ice Cream Sundae", "'Nuts','Whipped cream','Chocolate syrup','Cherry'");
-
-
+      linkRemovables(stmt, "Family Feast", "'Pickles','Lettuce','Caramelized onions','BBQ sauce','Mayo','Cheese','Bun (replace with gluten-free)'" +
+              ",'Sugar syrup','Milk','Whipped cream','Ice','Jalapeños','Cheese sauce','Mayo','Ketchup','Meat topping','Marinara dip','Breadcrumbs (replace with gluten-free)'" +
+              ",'Spicy sauce','Mayo dip','Breading'");
+      linkRemovables(stmt, "Burger Combo", "'Pickles','Lettuce','Caramelized onions','BBQ sauce','Mayo','Cheese','Bun (replace with gluten-free)'" +
+              ",'Sugar syrup','Milk','Whipped cream','Ice','Jalapeños','Cheese sauce','Mayo','Ketchup','Meat topping','Marinara dip','Breadcrumbs (replace with gluten-free)'" +
+              ",'Spicy sauce','Mayo dip','Breading'");
+      linkRemovables(stmt, "Chicken Combo", "'Pickles','Lettuce','Mayo','Cheese','Bun (replace with gluten-free)'" +
+              ",'Sugar syrup','Milk','Whipped cream','Ice','Jalapeños','Cheese sauce','Mayo','Ketchup','Meat topping','Marinara dip','Breadcrumbs (replace with gluten-free)'" +
+              ",'Spicy sauce','Mayo dip','Breading'");
+      linkRemovables(stmt, "Kids Combo", "'Mayo','Tomato','Lettuce','Pickles','Cheese','Bun (replace with gluten-free)','Spicy sauce','Mayo dip','Breading'" +
+              ",'Sugar coating','Chocolate sauce','Caramel sauce','Jalapeños','Cheese sauce','Mayo','Ketchup','Meat topping', 'Marinara dip','Breadcrumbs (replace with gluten-free)'" +
+              ",'Sugar syrup','Milk','Whipped cream','Ice'");
+      linkRemovables(stmt, "Snack Box", "'Jalapeños','Cheese sauce','Mayo','Ketchup','Meat topping', 'Marinara dip','Breadcrumbs (replace with gluten-free)'" +
+              ",'Spicy sauce','Mayo dip','Breading','Sugar syrup','Milk','Whipped cream','Ice'");
 
 
       System.out.println("Database initialized successfully.");
@@ -406,7 +402,7 @@ public class DatabaseInitializer {
 
   private static void linkExtras(Statement stmt, String itemName, String extraNames) throws SQLException {
     stmt.execute("""
-            INSERT INTO MenuItemExtraOption (menu_item_id, extra_id)
+            INSERT OR IGNORE INTO MenuItemExtraOption (menu_item_id, extra_id)
             SELECT m.menu_item_id, e.extra_id
             FROM MenuItem m, ExtraOption e
             WHERE m.name = '%s'
@@ -414,14 +410,20 @@ public class DatabaseInitializer {
             """.formatted(itemName, extraNames));
   }
 
-  private static void linkRemovables(Statement stmt, String itemName, String ingredientNames) throws SQLException {
+  private static void linkRemovables(
+          Statement stmt,
+          String itemName,
+          String ingredientNames
+  ) throws SQLException {
+
     stmt.execute("""
-            INSERT INTO MenuItemRemovableIngredient (menu_item_id, ingredient_id)
-            SELECT m.menu_item_id, i.ingredient_id
-            FROM MenuItem m, RemovableIngredient i
-            WHERE m.name = '%s'
-            AND i.name IN (%s)
-            """.formatted(itemName, ingredientNames));
+        INSERT OR IGNORE INTO MenuItemRemovableIngredient
+        (menu_item_id, ingredient_id)
+        SELECT m.menu_item_id, i.ingredient_id
+        FROM MenuItem m, RemovableIngredient i
+        WHERE m.name = '%s'
+        AND i.name IN (%s)
+        """.formatted(itemName, ingredientNames));
   }
 
   private static void insertComboGroup(

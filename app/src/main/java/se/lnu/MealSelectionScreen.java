@@ -138,7 +138,7 @@ public class MealSelectionScreen {
     ComboSelection comboSelection = null;
     VBox comboBox = null;
     List<CheckBox> comboCustomizeBoxes = new ArrayList<>();
-    VBox comboCustomizeBox = null;
+    //VBox comboCustomizeBox = null;
 
     if (isCombo) {
       VBox comboSizeSelector = createComboSizeSelector(comboSize, comboPrice, updateTotal);
@@ -146,10 +146,10 @@ public class MealSelectionScreen {
       comboSelection = createComboSelection(item, comboSizeSelector);
 
       comboBox = comboSelection.comboBox;
-      comboCustomizeBox = createComboCustomizeBox(comboCustomizeBoxes);
+      //comboCustomizeBox = createComboCustomizeBox(comboCustomizeBoxes);
     }
 
-    List<RemovableIngredient> removableIngredients = item.getRemovableIngredients();
+    List<RemovableIngredient> removableIngredients = DatabaseHelper.getRemovableIngredientsByItem(item.getId());
     List<CheckBox> removablesCheckBoxes = new ArrayList<>();
 
     for (RemovableIngredient r : removableIngredients) {
@@ -188,19 +188,19 @@ public class MealSelectionScreen {
 
     HBox ingredientChanges;
 
-    if (isCombo) {
-      comboCustomizeBox.setPrefWidth(360);
-      comboCustomizeBox.setMaxWidth(360);
+    //if (isCombo) {
+    //  comboCustomizeBox.setPrefWidth(360);
+    //  comboCustomizeBox.setMaxWidth(360);
 
       extrasBox.setPrefWidth(360);
       extrasBox.setMaxWidth(360);
 
-      ingredientChanges = new HBox(30, comboCustomizeBox, extrasBox);
-      ingredientChanges.setAlignment(Pos.TOP_CENTER);
-    } else {
+    //  ingredientChanges = new HBox(30, comboCustomizeBox, extrasBox);
+    //  ingredientChanges.setAlignment(Pos.TOP_CENTER);
+    //} else {
       ingredientChanges = new HBox(30, extrasBox, removablesBox);
       ingredientChanges.setAlignment(Pos.CENTER);
-    }
+    //}
 
     Label statusLabel = new Label("");
     statusLabel.setOpacity(0);
@@ -233,9 +233,10 @@ public class MealSelectionScreen {
 
       double totalExtraPrice = extrasPrice + comboPrice[0];
 
-      List<String> removedIngredients = isCombo
-              ? new ArrayList<>()
-              : getSelectedExtras(removablesBoxes);
+      //List<String> removedIngredients = isCombo
+      //        ? new ArrayList<>()
+      //        : getSelectedExtras(removablesBoxes);
+      List<String> removedIngredients = getSelectedExtras(removablesBoxes);
 
       List<String> comboChoices = new ArrayList<>();
 
@@ -559,7 +560,28 @@ public class MealSelectionScreen {
 
     VBox box = new VBox(8);
     box.getChildren().addAll(titleLabel, subtitleLabel);
-    box.getChildren().addAll(checkBoxes);
+    if (checkBoxes.size() < 10) {
+      box.getChildren().addAll(checkBoxes);
+    } else {
+      HBox hBox = new HBox(20); // spacing between columns
+
+      VBox col1 = new VBox(5); // spacing between checkboxes
+      VBox col2 = new VBox(5);
+
+      int half = (int) Math.ceil(checkBoxes.size() / 2.0);
+
+      for (int i = 0; i < checkBoxes.size(); i++) {
+        if (i < half) {
+          col1.getChildren().add(checkBoxes.get(i));
+        } else {
+          col2.getChildren().add(checkBoxes.get(i));
+        }
+      }
+
+      hBox.getChildren().addAll(col1, col2);
+
+      box.getChildren().add(hBox);
+    }
     box.setAlignment(Pos.CENTER_LEFT);
     box.setMaxWidth(560);
     box.setPadding(new Insets(24, 30, 24, 30));
