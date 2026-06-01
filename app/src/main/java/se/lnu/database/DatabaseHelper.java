@@ -857,6 +857,106 @@ public class DatabaseHelper {
         }
     }
 
+    public static void updateItemExtras(
+            int itemId,
+            List<Integer> extraIds
+    ) {
+        String deleteSql = """
+        DELETE FROM MenuItemExtraOption
+        WHERE menu_item_id = ?
+        """;
+
+        String insertSql = """
+        INSERT INTO MenuItemExtraOption
+        (menu_item_id, extra_id)
+        VALUES (?, ?)
+        """;
+
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                try (PreparedStatement deleteStmt =
+                             conn.prepareStatement(deleteSql)) {
+
+                    deleteStmt.setInt(1, itemId);
+                    deleteStmt.executeUpdate();
+                }
+
+                if (extraIds != null) {
+                    try (PreparedStatement insertStmt =
+                                 conn.prepareStatement(insertSql)) {
+                        for (Integer extraId : extraIds) {
+                            insertStmt.setInt(1, itemId);
+                            insertStmt.setInt(2, extraId);
+                            insertStmt.addBatch();
+                        }
+                        insertStmt.executeBatch();
+                    }
+                }
+                conn.commit();
+
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            }
+
+        } catch (SQLException e) {
+            System.out.println(
+                    "DB error (updateItemExtras): "
+                            + e.getMessage()
+            );
+        }
+    }
+
+    public static void updateItemRemovableIngredients(
+            int itemId,
+            List<Integer> ingredientIds
+    ) {
+        String deleteSql = """
+        DELETE FROM MenuItemRemovableIngredient
+        WHERE menu_item_id = ?
+        """;
+
+        String insertSql = """
+        INSERT INTO MenuItemRemovableIngredient
+        (menu_item_id, ingredient_id)
+        VALUES (?, ?)
+        """;
+
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                try (PreparedStatement deleteStmt =
+                             conn.prepareStatement(deleteSql)) {
+                    deleteStmt.setInt(1, itemId);
+                    deleteStmt.executeUpdate();
+                }
+
+                if (ingredientIds != null) {
+                    try (PreparedStatement insertStmt =
+                                 conn.prepareStatement(insertSql)) {
+                        for (Integer ingredientId : ingredientIds) {
+                            insertStmt.setInt(1, itemId);
+                            insertStmt.setInt(2, ingredientId);
+                            insertStmt.addBatch();
+                        }
+                        insertStmt.executeBatch();
+                    }
+                }
+                conn.commit();
+
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            }
+        } catch (SQLException e) {
+            System.out.println(
+                    "DB error (updateItemRemovableIngredients): "
+                            + e.getMessage()
+            );
+        }
+    }
+
     public static boolean saveOrder(
             int orderNumber,
             String itemName,
