@@ -30,12 +30,11 @@ public class ItemDetailsScreen {
         backButton.setOnAction(e -> CategoryScreen.show(stage));
 
         Button homeButton = ScreenStyle.createHomeButton(stage);
-        Button cartButton = ScreenStyle.createCartButton(stage);
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        HBox topBar = new HBox(12, backButton, spacer, homeButton, cartButton);
+        HBox topBar = new HBox(12, backButton, spacer, homeButton);
         topBar.setAlignment(Pos.CENTER_LEFT);
         topBar.setPadding(new Insets(16));
 

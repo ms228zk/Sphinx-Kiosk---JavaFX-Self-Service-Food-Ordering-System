@@ -20,7 +20,6 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import org.jspecify.annotations.NonNull;
 import se.lnu.database.DatabaseHelper;
 
 import java.util.ArrayList;
@@ -138,7 +137,6 @@ public class MealSelectionScreen {
     ComboSelection comboSelection = null;
     VBox comboBox = null;
     List<CheckBox> comboCustomizeBoxes = new ArrayList<>();
-    //VBox comboCustomizeBox = null;
 
     if (isCombo) {
       VBox comboSizeSelector = createComboSizeSelector(comboSize, comboPrice, updateTotal);
@@ -146,7 +144,6 @@ public class MealSelectionScreen {
       comboSelection = createComboSelection(item, comboSizeSelector);
 
       comboBox = comboSelection.comboBox;
-      //comboCustomizeBox = createComboCustomizeBox(comboCustomizeBoxes);
     }
 
     List<RemovableIngredient> removableIngredients = DatabaseHelper.getRemovableIngredientsByItem(item.getId());
@@ -188,19 +185,11 @@ public class MealSelectionScreen {
 
     HBox ingredientChanges;
 
-    //if (isCombo) {
-    //  comboCustomizeBox.setPrefWidth(360);
-    //  comboCustomizeBox.setMaxWidth(360);
+    extrasBox.setPrefWidth(360);
+    extrasBox.setMaxWidth(360);
 
-      extrasBox.setPrefWidth(360);
-      extrasBox.setMaxWidth(360);
-
-    //  ingredientChanges = new HBox(30, comboCustomizeBox, extrasBox);
-    //  ingredientChanges.setAlignment(Pos.TOP_CENTER);
-    //} else {
-      ingredientChanges = new HBox(30, extrasBox, removablesBox);
-      ingredientChanges.setAlignment(Pos.CENTER);
-    //}
+    ingredientChanges = new HBox(30, extrasBox, removablesBox);
+    ingredientChanges.setAlignment(Pos.CENTER);
 
     Label statusLabel = new Label("");
     statusLabel.setOpacity(0);
@@ -233,9 +222,6 @@ public class MealSelectionScreen {
 
       double totalExtraPrice = extrasPrice + comboPrice[0];
 
-      //List<String> removedIngredients = isCombo
-      //        ? new ArrayList<>()
-      //        : getSelectedExtras(removablesBoxes);
       List<String> removedIngredients = getSelectedExtras(removablesBoxes);
 
       List<String> comboChoices = new ArrayList<>();
@@ -582,72 +568,6 @@ public class MealSelectionScreen {
 
       box.getChildren().add(hBox);
     }
-    box.setAlignment(Pos.CENTER_LEFT);
-    box.setMaxWidth(560);
-    box.setPadding(new Insets(24, 30, 24, 30));
-    box.setStyle(createWhiteCardStyle());
-
-    return box;
-  }
-
-  private static @NonNull Button getViewCartButton(Stage stage) {
-    Button viewCartButton = new Button("View Cart");
-    viewCartButton.setStyle(
-            "-fx-font-size: 18px;" +
-                    "-fx-font-weight: bold;" +
-                    "-fx-background-color: #4CAF50;" +
-                    "-fx-text-fill: white;" +
-                    "-fx-padding: 13 28;" +
-                    "-fx-background-radius: 14;" +
-                    "-fx-cursor: hand;" +
-                    "-fx-effect: dropshadow(gaussian, rgba(76,175,80,0.25), 8, 0, 0, 2);"
-    );
-    viewCartButton.setOnAction(e -> CartScreen.show(stage));
-    return viewCartButton;
-  }
-
-  private static VBox createComboCustomizeBox(List<CheckBox> comboCustomizeBoxes) {
-    Label title = new Label("Customize Combo Items");
-    title.setStyle(
-            "-fx-font-size: 24px;" +
-                    "-fx-font-weight: bold;" +
-                    "-fx-text-fill: #1f1f1f;"
-    );
-
-    Label subtitle = new Label("Choose small changes for the selected burger or drink.");
-    subtitle.setWrapText(true);
-    subtitle.setStyle(
-            "-fx-font-size: 15px;" +
-                    "-fx-text-fill: #6f6f6f;" +
-                    "-fx-padding: 2 0 8 0;"
-    );
-
-    String[] options = {
-            "No Onion",
-            "No Pickles",
-            "No Lettuce",
-            "No Sauce",
-            "Less Ice",
-            "No Sugar"
-    };
-
-    VBox box = new VBox(8);
-    box.getChildren().addAll(title, subtitle);
-
-    for (String option : options) {
-      CheckBox checkBox = new CheckBox(option);
-      checkBox.setStyle(
-              "-fx-font-size: 16px;" +
-                      "-fx-font-weight: 600;" +
-                      "-fx-text-fill: #202020;" +
-                      "-fx-padding: 4 0 4 0;" +
-                      "-fx-cursor: hand;"
-      );
-
-      comboCustomizeBoxes.add(checkBox);
-      box.getChildren().add(checkBox);
-    }
-
     box.setAlignment(Pos.CENTER_LEFT);
     box.setMaxWidth(560);
     box.setPadding(new Insets(24, 30, 24, 30));

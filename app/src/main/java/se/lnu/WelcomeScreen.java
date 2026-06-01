@@ -169,56 +169,6 @@ public class WelcomeScreen {
     box.setPadding(new Insets(3));
     return box;
   }
-  private static VBox createColorBurgerIcon() {
-    Region topBun = new Region();
-    topBun.setPrefSize(120, 30);
-    topBun.setStyle(
-            "-fx-background-color: linear-gradient(to bottom, #ffb300, #ff8f00);" +
-                    "-fx-background-radius: 30 30 10 10;" +
-                    "-fx-effect: dropshadow(gaussian, rgba(255,143,0,0.25), 8, 0, 0, 2);"
-    );
-
-    Region lettuce = new Region();
-    lettuce.setPrefSize(128, 11);
-    lettuce.setStyle(
-            "-fx-background-color: #43a047;" +
-                    "-fx-background-radius: 8;"
-    );
-
-    Region cheese = new Region();
-    cheese.setPrefSize(112, 12);
-    cheese.setStyle(
-            "-fx-background-color: #ffca28;" +
-                    "-fx-background-radius: 8;"
-    );
-
-    Region patty = new Region();
-    patty.setPrefSize(122, 16);
-    patty.setStyle(
-            "-fx-background-color: #5d4037;" +
-                    "-fx-background-radius: 10;"
-    );
-
-    Region sauce = new Region();
-    sauce.setPrefSize(108, 10);
-    sauce.setStyle(
-            "-fx-background-color: #e53935;" +
-                    "-fx-background-radius: 8;"
-    );
-
-    Region bottomBun = new Region();
-    bottomBun.setPrefSize(116, 25);
-    bottomBun.setStyle(
-            "-fx-background-color: linear-gradient(to bottom, #ff9800, #f57c00);" +
-                    "-fx-background-radius: 8 8 26 26;"
-    );
-
-    VBox burger = new VBox(5, topBun, lettuce, cheese, patty, sauce, bottomBun);
-    burger.setAlignment(Pos.CENTER);
-    burger.setPadding(new Insets(8));
-
-    return burger;
-  }
 
   private static Label createSmallTag(String text) {
     Label tag = new Label(text);

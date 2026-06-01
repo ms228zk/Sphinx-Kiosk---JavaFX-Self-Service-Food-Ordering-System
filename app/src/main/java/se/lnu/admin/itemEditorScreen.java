@@ -8,7 +8,9 @@ import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import se.lnu.ExtraOption;
 import se.lnu.MenuItem;
+import se.lnu.RemovableIngredient;
 import se.lnu.database.DatabaseHelper;
 
 import javax.imageio.ImageIO;
@@ -18,6 +20,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 
 public class itemEditorScreen {
@@ -25,21 +28,15 @@ public class itemEditorScreen {
   private static Label imageLabel;
 
   public static void show(Stage stage) {
-
     VBox mainLayout = new VBox(25);
-
     mainLayout.setPadding(new Insets(30));
-
     mainLayout.setAlignment(Pos.TOP_CENTER);
-
     mainLayout.setStyle("""
                 -fx-background-color: linear-gradient(to bottom right, #f8f4ef, #f2d2a2);
                 """);
 
     // TOP BAR
-
     Button backButton = new Button("← Back");
-
     backButton.setStyle("""
                 -fx-background-color: #2d2d2d;
                 -fx-text-fill: white;
@@ -48,21 +45,16 @@ public class itemEditorScreen {
                 -fx-padding: 12 22;
                 -fx-background-radius: 15;
                 """);
-
     backButton.setOnAction(e ->
       AdminDashboardScreen.show(stage)
     );
 
     HBox topBar = new HBox(backButton);
-
     topBar.setAlignment(Pos.CENTER_LEFT);
-
     topBar.setMaxWidth(1200);
 
     // TITLE
-
     Label title = new Label("Manage Menu Items");
-
     title.setStyle("""
                 -fx-font-size: 42px;
                 -fx-font-weight: bold;
@@ -70,22 +62,16 @@ public class itemEditorScreen {
                 """);
 
     VBox itemsBox = new VBox(18);
-
     itemsBox.setPadding(new Insets(10));
 
     List<MenuItem> items =
       DatabaseHelper.getAllMenuItems();
 
     for (MenuItem item : items) {
-
       HBox row = new HBox(20);
-
       row.setAlignment(Pos.CENTER_LEFT);
-
       row.setPadding(new Insets(18));
-
       row.setMaxWidth(1200);
-
       row.setStyle("""
                     -fx-background-color: rgba(255,255,255,0.92);
                     -fx-background-radius: 22;
@@ -93,13 +79,10 @@ public class itemEditorScreen {
                     """);
 
       // ITEM INFO
-
       VBox itemInfo = new VBox(6);
-
       itemInfo.setPrefWidth(320);
 
       Label itemName = new Label(item.getName());
-
       itemName.setStyle("""
                     -fx-font-size: 24px;
                     -fx-font-weight: bold;
@@ -108,9 +91,7 @@ public class itemEditorScreen {
 
       Label descriptionLabel =
         new Label(item.getDescription());
-
       descriptionLabel.setWrapText(true);
-
       descriptionLabel.setStyle("""
                     -fx-font-size: 14px;
                     -fx-text-fill: #666;
@@ -122,10 +103,8 @@ public class itemEditorScreen {
       );
 
       // PRICE
-
       Label priceLabel =
         new Label(item.getPrice() + " kr");
-
       priceLabel.setStyle("""
                     -fx-font-size: 20px;
                     -fx-font-weight: bold;
@@ -133,26 +112,20 @@ public class itemEditorScreen {
                     """);
 
       // STATUS
-
       boolean available =
         DatabaseHelper.isItemAvailable(item.getId());
 
       Label statusLabel = new Label();
 
       if (available) {
-
         statusLabel.setText("Available");
-
         statusLabel.setStyle("""
                         -fx-text-fill: #2e7d32;
                         -fx-font-size: 16px;
                         -fx-font-weight: bold;
                         """);
-
       } else {
-
         statusLabel.setText("Unavailable");
-
         statusLabel.setStyle("""
                         -fx-text-fill: #c62828;
                         -fx-font-size: 16px;
@@ -161,9 +134,7 @@ public class itemEditorScreen {
       }
 
       // EDIT BUTTON
-
       Button editButton = new Button("Edit");
-
       editButton.setStyle("""
                     -fx-background-color: #9c27b0;
                     -fx-text-fill: white;
@@ -172,24 +143,18 @@ public class itemEditorScreen {
                     -fx-padding: 10 22;
                     -fx-background-radius: 12;
                     """);
-
       editButton.setOnAction(e -> {
-
         Stage popupStage = new Stage();
 
         VBox popupLayout = new VBox(18);
-
         popupLayout.setPadding(new Insets(30));
-
         popupLayout.setAlignment(Pos.CENTER);
-
         popupLayout.setStyle("""
                         -fx-background-color: linear-gradient(to bottom right, #ffffff, #f4f4f4);
                         """);
 
         Label popupTitle =
           new Label("Edit Item");
-
         popupTitle.setStyle("""
                         -fx-font-size: 30px;
                         -fx-font-weight: bold;
@@ -197,11 +162,8 @@ public class itemEditorScreen {
 
         TextField nameField =
           new TextField(item.getName());
-
         nameField.setPromptText("Item name");
-
         nameField.setPrefWidth(420);
-
         nameField.setStyle("""
                         -fx-font-size: 16px;
                         -fx-padding: 12;
@@ -210,15 +172,10 @@ public class itemEditorScreen {
 
         TextArea descriptionField =
           new TextArea(item.getDescription());
-
         descriptionField.setPromptText("Description");
-
         descriptionField.setWrapText(true);
-
         descriptionField.setPrefWidth(420);
-
         descriptionField.setPrefHeight(120);
-
         descriptionField.setStyle("""
                         -fx-font-size: 15px;
                         -fx-background-radius: 10;
@@ -228,16 +185,93 @@ public class itemEditorScreen {
           new TextField(
             String.valueOf(item.getPrice())
           );
-
         priceField.setPromptText("Price");
-
         priceField.setPrefWidth(420);
-
         priceField.setStyle("""
                         -fx-font-size: 16px;
                         -fx-padding: 12;
                         -fx-background-radius: 10;
                         """);
+
+        FlowPane extrasPane = new FlowPane();
+        extrasPane.setHgap(10);
+        extrasPane.setVgap(10);
+
+        List<CheckBox> extraBoxes = new ArrayList<>();
+
+        List<ExtraOption> allExtras =
+                DatabaseHelper.getAllExtraOptions();
+
+        List<ExtraOption> currentExtras =
+                DatabaseHelper.getExtrasByItem(item.getId());
+
+        for (ExtraOption extra : allExtras) {
+
+          CheckBox cb = new CheckBox(
+                  extra.getName() +
+                          " (+" +
+                          extra.getPrice() +
+                          " kr)"
+          );
+
+          cb.setUserData(extra.getId());
+
+          boolean alreadyAssigned =
+                  currentExtras.stream()
+                          .anyMatch(event ->
+                                  event.getId() ==
+                                          extra.getId()
+                          );
+
+          cb.setSelected(alreadyAssigned);
+
+          extraBoxes.add(cb);
+          extrasPane.getChildren().add(cb);
+        }
+
+        FlowPane removablePane = new FlowPane();
+        removablePane.setHgap(10);
+        removablePane.setVgap(10);
+
+        List<CheckBox> removableBoxes =
+                new ArrayList<>();
+
+        List<RemovableIngredient> ingredients =
+                DatabaseHelper.getAllRemovableIngredients();
+
+        List<RemovableIngredient> currentIngredients =
+                DatabaseHelper.getRemovableIngredientsByItem(
+                        item.getId()
+                );
+
+        for (RemovableIngredient ingredient : ingredients) {
+
+          CheckBox cb = new CheckBox(
+                  ingredient.name()
+          );
+
+          cb.setUserData(
+                  ingredient.ingredientId()
+          );
+
+          boolean alreadyAssigned =
+                  currentIngredients.stream()
+                          .anyMatch(i ->
+                                  i.ingredientId() ==
+                                          ingredient.ingredientId()
+                          );
+
+          cb.setSelected(alreadyAssigned);
+
+          removableBoxes.add(cb);
+          removablePane.getChildren().add(cb);
+        }
+
+        Label extrasTitle =
+                new Label("Extras");
+
+        Label removableTitle =
+                new Label("Removable Ingredients");
 
         Button editImage = createSecondaryButton("Edit image");
 
@@ -248,7 +282,6 @@ public class itemEditorScreen {
 
         Button saveButton =
           new Button("Save Changes");
-
         saveButton.setStyle("""
                         -fx-background-color: #4CAF50;
                         -fx-text-fill: white;
@@ -257,18 +290,35 @@ public class itemEditorScreen {
                         -fx-padding: 12 30;
                         -fx-background-radius: 14;
                         """);
-
         saveButton.setOnAction(event -> {
-
           try {
-
             String newName = nameField.getText().trim();
             String newDescription = descriptionField.getText().trim();
             double newPrice = Double.parseDouble(priceField.getText());
+            List<Integer> selectedExtraIds =
+                    new ArrayList<>();
+
+            for (CheckBox cb : extraBoxes) {
+              if (cb.isSelected()) {
+                selectedExtraIds.add(
+                        (Integer) cb.getUserData()
+                );
+              }
+            }
+
+            List<Integer> selectedIngredientIds =
+                    new ArrayList<>();
+
+            for (CheckBox cb : removableBoxes) {
+              if (cb.isSelected()) {
+                selectedIngredientIds.add(
+                        (Integer) cb.getUserData()
+                );
+              }
+            }
 
             // Handle image replacement
             if (selectedImageFile != null) {
-
               String oldImageName =
                       toSnakeCase(item.getName()) + ".png";
 
@@ -278,9 +328,7 @@ public class itemEditorScreen {
 
               Path oldImagePath =
                       imageDirectory.resolve(oldImageName);
-
               try {
-
                 // Delete previous image if it exists
                 Files.deleteIfExists(oldImagePath);
 
@@ -333,6 +381,16 @@ public class itemEditorScreen {
                     newDescription
             );
 
+            DatabaseHelper.updateItemExtras(
+                    item.getId(),
+                    selectedExtraIds
+            );
+
+            DatabaseHelper.updateItemRemovableIngredients(
+                    item.getId(),
+                    selectedIngredientIds
+            );
+
             // Update UI
             itemName.setText(newName);
             descriptionLabel.setText(newDescription);
@@ -351,16 +409,34 @@ public class itemEditorScreen {
           nameField,
           descriptionField,
           priceField,
+          extrasTitle,
+          extrasPane,
+          removableTitle,
+          removablePane,
           editImage,
           imageLabel,
           saveButton
         );
 
+
+        ScrollPane scrollPane = new ScrollPane();
+
+        scrollPane.setContent(popupLayout);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setPannable(true);
+
+        scrollPane.setHbarPolicy(
+                ScrollPane.ScrollBarPolicy.NEVER
+        );
+
+        scrollPane.setVbarPolicy(
+                ScrollPane.ScrollBarPolicy.AS_NEEDED
+        );
+
         Scene popupScene =
-          new Scene(popupLayout, 520, 520);
+                new Scene(scrollPane, 700, 800);
 
         popupStage.setScene(popupScene);
-
         popupStage.show();
       });
 
@@ -368,7 +444,6 @@ public class itemEditorScreen {
 
       Button unavailableButton =
         new Button("Unavailable");
-
       unavailableButton.setStyle("""
                     -fx-background-color: #ff9800;
                     -fx-text-fill: white;
@@ -377,16 +452,13 @@ public class itemEditorScreen {
                     -fx-padding: 10 22;
                     -fx-background-radius: 12;
                     """);
-
       unavailableButton.setOnAction(e -> {
-
         DatabaseHelper.updateItemAvailability(
           item.getId(),
           false
         );
 
         statusLabel.setText("Unavailable");
-
         statusLabel.setStyle("""
                         -fx-text-fill: #c62828;
                         -fx-font-size: 16px;
@@ -395,10 +467,8 @@ public class itemEditorScreen {
       });
 
       // AVAILABLE BUTTON
-
       Button availableButton =
         new Button("Available");
-
       availableButton.setStyle("""
                     -fx-background-color: #4CAF50;
                     -fx-text-fill: white;
@@ -407,16 +477,13 @@ public class itemEditorScreen {
                     -fx-padding: 10 22;
                     -fx-background-radius: 12;
                     """);
-
       availableButton.setOnAction(e -> {
-
         DatabaseHelper.updateItemAvailability(
           item.getId(),
           true
         );
 
         statusLabel.setText("Available");
-
         statusLabel.setStyle("""
                         -fx-text-fill: #2e7d32;
                         -fx-font-size: 16px;
@@ -440,15 +507,12 @@ public class itemEditorScreen {
         unavailableButton,
         availableButton
       );
-
       itemsBox.getChildren().add(row);
     }
 
     ScrollPane scrollPane =
       new ScrollPane(itemsBox);
-
     scrollPane.setFitToWidth(true);
-
     scrollPane.setStyle("""
                 -fx-background: transparent;
                 -fx-background-color: transparent;
@@ -464,7 +528,6 @@ public class itemEditorScreen {
       new Scene(mainLayout, 1450, 850);
 
     stage.setScene(scene);
-
     stage.setMaximized(true);
   }
 
@@ -505,9 +568,7 @@ public class itemEditorScreen {
 
   private static void chooseImage() {
     FileChooser fileChooser = new FileChooser();
-
     fileChooser.setTitle("Select PNG Image");
-
     fileChooser.getExtensionFilters().add(
             new FileChooser.ExtensionFilter("PNG Images", "*.png")
     );
