@@ -13,6 +13,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -294,7 +295,15 @@ public class MealSelectionScreen {
     });
 
     VBox centerContent = new VBox(14);
-    centerContent.getChildren().addAll(title, description, priceLabel);
+
+    // Item image displayed right under the name, above the description
+    ImageView itemImage = CategoryScreen.createSafeImageView(item.getImageFileName(), 280, 200);
+    VBox imageBox = new VBox();
+    imageBox.setAlignment(Pos.CENTER);
+    imageBox.setPadding(new Insets(4, 0, 4, 0));
+    imageBox.getChildren().add(itemImage);
+
+    centerContent.getChildren().addAll(title, imageBox, description, priceLabel);
 
     if (comboBox != null) {
       centerContent.getChildren().add(comboBox);

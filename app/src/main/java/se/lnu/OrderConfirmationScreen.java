@@ -11,6 +11,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -171,6 +172,9 @@ public class OrderConfirmationScreen {
                         "-fx-text-fill: " + TEXT_DARK + ";"
         );
 
+        // Small thumbnail next to the name
+        ImageView itemThumb = CategoryScreen.createSafeImageView(item.getMenuItem().getImageFileName(), 40, 40);
+
         Label itemPrice = new Label(String.format("%.2f kr", item.getSubtotal()));
         itemPrice.setStyle(
                 "-fx-font-size: 20px;" +
@@ -181,7 +185,7 @@ public class OrderConfirmationScreen {
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        HBox topRow = new HBox(12, itemName, spacer, itemPrice);
+        HBox topRow = new HBox(12, itemThumb, itemName, spacer, itemPrice);
         topRow.setAlignment(Pos.CENTER_LEFT);
 
         Label quantityLabel = new Label("Qty: " + item.getQuantity());

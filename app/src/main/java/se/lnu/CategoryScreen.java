@@ -276,12 +276,15 @@ public class CategoryScreen {
 
     Label itemName = new Label(cartItem.getMenuItem().getName());
     itemName.setWrapText(true);
-    itemName.setMaxWidth(160);
+    itemName.setMaxWidth(130);
     itemName.setStyle(
             "-fx-font-size: 15px;" +
                     "-fx-font-weight: bold;" +
                     "-fx-text-fill: #1f1f1f;"
     );
+
+    // Small item thumbnail next to the name
+    ImageView itemThumb = createSafeImageView(cartItem.getMenuItem().getImageFileName(), 40, 40);
 
     Label itemPrice = new Label(String.format("%.2f kr", cartItem.getSubtotal()));
     itemPrice.setMinWidth(80);
@@ -317,7 +320,7 @@ public class CategoryScreen {
     Region topSpacer = new Region();
     HBox.setHgrow(topSpacer, Priority.ALWAYS);
 
-    HBox topRow = new HBox(10, itemName, topSpacer, itemPrice, removeButton);
+    HBox topRow = new HBox(10, itemThumb, itemName, topSpacer, itemPrice, removeButton);
     topRow.setAlignment(Pos.CENTER_LEFT);
 
     VBox detailBox = new VBox(5);
@@ -627,7 +630,7 @@ public class CategoryScreen {
     return card;
   }
 
-  private static ImageView createSafeImageView(String imageFileName, double width, double height) {
+  static ImageView createSafeImageView(String imageFileName, double width, double height) {
     ImageView imageView = new ImageView();
 
     imageView.setFitWidth(width);
@@ -654,7 +657,7 @@ public class CategoryScreen {
     return imageView;
   }
 
-  private static Image loadImage(String imagePath) {
+  static Image loadImage(String imagePath) {
     try {
       if (imagePath == null || imagePath.isBlank()) {
         System.out.println("Image path is empty.");

@@ -30,14 +30,12 @@ public class ItemDetailsScreen {
         backButton.setOnAction(e -> CategoryScreen.show(stage));
 
         Button homeButton = ScreenStyle.createHomeButton(stage);
-        Button cartButton = ScreenStyle.createCartButton(stage);
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        HBox topBar = new HBox(12, backButton, spacer, homeButton, cartButton);
+        HBox topBar = new HBox(12, backButton, spacer, homeButton);
         topBar.setAlignment(Pos.CENTER_LEFT);
-        topBar.setPadding(new Insets(16));
 
         // Item image
         ImageView itemImage = createItemImage(item);
@@ -116,7 +114,7 @@ public class ItemDetailsScreen {
 
         // Main layout
         BorderPane root = new BorderPane();
-        root.setPadding(new Insets(0));
+        root.setPadding(new Insets(20));
         root.setBackground(ScreenStyle.createBackground());
         root.setTop(topBar);
 
