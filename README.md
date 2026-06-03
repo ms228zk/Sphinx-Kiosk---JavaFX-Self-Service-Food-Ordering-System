@@ -14,6 +14,7 @@
 * [Admin Panel](#admin-panel)
 
     * [Accessing the Admin Panel](#accessing-the-admin-panel)
+    * [Admin Login Details](#admin-login-details)
     * [Admin Dashboard](#admin-dashboard)
     * [Adding New Menu Items](#adding-new-menu-items)
     * [Managing Menu Items](#managing-menu-items)
@@ -88,7 +89,7 @@ This section gives an overview of the main user stories. The full list of issues
 * As a customer, I want to see the price per item based on quantity so that I understand the cost breakdown.
 * As a customer, I want the total price to update automatically when my current order changes so that I always see the correct amount.
 * As a customer, I want to view the total price so that I know the final cost.
-* As a customer, I want to view an order summary so that I can check my selected items before payment.
+* As a customer, I want to view an order summary so that I can check my selected items before placing order.
 * As a customer, I want the system to prevent invalid order actions, such as reducing quantity below 1 or confirming an empty order, so that I can complete my order correctly.
 * As a customer, I want to choose a payment method so that I can complete my order.
 * As a customer, I want to confirm my order so that it is sent for processing and I can be sure my order has been successfully placed.
@@ -254,7 +255,18 @@ The admin panel is used by restaurant staff to manage menu data and view custome
 3. Enter the admin credentials.
 4. After successful login, the admin dashboard is displayed.
 
-The admin login is used to protect the staff-only part of the application. For this course prototype, the password is protected using hashed authentication.
+The admin login is used to protect the staff-only part of the application.
+
+### Admin Login Details
+
+For testing and evaluation, the admin panel can be accessed with:
+
+```text
+Username: admin
+Password: Admin@2026
+```
+
+The password is checked using hashed authentication in the application. These login details are only for the course prototype.
 
 ---
 
@@ -525,21 +537,21 @@ The customer side is responsible for the ordering process. The admin side is res
 
 ```text
 Welcome Screen
-      ↓
+  ↓
 Order Type Screen
-      ↓
+  ↓
 Category Screen
-      ↓
+  ↓
 Item Details / Meal Selection
-      ↓
+  ↓
 Current Order Panel
-      ↓
+  ↓
 Payment Method
-      ↓
+  ↓
 Review Order
-      ↓
+  ↓
 Order Number Screen
-      ↓
+  ↓
 Welcome Screen
 ```
 
@@ -547,19 +559,19 @@ Welcome Screen
 
 ```text
 Welcome Screen
-      ↓
+  ↓
 Admin Login
-      ↓
+  ↓
 Admin Dashboard
-      ↓
+  ↓
 Add / Edit / Manage Menu Items
-      ↓
+  ↓
 Manage Categories
-      ↓
+  ↓
 View Orders
-      ↓
+  ↓
 SQLite Database
-      ↓
+  ↓
 Customer Side Updated
 ```
 
@@ -567,11 +579,11 @@ Customer Side Updated
 
 ```text
 Admin Action
-      ↓
+  ↓
 Database Update
-      ↓
+  ↓
 Menu Data Stored in SQLite
-      ↓
+  ↓
 Customer Side Reads Updated Data
 ```
 
@@ -624,6 +636,7 @@ This class is used to keep the screens visually consistent. It contains shared s
 * Navigation buttons
 
 ---
+
 ## Screenshots
 
 Screenshots are included to show the final customer and admin interfaces.
@@ -664,6 +677,7 @@ Screenshots are included to show the final customer and admin interfaces.
 
 ![Admin Access Button](tmp/docs/images/Admin_hidden_button.png)
 
+---
 
 ## Project Structure
 
