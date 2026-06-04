@@ -58,18 +58,89 @@ public class DatabaseHelper {
     }
 
     public static boolean deleteCategory(int id) {
-        String sql = "DELETE FROM Category WHERE category_id = ?";
+        String deleteComboOptionsSql = """
+        DELETE FROM ComboChoiceOption
+        WHERE group_id IN (
+            SELECT group_id
+            FROM ComboChoiceGroup
+            WHERE combo_item_id IN (
+                SELECT menu_item_id
+                FROM MenuItem
+                WHERE category_id = ?
+            )
+        )
+        """;
 
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        String deleteComboGroupsSql = """
+        DELETE FROM ComboChoiceGroup
+        WHERE combo_item_id IN (
+            SELECT menu_item_id
+            FROM MenuItem
+            WHERE category_id = ?
+        )
+        """;
 
-            pstmt.setInt(1, id);
-            pstmt.executeUpdate();
-            return true;
+        String deleteExtrasSql = """
+        DELETE FROM MenuItemExtraOption
+        WHERE menu_item_id IN (
+            SELECT menu_item_id
+            FROM MenuItem
+            WHERE category_id = ?
+        )
+        """;
+
+        String deleteRemovablesSql = """
+        DELETE FROM MenuItemRemovableIngredient
+        WHERE menu_item_id IN (
+            SELECT menu_item_id
+            FROM MenuItem
+            WHERE category_id = ?
+        )
+        """;
+
+        String deleteMenuItemsSql = """
+        DELETE FROM MenuItem
+        WHERE category_id = ?
+        """;
+
+        String deleteCategorySql = """
+        DELETE FROM Category
+        WHERE category_id = ?
+        """;
+
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            conn.setAutoCommit(false);
+
+            try {
+                executeDeleteByCategory(conn, deleteComboOptionsSql, id);
+                executeDeleteByCategory(conn, deleteComboGroupsSql, id);
+                executeDeleteByCategory(conn, deleteExtrasSql, id);
+                executeDeleteByCategory(conn, deleteRemovablesSql, id);
+                executeDeleteByCategory(conn, deleteMenuItemsSql, id);
+
+                int deletedCategoryRows = executeDeleteByCategory(conn, deleteCategorySql, id);
+
+                conn.commit();
+                return deletedCategoryRows > 0;
+
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            } finally {
+                conn.setAutoCommit(true);
+            }
 
         } catch (SQLException e) {
             System.out.println("DB error (deleteCategory): " + e.getMessage());
             return false;
+        }
+    }
+    private static int executeDeleteByCategory(Connection conn, String sql, int categoryId)
+            throws SQLException {
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, categoryId);
+            return pstmt.executeUpdate();
         }
     }
 
